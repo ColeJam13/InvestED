@@ -3,12 +3,10 @@ import { ThemeProvider } from './context/ThemeContext';
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
 import MarketsView from './views/MarketsView';
-import LearnView from './components/LearnView';
+import LearnView from './views/LearnView';
 import AIAdvisorView from './views/AIAdvisorView';
-import Profile from './views/Profile';
 import BottomNav from './components/BottomNav';
 import './styles/global.css';
-import './App.css';
 
 function App() {
     const [activeView, setActiveView] = useState('home');
@@ -24,7 +22,7 @@ function App() {
             case 'advisor':
                 return <AIAdvisorView />;
             case 'profile':
-                return <Profile />;
+                return <ComingSoon title="Profile" icon="👤" />;
             default:
                 return <Dashboard />;
         }

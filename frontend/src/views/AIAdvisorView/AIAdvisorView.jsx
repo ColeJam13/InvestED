@@ -2,14 +2,26 @@ import { useState, useRef, useEffect } from 'react';
 import styles from './AIAdvisorView.module.css';
 
 const AIAdvisorView = () => {
-    const [selectedAdvisor, setSelectedAdvisor] = useState(null);
     const [messages, setMessages] = useState([]);
     const [inputValue, setInputValue] = useState('');
     const [isTyping, setIsTyping] = useState(false);
-    const [showPortfolioPanel, setShowPortfolioPanel] = useState(true);
+    const [showPortfolioPanel, setShowPortfolioPanel] = useState(false);
+    const [showStyleSelector, setShowStyleSelector] = useState(false);
+    const [showHistorySidebar, setShowHistorySidebar] = useState(false);
+    const [selectedStyle, setSelectedStyle] = useState(null);
+    const [copiedId, setCopiedId] = useState(null);
     const messagesEndRef = useRef(null);
 
-    // Mock portfolio data (would come from context/API in real app)
+    // Mock chat history
+    const chatHistory = [
+        { id: 1, title: 'Portfolio diversification', date: 'Today', preview: 'How should I diversify my...' },
+        { id: 2, title: 'Value investing basics', date: 'Yesterday', preview: 'What makes a stock undervalued...' },
+        { id: 3, title: 'Risk tolerance assessment', date: 'Jan 10', preview: 'How do I know my risk...' },
+        { id: 4, title: 'ETF vs mutual funds', date: 'Jan 8', preview: 'What are the differences...' },
+        { id: 5, title: 'Dividend strategies', date: 'Jan 5', preview: 'How do I build passive income...' },
+    ];
+
+    // Mock portfolio data
     const portfolioData = {
         totalValue: '$50,243.89',
         todayChange: '+$1,234.56',
@@ -26,104 +38,73 @@ const AIAdvisorView = () => {
         topLoser: { symbol: 'BTC', change: '-1.2%' },
     };
 
-    const advisors = [
+    // Investing styles
+    const styleCategories = [
         {
-            id: 'buffett',
-            name: 'Warren Buffett',
-            title: 'The Oracle of Omaha',
-            style: 'Value Investing',
-            description: 'Patient, long-term value investing. Focus on fundamentals and buying great companies at fair prices.',
-            avatar: '🎩',
-            color: '#1E3A5F',
-            greeting: "Hello there! Let's talk about finding wonderful companies at sensible prices. Remember, the stock market is designed to transfer money from the impatient to the patient.",
-            quickPrompts: [
-                "What makes a company worth investing in?",
-                "How do I think long-term?",
-                "Explain value investing",
-                "What's your view on diversification?"
+            category: 'By Philosophy',
+            styles: [
+                { id: 'value', name: 'Value Investing', icon: '💎', description: 'Find undervalued stocks the market overlooked', color: '#1E3A5F' },
+                { id: 'growth', name: 'Growth Investing', icon: '🚀', description: 'Target companies with high growth potential', color: '#7C3AED' },
+                { id: 'momentum', name: 'Momentum Investing', icon: '📈', description: 'Invest in assets that are currently trending', color: '#EA580C' },
+                { id: 'income', name: 'Income Investing', icon: '💰', description: 'Generate regular income from dividends & bonds', color: '#059669' },
+                { id: 'quality', name: 'Quality Investing', icon: '⭐', description: 'Seek companies with strong fundamentals', color: '#2563EB' },
             ]
         },
         {
-            id: 'montaperto',
-            name: 'Deborah Montaperto',
-            title: 'The Strategic Planner',
-            style: 'Goal-Based Planning',
-            description: 'Strategic financial planning focused on life goals, risk assessment, and building sustainable wealth.',
-            avatar: '📊',
-            color: '#7C3AED',
-            greeting: "Welcome! I'm here to help you align your investments with your life goals. Let's create a strategy that works for your unique situation and timeline.",
-            quickPrompts: [
-                "How do I set investment goals?",
-                "What's my risk tolerance?",
-                "Help me plan for retirement",
-                "How should I balance my portfolio?"
+            category: 'By Strategy',
+            styles: [
+                { id: 'active', name: 'Active Investing', icon: '⚡', description: 'Frequent trading to try to beat the market', color: '#DC2626' },
+                { id: 'passive', name: 'Passive Investing', icon: '🎯', description: 'Match market performance with index funds', color: '#0891B2' },
             ]
         },
         {
-            id: 'ramsey',
-            name: 'Dave Ramsey',
-            title: 'The Debt-Free Advocate',
-            style: 'Conservative & Debt-Free',
-            description: 'Conservative approach emphasizing debt elimination, emergency funds, and steady wealth building.',
-            avatar: '💪',
-            color: '#DC2626',
-            greeting: "Hey there! Before we talk investing, let's make sure your financial house is in order. No debt, emergency fund in place, then we build wealth. Ready to win with money?",
-            quickPrompts: [
-                "Should I invest or pay off debt?",
-                "How much emergency fund do I need?",
-                "What are baby steps to wealth?",
-                "Is this investment too risky?"
+            category: 'By Risk Tolerance',
+            styles: [
+                { id: 'conservative', name: 'Conservative', icon: '🛡️', description: 'Prioritize capital preservation & stability', color: '#4B5563' },
+                { id: 'moderate', name: 'Moderate', icon: '⚖️', description: 'Balance risk and return with diversification', color: '#8B5CF6' },
+                { id: 'aggressive', name: 'Aggressive', icon: '🔥', description: 'Seek maximum returns with higher risk', color: '#EF4444' },
             ]
         },
         {
-            id: 'ocallaghan',
-            name: "Colleen O'Callaghan",
-            title: 'The Balanced Advisor',
-            style: 'Holistic Wealth Management',
-            description: 'Balanced approach combining growth and security, with emphasis on financial education and empowerment.',
-            avatar: '⚖️',
-            color: '#059669',
-            greeting: "Hi! I believe in empowering you with knowledge to make confident financial decisions. Let's explore your options together and find the right balance for your journey.",
-            quickPrompts: [
-                "How do I start investing?",
-                "Explain stocks vs bonds",
-                "What's a balanced portfolio?",
-                "How do I manage investment emotions?"
-            ]
-        },
-        {
-            id: 'lynch',
-            name: 'Peter Lynch',
-            title: 'The Growth Seeker',
-            style: 'Growth Investing',
-            description: 'Invest in what you know. Find growth companies before Wall Street discovers them.',
-            avatar: '🔍',
-            color: '#2563EB',
-            greeting: "Welcome! The best investment ideas are often right in front of you. What products do you love? What stores are always crowded? Let's find your edge together!",
-            quickPrompts: [
-                "How do I find good stocks?",
-                "What does 'invest in what you know' mean?",
-                "How do I research a company?",
-                "What's a ten-bagger?"
-            ]
-        },
-        {
-            id: 'cramer',
-            name: 'Jim Cramer',
-            title: 'The Market Enthusiast',
-            style: 'Active Trading',
-            description: 'High-energy market analysis with focus on current trends, momentum, and staying informed.',
-            avatar: '📺',
-            color: '#EA580C',
-            greeting: "BOOM! Welcome to the show! Markets are moving and there's always something happening. Let's talk about what's hot, what's not, and how to stay ahead of the game!",
-            quickPrompts: [
-                "What's moving the market today?",
-                "Is now a good time to buy?",
-                "How do I spot trends?",
-                "What should I watch out for?"
+            category: 'By Focus',
+            styles: [
+                { id: 'esg', name: 'Socially Responsible (ESG)', icon: '🌱', description: 'Incorporate environmental & social factors', color: '#10B981' },
+                { id: 'largecap', name: 'Large-Cap Focus', icon: '🏢', description: 'Focus on established, large companies', color: '#6366F1' },
+                { id: 'smallcap', name: 'Small-Cap Focus', icon: '🌱', description: 'Target smaller companies with growth potential', color: '#F59E0B' },
             ]
         }
     ];
+
+    const getQuickPrompts = () => {
+        if (!selectedStyle) {
+            return [
+                "What should I know as a beginner?",
+                "How do I start investing?",
+                "Explain my portfolio performance",
+                "What's the difference between stocks and bonds?",
+            ];
+        }
+        const stylePrompts = {
+            value: ["How do I find undervalued stocks?", "What metrics indicate good value?", "Explain intrinsic value"],
+            growth: ["How do I identify growth stocks?", "What's a reasonable P/E for growth?", "Growth vs value?"],
+            momentum: ["What's trending in the market?", "How do I spot momentum?", "When to exit momentum trades?"],
+            income: ["What's a good dividend yield?", "How do I build passive income?", "Dividend stocks vs bonds?"],
+            quality: ["What makes a quality company?", "How do I evaluate fundamentals?", "Quality vs growth?"],
+            active: ["How often should I trade?", "What are active trading risks?", "How to time the market?"],
+            passive: ["Best index funds to consider?", "How to set and forget?", "Active vs passive performance?"],
+            conservative: ["What are safest investments?", "How to protect capital?", "Government bonds vs savings?"],
+            moderate: ["What's a balanced allocation?", "How to diversify properly?", "60/40 portfolio relevance?"],
+            aggressive: ["High-growth opportunities?", "How much volatility is too much?", "Alternative investments?"],
+            esg: ["How to invest sustainably?", "What ESG factors matter?", "Do ESG funds underperform?"],
+            largecap: ["Best blue chip stocks?", "Large vs small-cap returns?", "Large company stability?"],
+            smallcap: ["How to find small-cap gems?", "Small-cap risks?", "When do small-caps outperform?"],
+        };
+        return stylePrompts[selectedStyle.id] || stylePrompts.value;
+    };
+
+    const formatTime = (date) => {
+        return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+    };
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -133,24 +114,42 @@ const AIAdvisorView = () => {
         scrollToBottom();
     }, [messages]);
 
-    const handleSelectAdvisor = (advisor) => {
-        setSelectedAdvisor(advisor);
-        setMessages([
-            {
+    useEffect(() => {
+        if (messages.length === 0) {
+            setMessages([{
                 id: 1,
                 type: 'ai',
                 messageType: 'greeting',
-                content: advisor.greeting,
+                content: "Hello! I'm your AI financial education advisor. I can help you learn about investing, understand your portfolio, and explore different strategies. Feel free to ask me anything, or select an investing style from the toolbar to get perspective-specific guidance.",
                 timestamp: new Date()
-            },
-            {
-                id: 2,
-                type: 'ai',
-                messageType: 'portfolio-insight',
-                content: `I can see you have a ${portfolioData.riskProfile.toLowerCase()} risk profile with ${portfolioData.holdings.length} holdings. Your portfolio is ${portfolioData.todayChangePercent.startsWith('+') ? 'up' : 'down'} ${portfolioData.todayChangePercent} today. ${portfolioData.topPerformer.symbol} is your top performer at ${portfolioData.topPerformer.change}.`,
-                timestamp: new Date()
-            }
-        ]);
+            }]);
+        }
+    }, []);
+
+    const handleStyleSelect = (style) => {
+        setSelectedStyle(style);
+        setShowStyleSelector(false);
+        const styleMessage = {
+            id: messages.length + 1,
+            type: 'ai',
+            messageType: 'style-change',
+            style: style,
+            content: `I'll now provide guidance from a ${style.name.toLowerCase()} perspective. ${style.description}. Feel free to ask me questions with this approach in mind!`,
+            timestamp: new Date()
+        };
+        setMessages(prev => [...prev, styleMessage]);
+    };
+
+    const handleClearStyle = () => {
+        setSelectedStyle(null);
+        const message = {
+            id: messages.length + 1,
+            type: 'ai',
+            messageType: 'standard',
+            content: "I've switched back to general guidance mode. I'll provide balanced educational information without a specific investing style bias.",
+            timestamp: new Date()
+        };
+        setMessages(prev => [...prev, message]);
     };
 
     const handleSendMessage = (content) => {
@@ -168,12 +167,10 @@ const AIAdvisorView = () => {
         setInputValue('');
         setIsTyping(true);
 
-        // Simulate AI response (placeholder until API integration)
         setTimeout(() => {
-            const response = getPlaceholderResponse(selectedAdvisor, content);
+            const response = getPlaceholderResponse(content);
             const aiMessages = [];
 
-            // Main response
             aiMessages.push({
                 id: messages.length + 2,
                 type: 'ai',
@@ -182,7 +179,6 @@ const AIAdvisorView = () => {
                 timestamp: new Date()
             });
 
-            // Sometimes add an educational callout
             if (response.education) {
                 aiMessages.push({
                     id: messages.length + 3,
@@ -194,7 +190,6 @@ const AIAdvisorView = () => {
                 });
             }
 
-            // Sometimes reference portfolio
             if (response.portfolioRef) {
                 aiMessages.push({
                     id: messages.length + 4,
@@ -210,23 +205,22 @@ const AIAdvisorView = () => {
         }, 1500 + Math.random() * 1000);
     };
 
-    const getPlaceholderResponse = (advisor, question) => {
+    const getPlaceholderResponse = (question) => {
         const lowerQuestion = question.toLowerCase();
+        const styleContext = selectedStyle ? ` From a ${selectedStyle.name.toLowerCase()} perspective,` : '';
         
-        // Check for portfolio-related questions
         if (lowerQuestion.includes('portfolio') || lowerQuestion.includes('holdings') || lowerQuestion.includes('my stocks')) {
             return {
                 type: 'standard',
-                content: getAdvisorResponse(advisor, 'portfolio'),
+                content: `${styleContext} looking at your portfolio, I can see you have a diversified mix of assets. Your total value is ${portfolioData.totalValue} with ${portfolioData.holdings.length} holdings. This shows a good foundation for building long-term wealth.`,
                 portfolioRef: portfolioData.holdings.slice(0, 2)
             };
         }
 
-        // Check for educational questions
         if (lowerQuestion.includes('what is') || lowerQuestion.includes('explain') || lowerQuestion.includes('how do')) {
             return {
                 type: 'standard',
-                content: getAdvisorResponse(advisor, 'educational'),
+                content: `${styleContext} that's a great question for building your investment knowledge. Understanding these concepts is key to making informed decisions.`,
                 education: {
                     title: '💡 Key Concept',
                     content: getEducationalContent(lowerQuestion)
@@ -234,11 +228,10 @@ const AIAdvisorView = () => {
             };
         }
 
-        // Check for risk questions
-        if (lowerQuestion.includes('risk') || lowerQuestion.includes('volatile') || lowerQuestion.includes('safe')) {
+        if (lowerQuestion.includes('risk')) {
             return {
                 type: 'standard',
-                content: getAdvisorResponse(advisor, 'risk'),
+                content: `${styleContext} understanding risk is crucial for any investor. Your risk tolerance should align with your time horizon and financial goals.`,
                 education: {
                     title: '⚠️ Risk Insight',
                     content: 'Risk tolerance varies by individual. Consider your time horizon, financial goals, and how you\'d feel if your portfolio dropped 20% temporarily.'
@@ -248,90 +241,68 @@ const AIAdvisorView = () => {
 
         return {
             type: 'standard',
-            content: getAdvisorResponse(advisor, 'general')
+            content: `${styleContext} That's a thoughtful question. Let me share some educational insights that can help you make more informed investment decisions.`
         };
-    };
-
-    const getAdvisorResponse = (advisor, topic) => {
-        const responses = {
-            buffett: {
-                portfolio: "Looking at your holdings, I see a mix of growth and value. Remember, it's far better to buy a wonderful company at a fair price than a fair company at a wonderful price.",
-                educational: "That's a great question. Let me explain this the way I think about it - always in terms of underlying business value.",
-                risk: "Risk comes from not knowing what you're doing. The best way to minimize risk is to think carefully and invest in businesses you understand.",
-                general: "Remember, price is what you pay, value is what you get. Let's think about this from a long-term business perspective."
-            },
-            montaperto: {
-                portfolio: "Your portfolio shows thoughtful diversification. Let's ensure these holdings align with your specific financial timeline and goals.",
-                educational: "Great question! Understanding these fundamentals is key to making confident financial decisions.",
-                risk: "Risk management is about balance. Your moderate risk profile suggests we should blend growth potential with stability.",
-                general: "Let's think about this strategically, considering both your short-term needs and long-term objectives."
-            },
-            ramsey: {
-                portfolio: "I see you've got some holdings here. But first - are you debt-free? Do you have 3-6 months expenses saved? Those come before investing!",
-                educational: "Listen, this stuff isn't complicated, but it does require discipline. Let me break it down simply.",
-                risk: "The best investment is paying off debt. After that, slow and steady wins the race. No get-rich-quick schemes!",
-                general: "Here's the deal - building wealth is a marathon, not a sprint. Let's make sure you're doing this the right way."
-            },
-            ocallaghan: {
-                portfolio: "Your holdings show you're building a foundation. Let's discuss how these fit into your overall financial picture.",
-                educational: "I love that you're asking questions! Knowledge is power when it comes to your finances.",
-                risk: "Understanding risk is crucial. Let's explore what level of volatility you're truly comfortable with.",
-                general: "Let's look at this from multiple angles so you can make the most informed decision for your situation."
-            },
-            lynch: {
-                portfolio: "Interesting holdings! Do you use Apple products? Shop at places that sell Tesla? Investing in what you know gives you an edge.",
-                educational: "Here's how I think about it - the best research often comes from your own observations as a consumer.",
-                risk: "The key to managing risk is understanding what you own. If you can't explain why you own something, that's risky.",
-                general: "Let's think about this practically. What companies do you interact with every day that seem to be doing well?"
-            },
-            cramer: {
-                portfolio: "BOOM! Let's look at what you've got! Tesla's moving, crypto's volatile - there's always action in this portfolio!",
-                educational: "Great question! You've got to understand this stuff to stay ahead of the game. Here's the breakdown!",
-                risk: "Look, markets are risky - that's the game! But homework and diversification help you sleep at night!",
-                general: "Here's my take - and remember, do your homework! Don't just take my word for it, do the research!"
-            }
-        };
-
-        return responses[advisor.id]?.[topic] || responses[advisor.id]?.general;
     };
 
     const getEducationalContent = (question) => {
-        if (question.includes('diversif')) {
-            return "Diversification means spreading investments across different assets to reduce risk. If one investment falls, others may hold steady or rise.";
-        }
-        if (question.includes('value invest')) {
-            return "Value investing focuses on finding stocks trading below their intrinsic worth. It requires patience and fundamental analysis.";
-        }
-        if (question.includes('etf') || question.includes('index')) {
-            return "ETFs (Exchange-Traded Funds) let you invest in many stocks at once, providing instant diversification at low cost.";
-        }
-        if (question.includes('dividend')) {
-            return "Dividends are portions of company profits paid to shareholders. Dividend yield = annual dividend ÷ stock price.";
-        }
+        if (question.includes('diversif')) return "Diversification means spreading investments across different assets to reduce risk. If one investment falls, others may hold steady or rise.";
+        if (question.includes('stock') && question.includes('bond')) return "Stocks represent ownership in companies with higher risk/reward. Bonds are loans to entities with lower risk and steady income.";
+        if (question.includes('etf') || question.includes('index')) return "ETFs (Exchange-Traded Funds) let you invest in many stocks at once, providing instant diversification at low cost.";
         return "This is a fundamental concept in investing. Understanding it will help you make more informed decisions about your portfolio.";
     };
 
-    const handleQuickPrompt = (prompt) => {
-        handleSendMessage(prompt);
+    const handleCopyMessage = (messageId, content) => {
+        navigator.clipboard.writeText(content);
+        setCopiedId(messageId);
+        setTimeout(() => setCopiedId(null), 2000);
     };
 
-    const handleBackToSelection = () => {
-        setSelectedAdvisor(null);
-        setMessages([]);
+    const handleExportChat = () => {
+        const chatContent = messages.map(m => 
+            `[${formatTime(m.timestamp)}] ${m.type === 'user' ? 'You' : 'AI Advisor'}: ${m.content}`
+        ).join('\n\n');
+        
+        const blob = new Blob([chatContent], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `chat-export-${new Date().toISOString().split('T')[0]}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
     };
 
-    const togglePortfolioPanel = () => {
-        setShowPortfolioPanel(!showPortfolioPanel);
+    const handleNewChat = () => {
+        setMessages([{
+            id: 1,
+            type: 'ai',
+            messageType: 'greeting',
+            content: "Hello! I'm your AI financial education advisor. How can I help you today?",
+            timestamp: new Date()
+        }]);
+        setSelectedStyle(null);
     };
 
-    // Render different message types
-    const renderMessage = (message) => {
+    const renderMessage = (message, index) => {
+        const isLatest = index === messages.length - 1;
+        
         switch (message.messageType) {
+            case 'style-change':
+                return (
+                    <div className={`${styles.styleChangeBubble} ${isLatest ? styles.slideIn : ''}`} style={{ '--style-color': message.style.color }}>
+                        <div className={styles.styleChangeHeader}>
+                            <span className={styles.styleIcon}>{message.style.icon}</span>
+                            <span className={styles.styleName}>{message.style.name}</span>
+                        </div>
+                        <p>{message.content}</p>
+                        <span className={styles.timestamp}>{formatTime(message.timestamp)}</span>
+                    </div>
+                );
+
             case 'education':
                 return (
-                    <div className={styles.educationCallout}>
+                    <div className={`${styles.educationCallout} ${isLatest ? styles.slideIn : ''}`}>
                         <div className={styles.educationHeader}>
-                            <span className={styles.educationIcon}>💡</span>
                             <span className={styles.educationTitle}>{message.title}</span>
                         </div>
                         <p className={styles.educationContent}>{message.content}</p>
@@ -340,7 +311,7 @@ const AIAdvisorView = () => {
             
             case 'portfolio-reference':
                 return (
-                    <div className={styles.portfolioReference}>
+                    <div className={`${styles.portfolioReference} ${isLatest ? styles.slideIn : ''}`}>
                         <div className={styles.portfolioRefHeader}>
                             <span>📊 Referenced Holdings</span>
                         </div>
@@ -357,111 +328,136 @@ const AIAdvisorView = () => {
                         </div>
                     </div>
                 );
-
-            case 'portfolio-insight':
-                return (
-                    <div 
-                        className={styles.messageBubble}
-                        style={{ '--advisor-color': selectedAdvisor.color }}
-                    >
-                        <div className={styles.insightBadge}>
-                            <span>📈</span> Portfolio Insight
-                        </div>
-                        {message.content}
-                    </div>
-                );
             
             default:
                 return (
-                    <div 
-                        className={styles.messageBubble}
-                        style={message.type === 'ai' ? { '--advisor-color': selectedAdvisor.color } : {}}
-                    >
+                    <div className={`${styles.messageBubble} ${isLatest ? styles.slideIn : ''}`}>
                         {message.content}
+                        <div className={styles.messageFooter}>
+                            <span className={styles.timestamp}>{formatTime(message.timestamp)}</span>
+                            {message.type === 'ai' && (
+                                <button 
+                                    className={styles.copyBtn}
+                                    onClick={() => handleCopyMessage(message.id, message.content)}
+                                >
+                                    {copiedId === message.id ? '✓ Copied' : '📋 Copy'}
+                                </button>
+                            )}
+                        </div>
                     </div>
                 );
         }
     };
 
-    // Advisor Selection Screen
-    if (!selectedAdvisor) {
-        return (
-            <div className={styles.container}>
-                <div className={styles.selectionHeader}>
-                    <h1 className={styles.title}>AI Advisor</h1>
-                    <p className={styles.subtitle}>
-                        Choose your investment mentor. Each advisor brings a unique philosophy and approach.
-                    </p>
-                </div>
-
-                <div className={styles.advisorGrid}>
-                    {advisors.map((advisor) => (
-                        <div
-                            key={advisor.id}
-                            className={styles.advisorCard}
-                            onClick={() => handleSelectAdvisor(advisor)}
-                            style={{ '--advisor-color': advisor.color }}
-                        >
-                            <div className={styles.advisorAvatar}>{advisor.avatar}</div>
-                            <div className={styles.advisorInfo}>
-                                <h3 className={styles.advisorName}>{advisor.name}</h3>
-                                <span className={styles.advisorTitle}>{advisor.title}</span>
-                                <span className={styles.advisorStyle}>{advisor.style}</span>
-                                <p className={styles.advisorDescription}>{advisor.description}</p>
-                            </div>
-                            <button className={styles.selectButton}>
-                                Start Chat →
-                            </button>
-                        </div>
-                    ))}
-                </div>
-
-                <div className={styles.disclaimer}>
-                    <span className={styles.disclaimerIcon}>ℹ️</span>
-                    <p>
-                        <strong>Educational Purpose Only:</strong> AI advisors provide simulated educational guidance 
-                        based on famous investing philosophies. This is not real financial advice. Always consult 
-                        a licensed financial advisor for personal investment decisions.
-                    </p>
-                </div>
-            </div>
-        );
-    }
-
-    // Chat Interface
     return (
         <div className={styles.chatContainer}>
-            {/* Chat Header */}
-            <div 
-                className={styles.chatHeader}
-                style={{ '--advisor-color': selectedAdvisor.color }}
-            >
-                <button className={styles.backButton} onClick={handleBackToSelection}>
-                    ← Back
+            {/* Gradient Header */}
+            <div className={styles.chatHeader}>
+                <button 
+                    className={styles.historyToggle}
+                    onClick={() => setShowHistorySidebar(!showHistorySidebar)}
+                >
+                    ☰
                 </button>
                 <div className={styles.chatHeaderInfo}>
-                    <div className={styles.chatAvatar}>{selectedAdvisor.avatar}</div>
+                    <div className={`${styles.chatAvatar} ${isTyping ? styles.pulse : ''}`}>🤖</div>
                     <div>
-                        <h2 className={styles.chatAdvisorName}>{selectedAdvisor.name}</h2>
-                        <span className={styles.chatAdvisorStyle}>{selectedAdvisor.style}</span>
+                        <h2 className={styles.chatAdvisorName}>AI Financial Advisor</h2>
+                        <span className={styles.chatAdvisorStyle}>
+                            {selectedStyle ? (
+                                <>
+                                    <span className={styles.activeStyleBadge} style={{ '--style-color': selectedStyle.color }}>
+                                        {selectedStyle.icon} {selectedStyle.name}
+                                    </span>
+                                    <button className={styles.clearStyleBtn} onClick={handleClearStyle}>✕</button>
+                                </>
+                            ) : (
+                                <span className={styles.onlineStatus}>● Online</span>
+                            )}
+                        </span>
                     </div>
                 </div>
-                <button 
-                    className={`${styles.portfolioToggle} ${showPortfolioPanel ? styles.active : ''}`}
-                    onClick={togglePortfolioPanel}
-                >
-                    📊 Portfolio
-                </button>
+                <div className={styles.headerActions}>
+                    <button 
+                        className={`${styles.headerButton} ${showStyleSelector ? styles.active : ''}`}
+                        onClick={() => setShowStyleSelector(!showStyleSelector)}
+                        title="Change Style"
+                    >
+                        🎨
+                    </button>
+                    <button 
+                        className={`${styles.headerButton} ${showPortfolioPanel ? styles.active : ''}`}
+                        onClick={() => setShowPortfolioPanel(!showPortfolioPanel)}
+                        title="Portfolio"
+                    >
+                        📊
+                    </button>
+                    <button 
+                        className={styles.headerButton}
+                        onClick={handleExportChat}
+                        title="Export Chat"
+                    >
+                        📥
+                    </button>
+                </div>
             </div>
 
+            {/* Style Selector */}
+            {showStyleSelector && (
+                <div className={styles.styleSelector}>
+                    <div className={styles.styleSelectorHeader}>
+                        <h3>Choose an Investing Style</h3>
+                        <p>Get guidance from a specific perspective</p>
+                    </div>
+                    <div className={styles.styleCategories}>
+                        {styleCategories.map((category, idx) => (
+                            <div key={idx} className={styles.styleCategory}>
+                                <h4>{category.category}</h4>
+                                <div className={styles.styleOptions}>
+                                    {category.styles.map((style) => (
+                                        <button
+                                            key={style.id}
+                                            className={`${styles.styleOption} ${selectedStyle?.id === style.id ? styles.selected : ''}`}
+                                            onClick={() => handleStyleSelect(style)}
+                                            style={{ '--style-color': style.color }}
+                                        >
+                                            <span className={styles.styleOptionIcon}>{style.icon}</span>
+                                            <span className={styles.styleOptionName}>{style.name}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             <div className={styles.chatBody}>
-                {/* Portfolio Context Panel */}
+                {/* History Sidebar */}
+                <div className={`${styles.historySidebar} ${showHistorySidebar ? styles.open : ''}`}>
+                    <div className={styles.sidebarHeader}>
+                        <h3>Chat History</h3>
+                        <button className={styles.newChatBtn} onClick={handleNewChat}>
+                            + New Chat
+                        </button>
+                    </div>
+                    <div className={styles.historyList}>
+                        {chatHistory.map((chat) => (
+                            <div key={chat.id} className={styles.historyItem}>
+                                <div className={styles.historyTitle}>{chat.title}</div>
+                                <div className={styles.historyPreview}>{chat.preview}</div>
+                                <div className={styles.historyDate}>{chat.date}</div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Portfolio Panel */}
                 <div className={`${styles.portfolioPanel} ${showPortfolioPanel ? styles.open : ''}`}>
                     <div className={styles.portfolioPanelHeader}>
                         <h3>Your Portfolio</h3>
-                        <button className={styles.panelClose} onClick={togglePortfolioPanel}>×</button>
+                        <button className={styles.panelClose} onClick={() => setShowPortfolioPanel(false)}>×</button>
                     </div>
-                    
                     <div className={styles.portfolioSummary}>
                         <div className={styles.portfolioTotal}>
                             <span className={styles.portfolioLabel}>Total Value</span>
@@ -470,19 +466,17 @@ const AIAdvisorView = () => {
                                 {portfolioData.todayChange} ({portfolioData.todayChangePercent})
                             </span>
                         </div>
-                        
                         <div className={styles.portfolioMeta}>
                             <div className={styles.metaItem}>
                                 <span className={styles.metaLabel}>Cash</span>
                                 <span className={styles.metaValue}>{portfolioData.cashAvailable}</span>
                             </div>
                             <div className={styles.metaItem}>
-                                <span className={styles.metaLabel}>Risk Profile</span>
+                                <span className={styles.metaLabel}>Risk</span>
                                 <span className={styles.metaValue}>{portfolioData.riskProfile}</span>
                             </div>
                         </div>
                     </div>
-
                     <div className={styles.holdingsList}>
                         <h4>Holdings</h4>
                         {portfolioData.holdings.map((holding, idx) => (
@@ -500,41 +494,33 @@ const AIAdvisorView = () => {
                             </div>
                         ))}
                     </div>
-
-                    <div className={styles.panelInsights}>
-                        <div className={styles.insightItem}>
-                            <span className={styles.insightLabel}>🚀 Top Performer</span>
-                            <span className={styles.insightValue}>{portfolioData.topPerformer.symbol} {portfolioData.topPerformer.change}</span>
-                        </div>
-                        <div className={styles.insightItem}>
-                            <span className={styles.insightLabel}>📉 Needs Attention</span>
-                            <span className={styles.insightValue}>{portfolioData.topLoser.symbol} {portfolioData.topLoser.change}</span>
-                        </div>
-                    </div>
                 </div>
 
                 {/* Messages Area */}
                 <div className={styles.messagesArea}>
                     <div className={styles.messagesWrapper}>
-                        {messages.map((message) => (
+                        {messages.map((message, index) => (
                             <div
                                 key={message.id}
                                 className={`${styles.message} ${message.type === 'user' ? styles.userMessage : styles.aiMessage}`}
                             >
                                 {message.type === 'ai' && message.messageType !== 'education' && message.messageType !== 'portfolio-reference' && (
-                                    <div className={styles.messageAvatar}>{selectedAdvisor.avatar}</div>
+                                    <div className={`${styles.messageAvatar} ${isTyping && index === messages.length - 1 ? styles.pulse : ''}`}>
+                                        🤖
+                                    </div>
                                 )}
-                                {renderMessage(message)}
+                                {renderMessage(message, index)}
                             </div>
                         ))}
 
                         {isTyping && (
                             <div className={`${styles.message} ${styles.aiMessage}`}>
-                                <div className={styles.messageAvatar}>{selectedAdvisor.avatar}</div>
+                                <div className={`${styles.messageAvatar} ${styles.pulse}`}>🤖</div>
                                 <div className={styles.typingIndicator}>
-                                    <span></span>
-                                    <span></span>
-                                    <span></span>
+                                    <span className={styles.typingText}>Typing</span>
+                                    <span className={styles.typingDots}>
+                                        <span>.</span><span>.</span><span>.</span>
+                                    </span>
                                 </div>
                             </div>
                         )}
@@ -546,11 +532,11 @@ const AIAdvisorView = () => {
 
             {/* Quick Prompts */}
             <div className={styles.quickPrompts}>
-                {selectedAdvisor.quickPrompts.map((prompt, index) => (
+                {getQuickPrompts().map((prompt, index) => (
                     <button
                         key={index}
                         className={styles.quickPromptBtn}
-                        onClick={() => handleQuickPrompt(prompt)}
+                        onClick={() => handleSendMessage(prompt)}
                     >
                         {prompt}
                     </button>
@@ -565,14 +551,13 @@ const AIAdvisorView = () => {
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && handleSendMessage(inputValue)}
-                        placeholder={`Ask ${selectedAdvisor.name.split(' ')[0]} a question...`}
+                        placeholder={selectedStyle ? `Ask about ${selectedStyle.name.toLowerCase()}...` : "Ask me anything about investing..."}
                         className={styles.chatInput}
                     />
                     <button
                         className={styles.sendButton}
                         onClick={() => handleSendMessage(inputValue)}
                         disabled={!inputValue.trim()}
-                        style={{ '--advisor-color': selectedAdvisor.color }}
                     >
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
