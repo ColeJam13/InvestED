@@ -16,10 +16,10 @@ function App() {
                 return <Dashboard />;
             case 'markets':
                 return <MarketsView />;
+            case 'learn':
+                return <LearnView />;
             case 'advisor':
                 return <ComingSoon title="AI Advisor" icon="💬" />;
-            case 'learn':
-                return <ComingSoon title="Learn" icon="📚" />;
             case 'profile':
                 return <ComingSoon title="Profile" icon="👤" />;
             default:
