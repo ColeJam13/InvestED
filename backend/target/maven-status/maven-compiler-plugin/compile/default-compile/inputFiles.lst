@@ -1,6 +1,7 @@
 /Users/dmurali/Projects/InvestED/backend/src/main/java/com/zipcode/invested/InvestEdApplication.java
 /Users/dmurali/Projects/InvestED/backend/src/main/java/com/zipcode/invested/config/TwelveDataConfig.java
 /Users/dmurali/Projects/InvestED/backend/src/main/java/com/zipcode/invested/controller/MarketDataController.java
+/Users/dmurali/Projects/InvestED/backend/src/main/java/com/zipcode/invested/controller/UserController.java
 /Users/dmurali/Projects/InvestED/backend/src/main/java/com/zipcode/invested/service/TwelveDataService.java
 /Users/dmurali/Projects/InvestED/backend/src/main/java/com/zipcode/invested/user/User.java
 /Users/dmurali/Projects/InvestED/backend/src/main/java/com/zipcode/invested/user/UserRepository.java
