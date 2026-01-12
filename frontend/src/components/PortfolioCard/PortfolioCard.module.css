@@ -1,0 +1,180 @@
+.card {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 1.5rem;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.portfolioLabel {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.portfolioValue {
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.portfolioMeta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.portfolioChange {
+    font-weight: 600;
+    color: var(--accent-green);
+}
+
+.cashBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    background: var(--accent-green-light);
+    color: var(--accent-green);
+}
+
+.cashBadge svg {
+    stroke: currentColor;
+}
+
+/* Chart Container */
+.chartContainer {
+    height: 180px;
+    position: relative;
+    margin-bottom: 0.5rem;
+}
+
+.chartSvg {
+    width: 100%;
+    height: 100%;
+}
+
+.chartLine {
+    stroke: var(--accent-green);
+}
+
+.chartArea {
+    fill: url(#chartGradient);
+}
+
+.yAxisLabels {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    padding: 0.25rem 0;
+}
+
+.xAxisLabels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+    padding: 0 0.5rem;
+}
+
+/* Time Filters */
+.timeFilters {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.timeBtn {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    border: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: transparent;
+    color: var(--text-muted);
+}
+
+.timeBtn:hover {
+    background: var(--border-color);
+}
+
+.timeBtn.active {
+    background: var(--accent-green);
+    color: #FFFFFF;
+}
+
+:global(body.dark-mode) .timeBtn.active {
+    color: #0f0f1a;
+}
+
+/* Asset Filters */
+.assetFilters {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.filterBtn {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+}
+
+.filterBtn:hover {
+    border-color: var(--accent-yellow);
+}
+
+.filterBtn.active {
+    background: var(--accent-yellow);
+    color: #1a1a2e;
+    border-color: var(--accent-yellow);
+}
+
+:global(body.dark-mode) .filterBtn.active {
+    background: var(--accent-green-light);
+    color: var(--accent-green);
+    border-color: var(--accent-green);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .portfolioValue {
+        font-size: 2rem;
+    }
+
+    .assetFilters {
+        flex-direction: column;
+    }
+
+    .timeFilters {
+        flex-wrap: wrap;
+    }
+}

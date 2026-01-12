@@ -1,0 +1,127 @@
+.section {
+    display: flex;
+    flex-direction: column;
+}
+
+.sectionHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.sectionTitle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.icon {
+    font-size: 1.1rem;
+}
+
+.infoIcon {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.viewAll {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--accent-green);
+    transition: opacity 0.2s;
+}
+
+.viewAll:hover {
+    opacity: 0.8;
+}
+
+.holdingsCard {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 0.5rem 1rem;
+    box-shadow: var(--shadow);
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.holdingsList {
+    display: flex;
+    flex-direction: column;
+}
+
+.holdingItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid var(--border-color);
+    transition: border-color 0.3s;
+}
+
+.holdingItem:last-child {
+    border-bottom: none;
+}
+
+.holdingLeft {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.holdingIcon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.65rem;
+    color: #FFFFFF;
+    letter-spacing: -0.5px;
+}
+
+.holdingInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.holdingName {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+}
+
+.holdingShares {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.holdingRight {
+    text-align: right;
+}
+
+.holdingValue {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    margin-bottom: 0.15rem;
+}
+
+.holdingChange {
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.holdingChange.positive {
+    color: var(--accent-green);
+}
+
+.holdingChange.negative {
+    color: var(--accent-red);
+}
