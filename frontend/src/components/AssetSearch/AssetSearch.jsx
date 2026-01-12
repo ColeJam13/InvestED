@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { marketService } from '../services/marketService';
+import { marketService } from '../../services/marketService';
+import styles from './AssetSearch.module.css';
 
 function AssetSearch({ onAssetSelect }) {
   const [query, setQuery] = useState('');
@@ -26,28 +27,28 @@ function AssetSearch({ onAssetSelect }) {
   };
 
   return (
-    <div className="asset-search">
+    <div className={styles.assetSearch}>
       <input
         type="text"
         value={query}
         onChange={handleSearch}
         placeholder="Search stocks or crypto (e.g., AAPL, BTC)"
-        className="search-input"
+        className={styles.searchInput}
       />
       
-      {loading && <div>Searching...</div>}
+      {loading && <div className={styles.loading}>Searching...</div>}
       
       {results.length > 0 && (
-        <div className="search-results">
+        <div className={styles.searchResults}>
           {results.map((asset, index) => (
             <div 
               key={index} 
-              className="search-result-item"
+              className={styles.searchResultItem}
               onClick={() => onAssetSelect(asset.symbol)}
             >
-              <div className="result-symbol">{asset.symbol}</div>
-              <div className="result-name">{asset.instrument_name}</div>
-              <div className="result-type">{asset.instrument_type}</div>
+              <div className={styles.resultSymbol}>{asset.symbol}</div>
+              <div className={styles.resultName}>{asset.instrument_name}</div>
+              <div className={styles.resultType}>{asset.instrument_type}</div>
             </div>
           ))}
         </div>

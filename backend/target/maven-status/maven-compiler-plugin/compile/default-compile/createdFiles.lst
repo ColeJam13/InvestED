@@ -1,0 +1,12 @@
+com/zipcode/invested/controller/UserController.class
+com/zipcode/invested/service/RiskProfileService.class
+com/zipcode/invested/service/PortfolioService.class
+com/zipcode/invested/portfolio/Portfolio.class
+com/zipcode/invested/risk/RiskProfileRepository.class
+com/zipcode/invested/risk/RiskProfile.class
+com/zipcode/invested/user/UserRepository.class
+com/zipcode/invested/controller/PortfolioController.class
+com/zipcode/invested/portfolio/PortfolioRepository.class
+com/zipcode/invested/service/UserService.class
+com/zipcode/invested/user/User.class
+com/zipcode/invested/controller/RiskProfileController.class
