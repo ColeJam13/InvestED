@@ -1,0 +1,44 @@
+import styles from './GoalCard.module.css';
+
+const GoalCard = () => {
+    const goal = {
+        title: 'House Down Payment',
+        target: '$20,000',
+        deadline: 'December 2026',
+        saved: '$18,234',
+        percentage: 91,
+    };
+
+    return (
+        <div className={styles.section}>
+            <div className={styles.sectionHeader}>
+                <div className={styles.sectionTitle}>
+                    <span className={styles.icon}>🎯</span>
+                    Featured Goal
+                </div>
+                <a href="#" className={styles.viewAll}>View All →</a>
+            </div>
+            
+            <div className={styles.goalCard}>
+                <div className={styles.goalTitle}>{goal.title}</div>
+                <div className={styles.goalTarget}>
+                    Target: {goal.target} by {goal.deadline}
+                </div>
+                
+                <div className={styles.progressBar}>
+                    <div 
+                        className={styles.progressFill} 
+                        style={{ width: `${goal.percentage}%` }}
+                    ></div>
+                </div>
+                
+                <div className={styles.goalStatus}>
+                    <span>{goal.saved} saved • {goal.percentage}% on track</span>
+                    <span className={styles.checkIcon}>✓</span>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default GoalCard;
