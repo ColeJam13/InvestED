@@ -15,10 +15,10 @@ Users  invest  paper  money  in  real  stocks  and  crypto,  learning  strategie
 personalized guidance from AI advisors and comprehensive market intelligence.
 
 Our AI financial mentor adopts the personality and investing style of famous advisors including Warren
-Buffett,  Dave  Ramsey,  Peter  Lynch,  and  Jim  Cramer.  Users  converse  with  these  AI  personalities  for
-investment suggestions aligned with each advisor's philosophy. The AI also supports ethical investing,
-guiding  recommendations  based  on  user  values.  Built  using  Llama  or  OpenAI,  the  system  provides
-intelligent guidance without premium API costs.
+Buffett, Deborah Montaperto, Dave  Ramsey, Colleen O'Callaghan, Peter  Lynch,  and  Jim  Cramer.  Users  converse  
+with  these  AI  personalities  for investment suggestions aligned with each advisor's philosophy. The AI also 
+supports ethical investing, guiding  recommendations  based  on  user  values.  Built  using  Llama  or  OpenAI,  
+the  system  provides intelligent guidance without premium API costs.
 
 Real-time  market  data  via  TwelveData  creates  an  authentic  experience  without  financial  risk.  Users
 explore  all  investment  vehicles  including  options  trading  through  advanced  educational  modules.  The
