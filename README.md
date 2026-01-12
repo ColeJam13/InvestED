@@ -4,6 +4,16 @@ An **educational investment simulation platform** that helps new investors learn
 
 ---
 
+- [Project Overview](#project-overview)
+- [Problem](#problem)
+- [Solution](#solution)
+- [Key Features](#key-features)
+- [Tech Stack](#tech-stack)
+- [Core Application Views](#core-application-views)
+- [Disclaimer](#disclaimer)
+
+---
+
 ## Project Overview
 
 The Investment Learning Platform is a **paper-trading simulator** that allows users to invest virtual money into real stocks and cryptocurrencies using live market data. Users can track portfolios, set financial goals, compare assets, and chat with an AI mentor—all while remaining in a safe learning environment (no real-money trading). 
