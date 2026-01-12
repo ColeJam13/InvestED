@@ -20,5 +20,10 @@ export const marketService = {
       params: { symbol }
     });
     return response.data;
+  },
+
+  getTrending: async () => {
+    const response = await axios.get(`${API_BASE_URL}/trending`);
+    return response.data;
   }
 };
