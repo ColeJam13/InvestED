@@ -15,6 +15,8 @@
     display: flex;
     align-items: center;
     gap: 2rem;
+    flex: 1;
+    min-width: 0;
 }
 
 .logo {
@@ -22,24 +24,58 @@
     font-weight: 800;
     letter-spacing: -0.5px;
     color: var(--accent-green);
+    flex-shrink: 0;
 }
 
-.marketTicker {
+.tickerWrapper {
     display: flex;
     align-items: center;
     gap: 1rem;
-    font-size: 0.8rem;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .tickerLabel {
     font-weight: 600;
+    font-size: 0.75rem;
     color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.marqueeContainer {
+    flex: 1;
+    overflow: hidden;
+    mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+}
+
+.marquee {
+    display: flex;
+    gap: 2rem;
+    animation: marquee 30s linear infinite;
+    width: max-content;
+}
+
+.marquee:hover {
+    animation-play-state: paused;
+}
+
+@keyframes marquee {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
 }
 
 .tickerItem {
     display: flex;
     align-items: center;
-    gap: 0.35rem;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    white-space: nowrap;
 }
 
 .tickerSymbol {
@@ -67,6 +103,7 @@
     display: flex;
     align-items: center;
     gap: 1rem;
+    flex-shrink: 0;
 }
 
 .welcomeText {
@@ -94,7 +131,7 @@
 
 /* Responsive */
 @media (max-width: 1024px) {
-    .marketTicker {
+    .tickerWrapper {
         display: none;
     }
 }
