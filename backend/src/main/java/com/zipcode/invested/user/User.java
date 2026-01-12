@@ -13,10 +13,7 @@ public class User {
 
     @Column(nullable = false, unique = true, length = 120)
     private String email;
-
-    @Column(nullable = false, length = 120)
-    private String passwordHash;
-
+    
     @Column(nullable = false, length = 80)
     private String displayName;
 
@@ -25,19 +22,16 @@ public class User {
 
     protected User() { }
 
-    public User(String email, String passwordHash, String displayName) {
+    public User(String email, String displayName) {
         this.email = email;
-        this.passwordHash = passwordHash;
         this.displayName = displayName;
     }
 
     public Long getId() { return id; }
     public String getEmail() { return email; }
-    public String getPasswordHash() { return passwordHash; }
     public String getDisplayName() { return displayName; }
     public Instant getCreatedAt() { return createdAt; }
 
     public void setEmail(String email) { this.email = email; }
-    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
     public void setDisplayName(String displayName) { this.displayName = displayName; }
 }
