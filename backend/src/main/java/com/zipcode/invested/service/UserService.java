@@ -1,6 +1,9 @@
-package com.zipcode.invested.user;
+package com.zipcode.invested.service;
 
 import org.springframework.stereotype.Service;
+
+import com.zipcode.invested.user.User;
+import com.zipcode.invested.user.UserRepository;
 
 import java.util.List;
 import java.util.Optional;

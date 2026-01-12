@@ -1,7 +1,8 @@
 package com.zipcode.invested.controller;
 
+import com.zipcode.invested.service.UserService;
 import com.zipcode.invested.user.User;
-import com.zipcode.invested.user.UserService;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
