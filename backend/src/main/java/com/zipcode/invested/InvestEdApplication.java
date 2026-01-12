@@ -9,5 +9,4 @@ public class InvestEdApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(InvestEdApplication.class, args);
 	}
-
 }
