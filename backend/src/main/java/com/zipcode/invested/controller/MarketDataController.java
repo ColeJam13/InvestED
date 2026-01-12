@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/market")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:5173")
 public class MarketDataController {
     
     @Autowired
@@ -17,8 +17,8 @@ public class MarketDataController {
         return twelveDataService.getStockPrice(symbol);
     }
     
-    @GetMapping("/quote/{symbol}")
-    public String getQuote(@PathVariable String symbol) {
+    @GetMapping("/quote")
+    public String getQuote(@RequestParam String symbol) {
         return twelveDataService.getStockQuote(symbol);
     }
     
