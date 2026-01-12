@@ -1,0 +1,911 @@
+.container {
+    padding: 1.5rem;
+    padding-bottom: 100px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Selection Screen */
+.selectionHeader {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* Advisor Grid */
+.advisorGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+}
+
+.advisorCard {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.advisorCard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--advisor-color);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.advisorCard:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.advisorCard:hover::before {
+    opacity: 1;
+}
+
+.advisorAvatar {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+    border-radius: 16px;
+    border: 2px solid var(--border-color);
+}
+
+.advisorInfo {
+    flex: 1;
+}
+
+.advisorName {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.advisorTitle {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--advisor-color);
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+}
+
+.advisorStyle {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.25rem 0.6rem;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+}
+
+.advisorDescription {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-bottom: 1rem;
+}
+
+.selectButton {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--advisor-color);
+    border: none;
+    border-radius: 10px;
+    color: #FFFFFF;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.selectButton:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+/* Disclaimer */
+.disclaimer {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    background: var(--bg-card);
+    border-radius: 12px;
+    border: 1px dashed var(--border-color);
+}
+
+.disclaimerIcon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.disclaimer p {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.disclaimer strong {
+    color: var(--text-secondary);
+}
+
+/* ========== CHAT INTERFACE ========== */
+.chatContainer {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 60px);
+    max-height: calc(100vh - 60px);
+    background: var(--bg-primary);
+}
+
+/* Chat Header */
+.chatHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+}
+
+.chatHeader::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--advisor-color), transparent);
+}
+
+.backButton {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.backButton:hover {
+    border-color: var(--advisor-color);
+    color: var(--advisor-color);
+}
+
+.chatHeaderInfo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.chatAvatar {
+    font-size: 1.75rem;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-primary);
+    border-radius: 12px;
+    border: 2px solid var(--advisor-color);
+}
+
+.chatAdvisorName {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.chatAdvisorStyle {
+    font-size: 0.75rem;
+    color: var(--advisor-color);
+    font-weight: 500;
+}
+
+.portfolioToggle {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.portfolioToggle:hover,
+.portfolioToggle.active {
+    border-color: var(--accent-green);
+    color: var(--accent-green);
+    background: var(--accent-green-light);
+}
+
+.headerSpacer {
+    width: 80px;
+}
+
+/* Chat Body - contains panel and messages */
+.chatBody {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* ========== PORTFOLIO CONTEXT PANEL ========== */
+.portfolioPanel {
+    width: 0;
+    overflow: hidden;
+    background: var(--bg-card);
+    border-right: 1px solid var(--border-color);
+    transition: width 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.portfolioPanel.open {
+    width: 300px;
+}
+
+.portfolioPanelHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.portfolioPanelHeader h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.panelClose {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.panelClose:hover {
+    color: var(--text-primary);
+}
+
+.portfolioSummary {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.portfolioTotal {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+}
+
+.portfolioLabel {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+}
+
+.portfolioValue {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.portfolioChange {
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.portfolioChange.positive {
+    color: var(--accent-green);
+}
+
+.portfolioChange.negative {
+    color: var(--accent-red);
+}
+
+.portfolioMeta {
+    display: flex;
+    gap: 1rem;
+}
+
+.metaItem {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem;
+    background: var(--bg-primary);
+    border-radius: 8px;
+}
+
+.metaLabel {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.metaValue {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.holdingsList {
+    padding: 1rem;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.holdingsList h4 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+}
+
+.holdingItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.holdingItem:last-child {
+    border-bottom: none;
+}
+
+.holdingMain {
+    display: flex;
+    flex-direction: column;
+}
+
+.holdingSymbol {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.holdingName {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.holdingData {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.holdingValue {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.holdingChange {
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.holdingChange.positive {
+    color: var(--accent-green);
+}
+
+.holdingChange.negative {
+    color: var(--accent-red);
+}
+
+.panelInsights {
+    padding: 1rem;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-primary);
+}
+
+.insightItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+}
+
+.insightLabel {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.insightValue {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Messages Area */
+.messagesArea {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.messagesWrapper {
+    max-width: 800px;
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.message {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.userMessage {
+    flex-direction: row-reverse;
+}
+
+.messageAvatar {
+    font-size: 1.25rem;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-card);
+    border-radius: 10px;
+    flex-shrink: 0;
+}
+
+.messageBubble {
+    max-width: 70%;
+    padding: 1rem 1.25rem;
+    border-radius: 16px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.aiMessage .messageBubble {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-bottom-left-radius: 4px;
+    box-shadow: var(--shadow);
+}
+
+.userMessage .messageBubble {
+    background: var(--accent-green);
+    color: #FFFFFF;
+    border-bottom-right-radius: 4px;
+}
+
+:global(body.dark-mode) .userMessage .messageBubble {
+    color: #0f0f1a;
+}
+
+/* Portfolio Insight Badge */
+.insightBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--accent-green);
+    margin-bottom: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    background: var(--accent-green-light);
+    border-radius: 4px;
+    width: fit-content;
+}
+
+/* Education Callout */
+.educationCallout {
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(124, 58, 237, 0.05) 100%);
+    border: 1px solid rgba(124, 58, 237, 0.3);
+    border-left: 4px solid #7C3AED;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin-left: 44px;
+    animation: fadeIn 0.3s ease;
+}
+
+:global(body.dark-mode) .educationCallout {
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.2) 0%, rgba(124, 58, 237, 0.1) 100%);
+}
+
+.educationHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.educationIcon {
+    font-size: 1rem;
+}
+
+.educationTitle {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #7C3AED;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.educationContent {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+/* Portfolio Reference Card */
+.portfolioReference {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-left: 44px;
+    animation: fadeIn 0.3s ease;
+}
+
+.portfolioRefHeader {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.portfolioRefList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.portfolioRefItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 0.75rem;
+    background: var(--bg-primary);
+    border-radius: 8px;
+}
+
+.refSymbol {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.refValue {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.refChange {
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.refChange.positive {
+    color: var(--accent-green);
+}
+
+.refChange.negative {
+    color: var(--accent-red);
+}
+
+/* Typing Indicator */
+.typingIndicator {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 1rem 1.25rem;
+    background: var(--bg-card);
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    border-bottom-left-radius: 4px;
+}
+
+.typingIndicator span {
+    width: 8px;
+    height: 8px;
+    background: var(--text-muted);
+    border-radius: 50%;
+    animation: bounce 1.4s ease-in-out infinite;
+}
+
+.typingIndicator span:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.typingIndicator span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typingIndicator span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes bounce {
+    0%, 60%, 100% {
+        transform: translateY(0);
+    }
+    30% {
+        transform: translateY(-6px);
+    }
+}
+
+/* Quick Prompts */
+.quickPrompts {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    overflow-x: auto;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+}
+
+.quickPrompts::-webkit-scrollbar {
+    height: 0;
+}
+
+.quickPromptBtn {
+    flex-shrink: 0;
+    padding: 0.5rem 1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.quickPromptBtn:hover {
+    border-color: var(--accent-green);
+    color: var(--accent-green);
+    background: var(--accent-green-light);
+}
+
+/* Input Area */
+.inputArea {
+    padding: 1rem 1.5rem;
+    padding-bottom: calc(1rem + 70px); /* Account for bottom nav */
+    background: var(--bg-card);
+    border-top: 1px solid var(--border-color);
+}
+
+.inputWrapper {
+    display: flex;
+    gap: 0.75rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.chatInput {
+    flex: 1;
+    padding: 0.85rem 1.25rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.chatInput:focus {
+    border-color: var(--accent-green);
+}
+
+.chatInput::placeholder {
+    color: var(--text-muted);
+}
+
+.sendButton {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    border: none;
+    background: var(--accent-green);
+    color: #FFFFFF;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.sendButton:hover:not(:disabled) {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+}
+
+.sendButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.sendButton svg {
+    width: 20px;
+    height: 20px;
+}
+
+:global(body.dark-mode) .sendButton {
+    color: #0f0f1a;
+}
+
+.inputDisclaimer {
+    text-align: center;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .portfolioPanel.open {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        z-index: 50;
+        width: 280px;
+        box-shadow: var(--shadow-lg);
+    }
+}
+
+@media (max-width: 768px) {
+    .advisorGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .chatHeader {
+        padding: 0.75rem 1rem;
+    }
+
+    .headerSpacer {
+        display: none;
+    }
+
+    .backButton {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.8rem;
+    }
+
+    .portfolioToggle {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.75rem;
+    }
+
+    .chatAvatar {
+        width: 38px;
+        height: 38px;
+        font-size: 1.5rem;
+    }
+
+    .chatAdvisorName {
+        font-size: 0.9rem;
+    }
+
+    .messagesArea {
+        padding: 1rem;
+    }
+
+    .messageBubble {
+        max-width: 85%;
+        padding: 0.85rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .educationCallout,
+    .portfolioReference {
+        margin-left: 0;
+    }
+
+    .quickPrompts {
+        padding: 0.5rem 1rem;
+    }
+
+    .inputArea {
+        padding: 0.75rem 1rem;
+        padding-bottom: calc(0.75rem + 70px);
+    }
+
+    .portfolioPanel.open {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 1rem;
+        padding-bottom: 90px;
+    }
+
+    .title {
+        font-size: 1.5rem;
+    }
+
+    .advisorCard {
+        padding: 1.25rem;
+    }
+
+    .advisorAvatar {
+        width: 60px;
+        height: 60px;
+        font-size: 2.5rem;
+    }
+}
