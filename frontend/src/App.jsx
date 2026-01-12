@@ -3,6 +3,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
 import MarketsView from './components/MarketsView';
+import LearnView from './components/LearnView';
 import BottomNav from './components/BottomNav';
 import './styles/global.css';
 
@@ -15,10 +16,10 @@ function App() {
                 return <Dashboard />;
             case 'markets':
                 return <MarketsView />;
+            case 'learn':
+                return <LearnView />;
             case 'advisor':
                 return <ComingSoon title="AI Advisor" icon="💬" />;
-            case 'learn':
-                return <ComingSoon title="Learn" icon="📚" />;
             case 'profile':
                 return <ComingSoon title="Profile" icon="👤" />;
             default:
