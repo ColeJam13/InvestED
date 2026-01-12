@@ -1,6 +1,7 @@
 package com.zipcode.invested.controller;
 
 import com.zipcode.invested.service.TwelveDataService;
+import com.zipcode.invested.service.FinnhubService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,6 +12,9 @@ public class MarketDataController {
     
     @Autowired
     private TwelveDataService twelveDataService;
+    
+    @Autowired
+    private FinnhubService finnhubService;
     
     @GetMapping("/price/{symbol}")
     public String getPrice(@PathVariable String symbol) {
@@ -25,5 +29,10 @@ public class MarketDataController {
     @GetMapping("/search")
     public String searchSymbol(@RequestParam String query) {
         return twelveDataService.searchSymbol(query);
+    }
+    
+    @GetMapping("/trending")
+    public String getTrending() {
+        return finnhubService.getTrendingQuotes();
     }
 }
