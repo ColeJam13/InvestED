@@ -5,6 +5,7 @@ import Dashboard from './components/Dashboard';
 import MarketsView from './views/MarketsView';
 import LearnView from './components/LearnView';
 import AIAdvisorView from './views/AIAdvisorView';
+import Profile from './views/Profile';
 import BottomNav from './components/BottomNav';
 import './styles/global.css';
 import './App.css';
@@ -23,7 +24,7 @@ function App() {
             case 'advisor':
                 return <AIAdvisorView />;
             case 'profile':
-                return <ComingSoon title="Profile" icon="👤" />;
+                return <Profile />;
             default:
                 return <Dashboard />;
         }
