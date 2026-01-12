@@ -1,8 +1,10 @@
-import '../styles/MarketsView.css';
+import * as styles from './MarketsView.module.css';
 import React, { useState, useEffect } from 'react';
-import AssetSearch from '../components/AssetSearch';
-import AssetDetails from '../components/AssetDetails';
-import { marketService } from '../services/marketService';
+import AssetSearch from '../../components/AssetSearch';
+import AssetDetails from '../../components/AssetDetails';
+import { marketService } from '../../services/marketService';
+
+console.log('STYLES OBJECT:', styles);
 
 function MarketsView() {
   const [selectedSymbol, setSelectedSymbol] = useState(null);
@@ -12,7 +14,6 @@ function MarketsView() {
     const fetchTrending = async () => {
       try {
         const data = await marketService.getTrending();
-        // Transform Finnhub data to your format
         const formatted = data.map((item, index) => {
           const symbols = ['AAPL', 'NVDA', 'TSLA', 'MSFT', 'META'];
           const names = ['Apple Inc.', 'NVIDIA Corp.', 'Tesla Inc.', 'Microsoft Corp.', 'Meta Platforms'];
@@ -28,44 +29,42 @@ function MarketsView() {
         setTrendingAssets(formatted);
       } catch (error) {
         console.error('Failed to fetch trending:', error);
-        // Fallback to hardcoded if API fails
         setTrendingAssets([
-          { symbol: 'AAPL', name: 'Apple Inc.', change: '+2.3%', positive: true },
-          { symbol: 'NVDA', name: 'NVIDIA Corp.', change: '+5.7%', positive: true },
-          { symbol: 'TSLA', name: 'Tesla Inc.', change: '-0.8%', positive: false },
-          { symbol: 'MSFT', name: 'Microsoft Corp.', change: '+1.5%', positive: true },
-          { symbol: 'META', name: 'Meta Platforms', change: '+3.1%', positive: true },
+          { symbol: 'AAPL', name: 'Apple Inc.', change: '+0.34%', positive: true },
+          { symbol: 'NVDA', name: 'NVIDIA Corp.', change: '+0.04%', positive: true },
+          { symbol: 'TSLA', name: 'Tesla Inc.', change: '+0.89%', positive: true },
+          { symbol: 'MSFT', name: 'Microsoft Corp.', change: '-0.44%', positive: false },
+          { symbol: 'META', name: 'Meta Platforms', change: '-1.70%', positive: false },
         ]);
       }
     };
 
     fetchTrending();
-    // Refresh every 5 minutes
     const interval = setInterval(fetchTrending, 5 * 60 * 1000);
     
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="markets-view">
-      <div className="search-section">
+    <div className={styles.marketsView}>
+      <div className={styles.searchSection}>
         <h1>Search Assets</h1>
         <AssetSearch onAssetSelect={setSelectedSymbol} />
         
-        <div className="trending-section">
+        <div className={styles.trendingSection}>
           <h2>🔥 Trending Today</h2>
-          <div className="trending-list">
+          <div className={styles.trendingList}>
             {trendingAssets.map((asset) => (
               <div 
                 key={asset.symbol} 
-                className="trending-item"
+                className={styles.trendingItem}
                 onClick={() => setSelectedSymbol(asset.symbol)}
               >
-                <div className="trending-info">
-                  <div className="trending-symbol">{asset.symbol}</div>
-                  <div className="trending-name">{asset.name}</div>
+                <div className={styles.trendingInfo}>
+                  <div className={styles.trendingSymbol}>{asset.symbol}</div>
+                  <div className={styles.trendingName}>{asset.name}</div>
                 </div>
-                <div className={`trending-change ${asset.positive ? 'positive' : 'negative'}`}>
+                <div className={`${styles.trendingChange} ${asset.positive ? styles.positive : styles.negative}`}>
                   {asset.change}
                 </div>
               </div>
@@ -74,23 +73,23 @@ function MarketsView() {
         </div>
       </div>
       
-      <div className="details-section">
+      <div className={styles.detailsSection}>
         {selectedSymbol ? (
           <AssetDetails symbol={selectedSymbol} />
         ) : (
-          <div className="empty-state">
-            <div className="empty-icon">📈</div>
+          <div className={styles.emptyState}>
+            <div className={styles.emptyIcon}>📈</div>
             <h2>Select an asset to view details</h2>
             <p>Search for a stock or crypto above, or click on a trending asset to get started.</p>
-            <div className="quick-actions">
+            <div className={styles.quickActions}>
               <button 
-                className="quick-action-btn"
+                className={styles.quickActionBtn}
                 onClick={() => setSelectedSymbol('AAPL')}
               >
                 View Apple
               </button>
               <button 
-                className="quick-action-btn"
+                className={styles.quickActionBtn}
                 onClick={() => setSelectedSymbol('BTC/USD')}
               >
                 View Bitcoin

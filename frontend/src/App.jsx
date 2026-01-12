@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { ThemeProvider } from './context/ThemeContext';
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
-import MarketsView from './components/MarketsView';
 import BottomNav from './components/BottomNav';
+import MarketsView from './views/MarketsView';
 import './styles/global.css';
+import './App.css';
 
 function App() {
     const [activeView, setActiveView] = useState('home');
