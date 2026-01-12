@@ -1,0 +1,280 @@
+.marketsContainer {
+    padding: 1.5rem;
+    padding-bottom: 100px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header {
+    margin-bottom: 2rem;
+}
+
+.title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+.content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.searchSection {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+}
+
+.detailsSection {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    min-height: 300px;
+}
+
+.placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 250px;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.placeholderIcon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.placeholder h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.placeholder p {
+    font-size: 0.9rem;
+}
+
+.popularSection {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+}
+
+.sectionTitle {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+.popularGrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.popularItem {
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.popularItem:hover {
+    border-color: var(--accent-green);
+    background: var(--accent-green-light);
+    color: var(--accent-green);
+}
+
+/* AssetSearch styling overrides */
+.searchSection :global(.asset-search) {
+    width: 100%;
+}
+
+.searchSection :global(.search-input) {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.searchSection :global(.search-input):focus {
+    border-color: var(--accent-green);
+}
+
+.searchSection :global(.search-input)::placeholder {
+    color: var(--text-muted);
+}
+
+.searchSection :global(.search-results) {
+    margin-top: 0.75rem;
+    max-height: 300px;
+    overflow-y: auto;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+}
+
+.searchSection :global(.search-result-item) {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.searchSection :global(.search-result-item):last-child {
+    border-bottom: none;
+}
+
+.searchSection :global(.search-result-item):hover {
+    background: var(--accent-green-light);
+}
+
+.searchSection :global(.result-symbol) {
+    font-weight: 700;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+.searchSection :global(.result-name) {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-top: 0.15rem;
+}
+
+.searchSection :global(.result-type) {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    margin-top: 0.15rem;
+}
+
+/* AssetDetails styling overrides */
+.detailsSection :global(.asset-details) {
+    height: 100%;
+}
+
+.detailsSection :global(.asset-details h2) {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.detailsSection :global(.asset-details h3) {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+.detailsSection :global(.price-section) {
+    margin-bottom: 1.5rem;
+}
+
+.detailsSection :global(.current-price) {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.detailsSection :global(.price-change) {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 0.25rem;
+}
+
+.detailsSection :global(.asset-info) {
+    background: var(--bg-primary);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.detailsSection :global(.info-row) {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.9rem;
+}
+
+.detailsSection :global(.info-row):last-child {
+    border-bottom: none;
+}
+
+.detailsSection :global(.info-row span:first-child) {
+    color: var(--text-muted);
+}
+
+.detailsSection :global(.info-row span:last-child) {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.detailsSection :global(.buy-button) {
+    width: 100%;
+    padding: 0.85rem;
+    border-radius: 10px;
+    border: none;
+    background: var(--accent-green);
+    color: #FFFFFF;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+:global(body.dark-mode) .detailsSection :global(.buy-button) {
+    color: #0f0f1a;
+}
+
+.detailsSection :global(.buy-button):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .content {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .marketsContainer {
+        padding: 1rem;
+        padding-bottom: 90px;
+    }
+
+    .title {
+        font-size: 1.5rem;
+    }
+}

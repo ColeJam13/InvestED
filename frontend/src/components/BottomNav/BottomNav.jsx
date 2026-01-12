@@ -1,9 +1,6 @@
-import { useState } from 'react';
 import styles from './BottomNav.module.css';
 
-const BottomNav = () => {
-    const [activeNav, setActiveNav] = useState('home');
-
+const BottomNav = ({ activeView, onNavigate }) => {
     const navItems = [
         {
             id: 'home',
@@ -62,8 +59,8 @@ const BottomNav = () => {
             {navItems.map((item) => (
                 <button
                     key={item.id}
-                    className={`${styles.navItem} ${activeNav === item.id ? styles.active : ''}`}
-                    onClick={() => setActiveNav(item.id)}
+                    className={`${styles.navItem} ${activeView === item.id ? styles.active : ''}`}
+                    onClick={() => onNavigate(item.id)}
                 >
                     {item.icon}
                     <span>{item.label}</span>
