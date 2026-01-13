@@ -89,7 +89,7 @@ A learning-first simulation platform that provides:
 
 ## Core Application Views
 
-- Login / Register
+- Register User
 - Onboarding (educational purpose + disclaimer acceptance)
 - Dashboard (portfolio summary, value, cash, holdings, P/L)
 - Market Search + Asset Detail (quote, metrics, buy flow)
