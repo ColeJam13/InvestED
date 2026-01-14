@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Menu, Bot, Palette, BarChart3, Download, X, Send, Copy, Check, Diamond, Rocket, TrendingUp, DollarSign, Star, Zap, Target, Shield, Scale, Flame, Leaf, Building2, Sprout, Lightbulb, AlertTriangle } from 'lucide-react';
 import styles from './AIAdvisorView.module.css';
+import { portfolioService } from '../../services/portfolioService';
 
 const AIAdvisorView = () => {
     const [messages, setMessages] = useState([]);
@@ -13,6 +14,59 @@ const AIAdvisorView = () => {
     const [copiedId, setCopiedId] = useState(null);
     const messagesEndRef = useRef(null);
 
+    const userId = 1;
+    const [portfolioData, setPortfolioData] = useState(null);
+    const [portfolioLoading, setPortfolioLoading] = useState(true);
+    const [portfolioError, setPortfolioError] = useState(null);
+
+    // Fetch portfolio data when panel opens
+    useEffect(() => {
+        const fetchPortfolioData = async () => {
+            try {
+                setPortfolioLoading(true);
+                const [summary, positions] = await Promise.all([
+                    portfolioService.getPortfolioSummary(userId),
+                    portfolioService.getAllPositions(userId)
+                ]);
+
+                // Try to get risk profile
+                let riskLevel = 'Not Set';
+                try {
+                    const risk = await portfolioService.getRiskProfile(userId);
+                    if (risk) riskLevel = risk.riskLevel;
+                } catch (e) {
+                    console.log('Risk profile not available');
+                }
+
+                setPortfolioData({
+                    totalValue: portfolioService.formatCurrency(summary.totalValue),
+                    todayChange: portfolioService.formatCurrency(summary.totalGainLoss),
+                    todayChangePercent: portfolioService.formatPercent(summary.totalGainLossPercent),
+                    cashAvailable: portfolioService.formatCurrency(summary.totalCash),
+                    riskProfile: riskLevel,
+                    holdings: positions.map(p => ({
+                        symbol: p.symbol,
+                        name: p.name,
+                        value: portfolioService.formatCurrency(p.quantity * p.currentPrice),
+                        change: portfolioService.formatPercent(
+                            ((p.currentPrice - p.averageBuyPrice) / p.averageBuyPrice) * 100
+                        ),
+                        positive: p.currentPrice >= p.averageBuyPrice
+                    }))
+                });
+            } catch (err) {
+                console.error('Error fetching portfolio data:', err);
+                setPortfolioError('Failed to load portfolio');
+            } finally {
+                setPortfolioLoading(false);
+            }
+        };
+
+        if (showPortfolioPanel) {
+            fetchPortfolioData();
+        }
+    }, [showPortfolioPanel, userId]);
+
     const chatHistory = [
         { id: 1, title: 'Portfolio diversification', date: 'Today', preview: 'How should I diversify my...' },
         { id: 2, title: 'Value investing basics', date: 'Yesterday', preview: 'What makes a stock undervalued...' },
@@ -20,20 +74,6 @@ const AIAdvisorView = () => {
         { id: 4, title: 'ETF vs mutual funds', date: 'Jan 8', preview: 'What are the differences...' },
         { id: 5, title: 'Dividend strategies', date: 'Jan 5', preview: 'How do I build passive income...' },
     ];
-
-    const portfolioData = {
-        totalValue: '$50,243.89',
-        todayChange: '+$1,234.56',
-        todayChangePercent: '+2.52%',
-        cashAvailable: '$5,000.00',
-        riskProfile: 'Moderate',
-        holdings: [
-            { symbol: 'AAPL', name: 'Apple Inc.', value: '$1,850.00', change: '+2.3%', positive: true },
-            { symbol: 'BTC', name: 'Bitcoin', value: '$34,500.00', change: '-1.2%', positive: false },
-            { symbol: 'TSLA', name: 'Tesla Inc.', value: '$1,250.00', change: '+5.7%', positive: true },
-            { symbol: 'ETH', name: 'Ethereum', value: '$6,125.00', change: '+1.5%', positive: true },
-        ],
-    };
 
     const styleCategories = [
         {
@@ -154,8 +194,7 @@ const AIAdvisorView = () => {
         const userMessage = {
             id: messages.length + 1,
             type: 'user',
-            messageType: 'standard',
-            content: content.trim(),
+            content: content,
             timestamp: new Date()
         };
 
@@ -164,81 +203,45 @@ const AIAdvisorView = () => {
         setIsTyping(true);
 
         setTimeout(() => {
-            const response = getPlaceholderResponse(content);
-            const aiMessages = [];
+            let aiResponse;
+            const lowerContent = content.toLowerCase();
 
-            aiMessages.push({
-                id: messages.length + 2,
-                type: 'ai',
-                messageType: response.type,
-                content: response.content,
-                timestamp: new Date()
-            });
-
-            if (response.education) {
-                aiMessages.push({
-                    id: messages.length + 3,
-                    type: 'ai',
-                    messageType: 'education',
-                    title: response.education.title,
-                    content: response.education.content,
-                    timestamp: new Date()
-                });
-            }
-
-            if (response.portfolioRef) {
-                aiMessages.push({
-                    id: messages.length + 4,
+            if (lowerContent.includes('portfolio') || lowerContent.includes('my holdings') || lowerContent.includes('my investments')) {
+                const styleContext = selectedStyle ? `From a ${selectedStyle.name.toLowerCase()} perspective, ` : '';
+                aiResponse = {
+                    id: messages.length + 2,
                     type: 'ai',
                     messageType: 'portfolio-reference',
-                    holdings: response.portfolioRef,
-                    timestamp: new Date()
-                });
+                    content: `${styleContext}looking at your portfolio, I can see you have a diversified mix of assets. Your total value is ${portfolioData?.totalValue || 'loading...'} with ${portfolioData?.holdings?.length || 0} holdings.`,
+                    portfolioRef: portfolioData?.holdings?.slice(0, 2) || []
+                };
+            } else if (selectedStyle) {
+                aiResponse = {
+                    id: messages.length + 2,
+                    type: 'ai',
+                    messageType: 'standard',
+                    content: `From a ${selectedStyle.name.toLowerCase()} lens: ${content}. This is a simulated response explaining the topic with emphasis on ${selectedStyle.description.toLowerCase()}. Key considerations include market analysis, risk assessment, and alignment with your investment goals.`
+                };
+            } else if (lowerContent.includes('learn') || lowerContent.includes('explain') || lowerContent.includes('what is')) {
+                aiResponse = {
+                    id: messages.length + 2,
+                    type: 'ai',
+                    messageType: 'education',
+                    content: `Let me explain this concept: "${content}". This is an educational response that would cover key principles, practical examples, and important considerations for beginners.`,
+                    educationTopic: content
+                };
+            } else {
+                aiResponse = {
+                    id: messages.length + 2,
+                    type: 'ai',
+                    messageType: 'standard',
+                    content: `Great question! Regarding "${content}", here's what you should know: This is a simulated AI response that would provide thoughtful, educational guidance. In a real implementation, this would connect to a language model for dynamic responses.`
+                };
             }
 
-            setMessages(prev => [...prev, ...aiMessages]);
+            setMessages(prev => [...prev, aiResponse]);
             setIsTyping(false);
-        }, 1500 + Math.random() * 1000);
-    };
-
-    const getPlaceholderResponse = (question) => {
-        const lowerQuestion = question.toLowerCase();
-        const styleContext = selectedStyle ? ` From a ${selectedStyle.name.toLowerCase()} perspective,` : '';
-        
-        if (lowerQuestion.includes('portfolio') || lowerQuestion.includes('holdings')) {
-            return {
-                type: 'standard',
-                content: `${styleContext} looking at your portfolio, I can see you have a diversified mix of assets. Your total value is ${portfolioData.totalValue} with ${portfolioData.holdings.length} holdings.`,
-                portfolioRef: portfolioData.holdings.slice(0, 2)
-            };
-        }
-
-        if (lowerQuestion.includes('what is') || lowerQuestion.includes('explain') || lowerQuestion.includes('how do')) {
-            return {
-                type: 'standard',
-                content: `${styleContext} that's a great question for building your investment knowledge.`,
-                education: {
-                    title: 'Key Concept',
-                    content: 'Understanding these fundamentals is crucial for making informed investment decisions.'
-                }
-            };
-        }
-
-        if (lowerQuestion.includes('risk')) {
-            return {
-                type: 'standard',
-                content: `${styleContext} understanding risk is crucial for any investor.`,
-                education: {
-                    title: 'Risk Insight',
-                    content: 'Risk tolerance varies by individual. Consider your time horizon and financial goals.'
-                }
-            };
-        }
-
-        return {
-            type: 'standard',
-            content: `${styleContext} That's a thoughtful question. Let me share some educational insights.`
-        };
+        }, 1500);
     };
 
     const handleCopyMessage = (messageId, content) => {
@@ -247,177 +250,201 @@ const AIAdvisorView = () => {
         setTimeout(() => setCopiedId(null), 2000);
     };
 
-    const handleExportChat = () => {
-        const chatContent = messages.map(m => 
-            `[${formatTime(m.timestamp)}] ${m.type === 'user' ? 'You' : 'AI Advisor'}: ${m.content}`
-        ).join('\n\n');
-        
-        const blob = new Blob([chatContent], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `chat-export-${new Date().toISOString().split('T')[0]}.txt`;
-        a.click();
-        URL.revokeObjectURL(url);
-    };
-
     const handleNewChat = () => {
         setMessages([{
             id: 1,
             type: 'ai',
             messageType: 'greeting',
-            content: "Hello! I'm your AI financial education advisor. How can I help you today?",
+            content: "Hello! I'm your AI financial education advisor. I can help you learn about investing, understand your portfolio, and explore different strategies. Feel free to ask me anything, or select an investing style from the toolbar to get perspective-specific guidance.",
             timestamp: new Date()
         }]);
         setSelectedStyle(null);
     };
 
     const renderMessage = (message, index) => {
-        const isLatest = index === messages.length - 1;
-        
-        switch (message.messageType) {
-            case 'style-change':
-                const StyleIcon = message.style.icon;
-                return (
-                    <div className={`${styles.styleChangeBubble} ${isLatest ? styles.slideIn : ''}`} style={{ '--style-color': message.style.color }}>
-                        <div className={styles.styleChangeHeader}>
-                            <StyleIcon size={20} className={styles.styleIcon} />
-                            <span className={styles.styleName}>{message.style.name}</span>
-                        </div>
-                        <p>{message.content}</p>
-                        <span className={styles.timestamp}>{formatTime(message.timestamp)}</span>
+        if (message.messageType === 'greeting') {
+            return (
+                <div className={styles.greetingBubble}>
+                    <div className={styles.greetingHeader}>
+                        <Bot size={32} className={styles.greetingIcon} />
+                        <div className={styles.greetingTitle}>Welcome to InvestED AI Advisor</div>
                     </div>
-                );
-
-            case 'education':
-                return (
-                    <div className={`${styles.educationCallout} ${isLatest ? styles.slideIn : ''}`}>
-                        <div className={styles.educationHeader}>
-                            <Lightbulb size={18} />
-                            <span className={styles.educationTitle}>{message.title}</span>
+                    <p className={styles.greetingText}>{message.content}</p>
+                    <div className={styles.greetingFeatures}>
+                        <div className={styles.featureItem}>
+                            <Lightbulb size={16} />
+                            <span>Learn investing concepts</span>
                         </div>
-                        <p className={styles.educationContent}>{message.content}</p>
-                    </div>
-                );
-            
-            case 'portfolio-reference':
-                return (
-                    <div className={`${styles.portfolioReference} ${isLatest ? styles.slideIn : ''}`}>
-                        <div className={styles.portfolioRefHeader}>
+                        <div className={styles.featureItem}>
+                            <Palette size={16} />
+                            <span>Explore investing styles</span>
+                        </div>
+                        <div className={styles.featureItem}>
                             <BarChart3 size={16} />
-                            <span>Referenced Holdings</span>
-                        </div>
-                        <div className={styles.portfolioRefList}>
-                            {message.holdings.map((holding, idx) => (
-                                <div key={idx} className={styles.portfolioRefItem}>
-                                    <span className={styles.refSymbol}>{holding.symbol}</span>
-                                    <span className={styles.refValue}>{holding.value}</span>
-                                    <span className={`${styles.refChange} ${holding.positive ? styles.positive : styles.negative}`}>
-                                        {holding.change}
-                                    </span>
-                                </div>
-                            ))}
+                            <span>Understand your portfolio</span>
                         </div>
                     </div>
-                );
-            
-            default:
-                return (
-                    <div className={`${styles.messageBubble} ${isLatest ? styles.slideIn : ''}`}>
-                        {message.content}
-                        <div className={styles.messageFooter}>
-                            <span className={styles.timestamp}>{formatTime(message.timestamp)}</span>
-                            {message.type === 'ai' && (
-                                <button 
-                                    className={styles.copyBtn}
-                                    onClick={() => handleCopyMessage(message.id, message.content)}
-                                >
-                                    {copiedId === message.id ? <><Check size={12} /> Copied</> : <><Copy size={12} /> Copy</>}
-                                </button>
-                            )}
-                        </div>
-                    </div>
-                );
+                </div>
+            );
         }
+
+        if (message.messageType === 'style-change') {
+            const StyleIcon = message.style.icon;
+            return (
+                <div className={styles.styleChangeBubble} style={{ borderLeftColor: message.style.color }}>
+                    <div className={styles.styleChangeHeader}>
+                        <StyleIcon size={20} style={{ color: message.style.color }} />
+                        <span className={styles.styleChangeTitle}>{message.style.name} Mode Activated</span>
+                    </div>
+                    <p className={styles.styleChangeText}>{message.content}</p>
+                </div>
+            );
+        }
+
+        if (message.messageType === 'education') {
+            return (
+                <div className={styles.educationBubble}>
+                    <div className={styles.educationHeader}>
+                        <Lightbulb size={18} className={styles.educationIcon} />
+                        <span>Educational Content</span>
+                    </div>
+                    <div className={styles.educationContent}>
+                        <p>{message.content}</p>
+                    </div>
+                    <div className={styles.messageActions}>
+                        <button className={styles.actionBtn} onClick={() => handleCopyMessage(message.id, message.content)}>
+                            {copiedId === message.id ? <Check size={14} /> : <Copy size={14} />}
+                            {copiedId === message.id ? 'Copied!' : 'Copy'}
+                        </button>
+                    </div>
+                    <span className={styles.messageTime}>{formatTime(message.timestamp)}</span>
+                </div>
+            );
+        }
+
+        if (message.messageType === 'portfolio-reference' && message.portfolioRef) {
+            return (
+                <div className={styles.portfolioBubble}>
+                    <p className={styles.portfolioText}>{message.content}</p>
+                    <div className={styles.portfolioSnapshot}>
+                        {message.portfolioRef.map((holding, idx) => (
+                            <div key={idx} className={styles.snapshotItem}>
+                                <span className={styles.snapshotSymbol}>{holding.symbol}</span>
+                                <span className={styles.snapshotValue}>{holding.value}</span>
+                                <span className={`${styles.snapshotChange} ${holding.positive ? styles.positive : styles.negative}`}>
+                                    {holding.change}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                    <div className={styles.messageActions}>
+                        <button className={styles.actionBtn} onClick={() => handleCopyMessage(message.id, message.content)}>
+                            {copiedId === message.id ? <Check size={14} /> : <Copy size={14} />}
+                            {copiedId === message.id ? 'Copied!' : 'Copy'}
+                        </button>
+                    </div>
+                    <span className={styles.messageTime}>{formatTime(message.timestamp)}</span>
+                </div>
+            );
+        }
+
+        if (message.type === 'user') {
+            return (
+                <div className={styles.userBubble}>
+                    <p>{message.content}</p>
+                    <span className={styles.messageTime}>{formatTime(message.timestamp)}</span>
+                </div>
+            );
+        }
+
+        return (
+            <div className={styles.messageBubble}>
+                <p>{message.content}</p>
+                <div className={styles.messageActions}>
+                    <button className={styles.actionBtn} onClick={() => handleCopyMessage(message.id, message.content)}>
+                        {copiedId === message.id ? <Check size={14} /> : <Copy size={14} />}
+                        {copiedId === message.id ? 'Copied!' : 'Copy'}
+                    </button>
+                </div>
+                <span className={styles.messageTime}>{formatTime(message.timestamp)}</span>
+            </div>
+        );
     };
 
     return (
-        <div className={styles.chatContainer}>
-            {/* Header */}
-            <div className={styles.chatHeader}>
-                <button className={styles.historyToggle} onClick={() => setShowHistorySidebar(!showHistorySidebar)}>
-                    <Menu size={20} />
-                </button>
-                <div className={styles.chatHeaderInfo}>
-                    <div className={`${styles.chatAvatar} ${isTyping ? styles.pulse : ''}`}>
-                        <Bot size={24} />
-                    </div>
-                    <div>
-                        <h2 className={styles.chatAdvisorName}>AI Financial Advisor</h2>
-                        <span className={styles.chatAdvisorStyle}>
-                            {selectedStyle ? (
-                                <>
-                                    <span className={styles.activeStyleBadge} style={{ '--style-color': selectedStyle.color }}>
-                                        {(() => {
-                                            const Icon = selectedStyle.icon;
-                                            return <Icon size={14} />;
-                                        })()}
-                                        {selectedStyle.name}
-                                    </span>
-                                    <button className={styles.clearStyleBtn} onClick={handleClearStyle}>
-                                        <X size={14} />
-                                    </button>
-                                </>
-                            ) : (
-                                <span className={styles.onlineStatus}>Online</span>
-                            )}
-                        </span>
-                    </div>
+        <div className={styles.aiAdvisorView}>
+            {/* Toolbar */}
+            <div className={styles.toolbar}>
+                <div className={styles.toolbarLeft}>
+                    <button className={styles.toolbarBtn} onClick={() => setShowHistorySidebar(!showHistorySidebar)}>
+                        <Menu size={20} />
+                    </button>
+                    <div className={styles.toolbarTitle}>AI Financial Advisor</div>
                 </div>
-                <div className={styles.headerActions}>
-                    <button 
-                        className={`${styles.headerButton} ${showStyleSelector ? styles.active : ''}`}
+                <div className={styles.toolbarRight}>
+                    {selectedStyle && (
+                        <div className={styles.activeStyle} style={{ borderColor: selectedStyle.color }}>
+                            {(() => {
+                                const StyleIcon = selectedStyle.icon;
+                                return <StyleIcon size={16} style={{ color: selectedStyle.color }} />;
+                            })()}
+                            <span>{selectedStyle.name}</span>
+                            <button className={styles.clearStyleBtn} onClick={handleClearStyle}>
+                                <X size={14} />
+                            </button>
+                        </div>
+                    )}
+                    <button
+                        className={`${styles.toolbarBtn} ${showStyleSelector ? styles.active : ''}`}
                         onClick={() => setShowStyleSelector(!showStyleSelector)}
-                        title="Change Style"
+                        title="Select investing style"
                     >
                         <Palette size={20} />
                     </button>
-                    <button 
-                        className={`${styles.headerButton} ${showPortfolioPanel ? styles.active : ''}`}
+                    <button
+                        className={`${styles.toolbarBtn} ${showPortfolioPanel ? styles.active : ''}`}
                         onClick={() => setShowPortfolioPanel(!showPortfolioPanel)}
-                        title="Portfolio"
+                        title="View portfolio"
                     >
                         <BarChart3 size={20} />
                     </button>
-                    <button className={styles.headerButton} onClick={handleExportChat} title="Export Chat">
+                    <button className={styles.toolbarBtn} title="Export chat">
                         <Download size={20} />
                     </button>
                 </div>
             </div>
 
-            {/* Style Selector */}
+            {/* Style Selector Dropdown */}
             {showStyleSelector && (
                 <div className={styles.styleSelector}>
                     <div className={styles.styleSelectorHeader}>
-                        <h3>Choose an Investing Style</h3>
-                        <p>Get guidance from a specific perspective</p>
+                        <h3>Select Investing Style</h3>
+                        <button className={styles.closeStyleSelector} onClick={() => setShowStyleSelector(false)}>
+                            <X size={20} />
+                        </button>
                     </div>
-                    <div className={styles.styleCategories}>
-                        {styleCategories.map((category, idx) => (
-                            <div key={idx} className={styles.styleCategory}>
-                                <h4>{category.category}</h4>
-                                <div className={styles.styleOptions}>
+                    <div className={styles.styleSelectorContent}>
+                        {styleCategories.map((category) => (
+                            <div key={category.category} className={styles.styleCategory}>
+                                <h4 className={styles.categoryTitle}>{category.category}</h4>
+                                <div className={styles.styleGrid}>
                                     {category.styles.map((style) => {
                                         const StyleIcon = style.icon;
                                         return (
                                             <button
                                                 key={style.id}
-                                                className={`${styles.styleOption} ${selectedStyle?.id === style.id ? styles.selected : ''}`}
+                                                className={`${styles.styleOption} ${selectedStyle?.id === style.id ? styles.selectedOption : ''}`}
                                                 onClick={() => handleStyleSelect(style)}
-                                                style={{ '--style-color': style.color }}
+                                                style={{ borderLeftColor: style.color }}
                                             >
-                                                <StyleIcon size={18} className={styles.styleOptionIcon} />
-                                                <span className={styles.styleOptionName}>{style.name}</span>
+                                                <StyleIcon size={24} style={{ color: style.color }} />
+                                                <div className={styles.styleOptionContent}>
+                                                    <span className={styles.styleOptionName}>{style.name}</span>
+                                                    <span className={styles.styleOptionDesc}>{style.description}</span>
+                                                </div>
+                                                {selectedStyle?.id === style.id && (
+                                                    <Check size={18} className={styles.selectedCheck} />
+                                                )}
                                             </button>
                                         );
                                     })}
@@ -455,40 +482,66 @@ const AIAdvisorView = () => {
                         </button>
                     </div>
                     <div className={styles.portfolioSummary}>
-                        <div className={styles.portfolioTotal}>
-                            <span className={styles.portfolioLabel}>Total Value</span>
-                            <span className={styles.portfolioValue}>{portfolioData.totalValue}</span>
-                            <span className={`${styles.portfolioChange} ${styles.positive}`}>
-                                {portfolioData.todayChange} ({portfolioData.todayChangePercent})
-                            </span>
-                        </div>
-                        <div className={styles.portfolioMeta}>
-                            <div className={styles.metaItem}>
-                                <span className={styles.metaLabel}>Cash</span>
-                                <span className={styles.metaValue}>{portfolioData.cashAvailable}</span>
+                        {portfolioLoading ? (
+                            <div className={styles.portfolioLoading}>
+                                <div className={styles.spinner}></div>
+                                <p>Loading portfolio...</p>
                             </div>
-                            <div className={styles.metaItem}>
-                                <span className={styles.metaLabel}>Risk</span>
-                                <span className={styles.metaValue}>{portfolioData.riskProfile}</span>
+                        ) : portfolioError ? (
+                            <div className={styles.portfolioError}>
+                                <p>{portfolioError}</p>
                             </div>
-                        </div>
+                        ) : portfolioData ? (
+                            <>
+                                <div className={styles.portfolioTotal}>
+                                    <span className={styles.portfolioLabel}>Total Value</span>
+                                    <span className={styles.portfolioValue}>{portfolioData.totalValue}</span>
+                                    <span className={`${styles.portfolioChange} ${portfolioData.todayChange.includes('+') ? styles.positive : styles.negative}`}>
+                                        {portfolioData.todayChange} ({portfolioData.todayChangePercent})
+                                    </span>
+                                </div>
+                                <div className={styles.portfolioMeta}>
+                                    <div className={styles.metaItem}>
+                                        <span className={styles.metaLabel}>Cash</span>
+                                        <span className={styles.metaValue}>{portfolioData.cashAvailable}</span>
+                                    </div>
+                                    <div className={styles.metaItem}>
+                                        <span className={styles.metaLabel}>Risk</span>
+                                        <span className={styles.metaValue}>{portfolioData.riskProfile}</span>
+                                    </div>
+                                </div>
+                            </>
+                        ) : null}
                     </div>
                     <div className={styles.holdingsList}>
                         <h4>Holdings</h4>
-                        {portfolioData.holdings.map((holding, idx) => (
-                            <div key={idx} className={styles.holdingItem}>
-                                <div className={styles.holdingMain}>
-                                    <span className={styles.holdingSymbol}>{holding.symbol}</span>
-                                    <span className={styles.holdingName}>{holding.name}</span>
+                        {portfolioLoading ? (
+                            <div className={styles.portfolioLoading}>Loading...</div>
+                        ) : portfolioError ? (
+                            <div className={styles.portfolioError}>{portfolioError}</div>
+                        ) : portfolioData && portfolioData.holdings.length > 0 ? (
+                            portfolioData.holdings.map((holding, idx) => (
+                                <div key={idx} className={styles.holdingItem}>
+                                    <div className={styles.holdingMain}>
+                                        <span className={styles.holdingSymbol}>{holding.symbol}</span>
+                                        <span className={styles.holdingName}>{holding.name}</span>
+                                    </div>
+                                    <div className={styles.holdingData}>
+                                        <span className={styles.holdingValue}>{holding.value}</span>
+                                        <span className={`${styles.holdingChange} ${holding.positive ? styles.positive : styles.negative}`}>
+                                            {holding.change}
+                                        </span>
+                                    </div>
                                 </div>
-                                <div className={styles.holdingData}>
-                                    <span className={styles.holdingValue}>{holding.value}</span>
-                                    <span className={`${styles.holdingChange} ${holding.positive ? styles.positive : styles.negative}`}>
-                                        {holding.change}
-                                    </span>
-                                </div>
+                            ))
+                        ) : (
+                            <div className={styles.noHoldings}>
+                                <p>No holdings yet</p>
+                                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                                    Start investing to see your portfolio here!
+                                </p>
                             </div>
-                        ))}
+                        )}
                     </div>
                 </div>
 
