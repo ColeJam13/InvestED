@@ -6,6 +6,7 @@ import MarketsView from './views/MarketsView';
 import LearnView from './views/LearnView';
 import AIAdvisorView from './views/AIAdvisorView';
 import GoalsView from './views/GoalsView';
+import Profile from './views/Profile';
 import PortfolioView from './views/PortfolioView';
 import BottomNav from './components/BottomNav';
 import './styles/global.css';
@@ -28,7 +29,7 @@ function App() {
             case 'portfolio':
                 return <PortfolioView />;
             case 'profile':
-                return <ComingSoon title="Profile" icon="👤" />;
+                return <Profile />;
             default:
                 return <Dashboard onNavigate={setActiveView} />;
         }
