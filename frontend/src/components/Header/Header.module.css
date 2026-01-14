@@ -141,3 +141,206 @@
         display: none;
     }
 }
+
+/* Avatar button */
+.avatarButton {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.avatarButton:hover {
+    transform: scale(1.05);
+}
+
+.avatarButton:hover .avatar {
+    box-shadow: 0 0 0 3px var(--accent-green);
+}
+
+/* New Logo Styles */
+.logoButton {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.logoIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #80C4B7 0%, #3D9B89 100%);
+    border-radius: 10px;
+    color: #FFFFFF;
+    box-shadow: 0 4px 12px rgba(128, 196, 183, 0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.logoButton:hover .logoIcon {
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(128, 196, 183, 0.4);
+}
+
+.logoText {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.5px;
+}
+
+.logoHighlight {
+    background: linear-gradient(135deg, #80C4B7 0%, #3D9B89 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+:global(body.dark-mode) .logoHighlight {
+    background: linear-gradient(135deg, #80C4B7 0%, #A8E6CF 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Avatar button */
+.avatarButton {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.avatarButton:hover {
+    transform: scale(1.05);
+}
+
+.avatarButton:hover .avatar {
+    box-shadow: 0 0 0 3px var(--accent-green);
+}
+
+/* Logo Styles */
+.logoButton {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.logoIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #1E3A5F 0%, #2D5A87 100%);
+    border-radius: 10px;
+    color: #80C4B7;
+    box-shadow: 0 4px 12px rgba(30, 58, 95, 0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.logoButton:hover .logoIcon {
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(30, 58, 95, 0.4);
+}
+
+.logoText {
+    display: flex;
+    align-items: center;
+}
+
+.logoInvest {
+    font-size: 1.3rem;
+    font-weight: 300;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+}
+
+.logoEd {
+    font-size: 1.3rem;
+    font-weight: 900;
+    color: #80C4B7;
+    letter-spacing: 2px;
+}
+
+/* Avatar button */
+.avatarButton {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.avatarButton:hover {
+    transform: scale(1.05);
+}
+
+.avatarButton:hover .avatar {
+    box-shadow: 0 0 0 3px var(--accent-green);
+}
+
+/* Logo Dark Mode Overrides */
+:global(body.dark-mode) .logoIcon {
+    background: linear-gradient(135deg, #1E3A5F 0%, #2D5A87 100%);
+    color: #80C4B7;
+    box-shadow: 0 4px 12px rgba(30, 58, 95, 0.3);
+}
+
+:global(body.dark-mode) .logoInvest {
+    color: #888;
+}
+
+:global(body.dark-mode) .logoEd {
+    color: #80C4B7;
+}
+
+/* Logo Light Mode */
+.logoIcon {
+    background: linear-gradient(135deg, #80C4B7 0%, #3D9B89 100%);
+    color: #FFFFFF;
+    box-shadow: 0 4px 12px rgba(128, 196, 183, 0.3);
+}
+
+.logoInvest {
+    color: #666;
+}
+
+.logoEd {
+    color: #3D9B89;
+}
+
+.logoButton:hover .logoIcon {
+    transform: scale(1.05);
+}
+
+:global(body.dark-mode) .logoButton:hover .logoIcon {
+    box-shadow: 0 6px 16px rgba(30, 58, 95, 0.5);
+}
+
+/* Bigger and wider logo icon box */
+.logoIcon {
+    width: 58px;
+    height: 52px;
+    border-radius: 12px;
+}

@@ -6,8 +6,8 @@ import MarketsView from './views/MarketsView';
 import LearnView from './views/LearnView';
 import AIAdvisorView from './views/AIAdvisorView';
 import GoalsView from './views/GoalsView';
-import Profile from './views/Profile';
 import PortfolioView from './views/PortfolioView';
+import Profile from './views/Profile';
 import BottomNav from './components/BottomNav';
 import './styles/global.css';
 
@@ -38,29 +38,12 @@ function App() {
     return (
         <ThemeProvider>
             <div className="app-container">
-                <Header />
+                <Header onNavigate={setActiveView} />
                 {renderView()}
                 <BottomNav activeView={activeView} onNavigate={setActiveView} />
             </div>
         </ThemeProvider>
     );
 }
-
-const ComingSoon = ({ title, icon }) => (
-    <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: 'calc(100vh - 180px)',
-        color: 'var(--text-muted)',
-        textAlign: 'center',
-        padding: '2rem'
-    }}>
-        <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>{icon}</div>
-        <h2 style={{ color: 'var(--text-primary)', marginBottom: '0.5rem' }}>{title}</h2>
-        <p>Coming soon...</p>
-    </div>
-);
 
 export default App;

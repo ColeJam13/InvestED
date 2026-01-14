@@ -742,3 +742,197 @@
         grid-template-columns: 1fr 1fr;
     }
 }
+
+/* Fix goal details modal - scrollable with better background */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    z-index: 1000;
+    padding: 2rem 1rem;
+    overflow-y: auto;
+}
+
+.modalLarge {
+    background: var(--bg-card);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 550px;
+    max-height: none;
+    margin: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--border-color);
+}
+
+.detailsContent {
+    padding: 1.5rem;
+    max-height: none;
+    overflow: visible;
+}
+
+/* Ensure modal doesn't get cut off on mobile */
+@media (max-width: 640px) {
+    .modalOverlay {
+        padding: 1rem 0.5rem;
+        align-items: flex-start;
+    }
+    
+    .modalLarge {
+        max-width: 100%;
+        margin-top: 1rem;
+        margin-bottom: 5rem;
+        border-radius: 16px;
+    }
+    
+    .detailsContent {
+        padding: 1rem;
+    }
+}
+
+/* Fix AI Suggestions layout */
+.aiSuggestions {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.aiHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.aiHeader h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.suggestionsList {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.suggestionItem {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    padding: 1rem;
+    background: var(--bg-primary);
+    border-radius: 12px;
+}
+
+.suggestionIcon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-card);
+    border-radius: 10px;
+    color: var(--accent-green);
+}
+
+.suggestionContent {
+    flex: 1;
+}
+
+.suggestionContent h4 {
+    margin: 0 0 0.35rem 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.suggestionContent p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+/* Wider modal */
+.modalLarge {
+    max-width: 650px;
+}
+
+/* Fix action buttons */
+.detailsActions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.editBtn,
+.contributeBtn,
+.deleteBtn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.9rem 1rem;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.editBtn {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.editBtn:hover {
+    border-color: var(--accent-green);
+    color: var(--accent-green);
+}
+
+.contributeBtn {
+    background: var(--accent-green);
+    border: none;
+    color: #FFFFFF;
+}
+
+:global(body.dark-mode) .contributeBtn {
+    color: #0f0f1a;
+}
+
+.contributeBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+}
+
+.deleteBtn {
+    background: transparent;
+    border: 1px solid #EF4444;
+    color: #EF4444;
+}
+
+.deleteBtn:hover {
+    background: #EF4444;
+    color: #FFFFFF;
+}
+
+@media (max-width: 640px) {
+    .detailsActions {
+        flex-direction: column;
+    }
+    
+    .modalLarge {
+        max-width: 100%;
+    }
+}

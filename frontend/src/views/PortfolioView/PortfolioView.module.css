@@ -536,3 +536,13 @@
 .summaryIcon svg {
     stroke: var(--accent-green);
 }
+
+/* Fix icon backgrounds */
+.summaryIcon {
+    background: transparent;
+    color: var(--text-muted);
+}
+
+.summaryIcon svg {
+    stroke: var(--accent-green);
+}
