@@ -15,7 +15,6 @@ public class FinnhubService {
     
     private final RestTemplate restTemplate = new RestTemplate();
     
-    // Cache quotes for 60 seconds (60000 milliseconds)
     @Cacheable(value = "quotes", key = "#symbol", unless = "#result == null")
     public String getQuote(String symbol) {
         String url = UriComponentsBuilder
@@ -24,16 +23,14 @@ public class FinnhubService {
             .queryParam("token", config.getApiKey())
             .toUriString();
         
-        System.out.println("🔴 Fetching quote from Finnhub API for: " + symbol); // Log when API is actually called
+        System.out.println("Fetching quote from Finnhub API for: " + symbol); 
         return restTemplate.getForObject(url, String.class);
     }
     
-    // Cache trending quotes for 5 minutes (300000 milliseconds)
     @Cacheable(value = "trending", unless = "#result == null")
     public String getTrendingQuotes() {
-        System.out.println("🔴 Fetching trending quotes from Finnhub API"); // Log when API is actually called
+        System.out.println("Fetching trending quotes from Finnhub API"); 
         
-        // Get quotes for popular symbols
         String[] symbols = {"AAPL", "NVDA", "TSLA", "MSFT", "META"};
         StringBuilder result = new StringBuilder("[");
         
@@ -49,7 +46,6 @@ public class FinnhubService {
         return result.toString();
     }
     
-    // Cache search results for 10 minutes (600000 milliseconds)
     @Cacheable(value = "search", key = "#query", unless = "#result == null")
     public String searchSymbol(String query) {
         String url = UriComponentsBuilder
@@ -58,7 +54,7 @@ public class FinnhubService {
             .queryParam("token", config.getApiKey())
             .toUriString();
         
-        System.out.println("🔴 Fetching search results from Finnhub API for: " + query); // Log when API is actually called
+        System.out.println("Fetching search results from Finnhub API for: " + query); 
         return restTemplate.getForObject(url, String.class);
     }
 }

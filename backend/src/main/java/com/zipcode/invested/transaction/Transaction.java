@@ -24,7 +24,7 @@ public class Transaction {
     private Asset asset;
 
     @Column(nullable = false, length = 10)
-    private String transactionType; // "BUY" or "SELL"
+    private String transactionType; 
 
     @Column(nullable = false, precision = 19, scale = 6)
     private BigDecimal quantity;
@@ -33,7 +33,7 @@ public class Transaction {
     private BigDecimal priceAtTransaction;
 
     @Column(nullable = false, precision = 19, scale = 2)
-    private BigDecimal totalAmount; // quantity * price
+    private BigDecimal totalAmount; 
 
     @Column(nullable = false)
     private Instant transactionDate = Instant.now();
@@ -50,7 +50,6 @@ public class Transaction {
         this.totalAmount = quantity.multiply(priceAtTransaction);
     }
 
-    // Getters
     public Long getId() { return id; }
     public Portfolio getPortfolio() { return portfolio; }
     public Asset getAsset() { return asset; }
@@ -60,7 +59,6 @@ public class Transaction {
     public BigDecimal getTotalAmount() { return totalAmount; }
     public Instant getTransactionDate() { return transactionDate; }
 
-    // Setters
     public void setPortfolio(Portfolio portfolio) { this.portfolio = portfolio; }
     public void setAsset(Asset asset) { this.asset = asset; }
     public void setTransactionType(String transactionType) { this.transactionType = transactionType; }

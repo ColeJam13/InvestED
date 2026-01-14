@@ -52,19 +52,15 @@ public class PortfolioService {
     
     @Transactional
     public PortfolioPosition executeBuy(Long portfolioId, BuyRequest buyRequest) {
-        // 1. Get portfolio
         Portfolio portfolio = findById(portfolioId)
             .orElseThrow(() -> new RuntimeException("Portfolio not found"));
         
-        // 2. Calculate total cost
         BigDecimal totalCost = buyRequest.getQuantity().multiply(buyRequest.getCurrentPrice());
         
-        // 3. Validate sufficient cash
         if (portfolio.getCashBalance().compareTo(totalCost) < 0) {
             throw new RuntimeException("Insufficient cash balance");
         }
         
-        // 4. Get or create Asset
         Asset asset = assetService.findBySymbolAndAssetType(
             buyRequest.getSymbol(), 
             buyRequest.getAssetType()
@@ -77,7 +73,6 @@ public class PortfolioService {
             return assetService.save(newAsset);
         });
         
-        // 5. Get or create PortfolioPosition
         PortfolioPosition position = positionService.findByPortfolioAndAsset(portfolio, asset)
             .orElseGet(() -> new PortfolioPosition(
                 portfolio,
@@ -86,7 +81,6 @@ public class PortfolioService {
                 BigDecimal.ZERO
             ));
         
-        // 6. Update position with new average cost
         BigDecimal oldQuantity = position.getQuantity();
         BigDecimal oldTotalValue = oldQuantity.multiply(position.getAverageBuyPrice());
         BigDecimal newTotalValue = oldTotalValue.add(totalCost);
@@ -97,14 +91,11 @@ public class PortfolioService {
         position.setAverageBuyPrice(newAverageCost);
         position.setUpdatedAt(Instant.now());
         
-        // 7. Save position
         PortfolioPosition savedPosition = positionService.save(position);
         
-        // 8. Deduct cash from portfolio
         portfolio.setCashBalance(portfolio.getCashBalance().subtract(totalCost));
         save(portfolio);
         
-        // 9. Create transaction record
         Transaction transaction = new Transaction(
             portfolio,
             asset,

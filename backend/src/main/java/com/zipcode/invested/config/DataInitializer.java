@@ -22,13 +22,12 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // Check if test user already exists
+
         if (userService.findById(1L).isEmpty()) {
-            // Create test user
+
             User testUser = new User("test@example.com", "Jordan Mitchell");
             User savedUser = userService.create(testUser);
 
-            // Create portfolios with cash balance
             Portfolio mainPortfolio = new Portfolio(savedUser, "Main Portfolio");
             mainPortfolio.setCashBalance(new BigDecimal("10000.00"));
             portfolioService.save(mainPortfolio);
@@ -37,9 +36,9 @@ public class DataInitializer implements CommandLineRunner {
             retirementPortfolio.setCashBalance(new BigDecimal("10000.00"));
             portfolioService.save(retirementPortfolio);
 
-            System.out.println("✅ Test data initialized: User ID " + savedUser.getId());
+            System.out.println("Test data initialized: User ID " + savedUser.getId());
         } else {
-            System.out.println("ℹ️ Test data already exists, skipping initialization");
+            System.out.println("Test data already exists, skipping initialization");
         }
     }
 }

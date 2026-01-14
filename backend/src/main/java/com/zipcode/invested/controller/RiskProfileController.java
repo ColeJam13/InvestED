@@ -33,14 +33,11 @@ public class RiskProfileController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-
-    // Create or update a user's risk profile
     @PostMapping("/user/{userId}")
     public ResponseEntity<RiskProfile> upsertForUser(@PathVariable Long userId, @RequestBody RiskProfile body) {
         User user = userService.findById(userId).orElse(null);
         if (user == null) return ResponseEntity.notFound().build();
 
-        // force-link to the correct user (don't trust request body)
         body.setUser(user);
 
         RiskProfile saved = riskProfileService.save(body);

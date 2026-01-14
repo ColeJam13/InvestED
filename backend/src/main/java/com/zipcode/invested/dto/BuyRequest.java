@@ -6,11 +6,10 @@ public class BuyRequest {
     
     private String symbol;
     private String assetName;
-    private String assetType; // "STOCK" or "CRYPTO"
+    private String assetType; 
     private BigDecimal quantity;
     private BigDecimal currentPrice;
     
-    // Constructors
     public BuyRequest() {}
     
     public BuyRequest(String symbol, String assetName, String assetType, 
@@ -22,7 +21,6 @@ public class BuyRequest {
         this.currentPrice = currentPrice;
     }
     
-    // Getters and Setters
     public String getSymbol() { return symbol; }
     public void setSymbol(String symbol) { this.symbol = symbol; }
     

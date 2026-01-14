@@ -17,9 +17,9 @@ public class CacheConfig {
     public CacheManager cacheManager() {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager("quotes", "search", "trending");
         cacheManager.setCaffeine(Caffeine.newBuilder()
-            .expireAfterWrite(1, TimeUnit.MINUTES)  // Cache expires after 1 minute
-            .maximumSize(1000)  // Max 1000 entries
-            .recordStats());  // Enable cache stats for monitoring
+            .expireAfterWrite(1, TimeUnit.MINUTES)  
+            .maximumSize(1000)  
+            .recordStats());  
         return cacheManager;
     }
 }
