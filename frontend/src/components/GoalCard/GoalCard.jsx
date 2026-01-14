@@ -1,12 +1,19 @@
 import styles from './GoalCard.module.css';
 
-const GoalCard = () => {
+const GoalCard = ({ onNavigate }) => {
     const goal = {
         title: 'House Down Payment',
         target: '$20,000',
         deadline: 'December 2026',
         saved: '$18,234',
         percentage: 91,
+    };
+
+    const handleViewAll = (e) => {
+        e.preventDefault();
+        if (onNavigate) {
+            onNavigate('goals');
+        }
     };
 
     return (
@@ -16,7 +23,7 @@ const GoalCard = () => {
                     <span className={styles.icon}>🎯</span>
                     Featured Goal
                 </div>
-                <a href="#" className={styles.viewAll}>View All →</a>
+                <a href="#" className={styles.viewAll} onClick={handleViewAll}>View All →</a>
             </div>
             
             <div className={styles.goalCard}>
