@@ -106,3 +106,55 @@
 .buyButton:active {
   transform: translateY(0);
 }
+
+.actionButtons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.buyButton {
+  flex: 2;
+  padding: 1.25rem;
+  background: linear-gradient(135deg, #80C4B7 0%, #E3856B 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(128, 196, 183, 0.3);
+}
+
+.buyButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(128, 196, 183, 0.4);
+}
+
+.buyButton:active {
+  transform: translateY(0);
+}
+
+.compareButton {
+  flex: 1;
+  padding: 1.25rem;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 2px solid var(--accent-green);
+  border-radius: 12px;
+  font-size: 1.125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.compareButton:hover {
+  background: var(--accent-green);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.compareButton:active {
+  transform: translateY(0);
+}
