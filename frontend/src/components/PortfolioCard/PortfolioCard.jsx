@@ -6,6 +6,7 @@ const PortfolioCard = () => {
     const [activeTime, setActiveTime] = useState('1D');
     const [activeFilter, setActiveFilter] = useState('all');
     const [portfolioData, setPortfolioData] = useState(null);
+    const [chartData, setChartData] = useState([]);
     const [loading, setLoading] = useState(true);
 
     const timeFilters = ['Live', '1D', '1W', '1M', '3M', '1Y', 'All'];
@@ -19,8 +20,12 @@ const PortfolioCard = () => {
         const fetchPortfolioData = async () => {
             setLoading(true);
             try {
-                const response = await axios.get('http://localhost:8080/api/portfolios/user/1/summary');
-                setPortfolioData(response.data);
+                const [summaryRes, chartRes] = await Promise.all([
+                    axios.get('http://localhost:8080/api/portfolios/user/1/summary'),
+                    axios.get('http://localhost:8080/api/portfolio-snapshots/user/1/chart-data')
+                ]);
+                setPortfolioData(summaryRes.data);
+                setChartData(chartRes.data);
             } catch (error) {
                 console.error('Error fetching portfolio data:', error);
             } finally {
@@ -50,6 +55,47 @@ const PortfolioCard = () => {
         return `${sign}${parseFloat(value).toFixed(2)}%`;
     };
 
+    // Generate SVG path from chart data
+    const generateChartPath = () => {
+        if (!chartData || chartData.length === 0) return '';
+        
+        const width = 350;
+        const height = 150;
+        const values = chartData.map(d => d.value);
+        const min = Math.min(...values);
+        const max = Math.max(...values);
+        const range = max - min || 1; // Avoid division by zero
+        
+        const points = chartData.map((point, index) => {
+            const x = (index / (chartData.length - 1)) * width;
+            const y = height - ((point.value - min) / range) * height;
+            return `${x},${y}`;
+        });
+        
+        return `M${points.join(' L')}`;
+    };
+
+    // Generate area path (same as line but closed at bottom)
+    const generateAreaPath = () => {
+        const linePath = generateChartPath();
+        if (!linePath) return '';
+        return `${linePath} L350,150 L0,150 Z`;
+    };
+
+    // Generate time labels from chart data
+    const generateTimeLabels = () => {
+        if (!chartData || chartData.length === 0) return [];
+        
+        const step = Math.floor(chartData.length / 7); // Show 7 labels
+        return chartData
+            .filter((_, index) => index % step === 0)
+            .slice(0, 6)
+            .map(point => {
+                const date = new Date(point.timestamp);
+                return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: false });
+            });
+    };
+
     if (loading) {
         return (
             <div className={styles.card}>
@@ -69,6 +115,8 @@ const PortfolioCard = () => {
     }
 
     const isPositive = portfolioData.totalGainLoss >= 0;
+    const chartMax = chartData.length > 0 ? Math.max(...chartData.map(d => d.value)) : portfolioData.totalValue;
+    const chartMin = chartData.length > 0 ? Math.min(...chartData.map(d => d.value)) : portfolioData.totalValue;
 
     return (
         <div className={styles.card}>
@@ -88,47 +136,47 @@ const PortfolioCard = () => {
                 </span>
             </div>
 
-            {/* Chart - placeholder for now */}
+            {/* Chart with real data */}
             <div className={styles.chartContainer}>
-                <svg className={styles.chartSvg} viewBox="0 0 400 150" preserveAspectRatio="none">
+                <svg className={styles.chartSvg} viewBox="0 0 350 150" preserveAspectRatio="none">
                     <defs>
                         <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
                             <stop offset="0%" stopColor="var(--accent-green)" stopOpacity="0.3"/>
                             <stop offset="100%" stopColor="var(--accent-green)" stopOpacity="0"/>
                         </linearGradient>
                     </defs>
-                    <path 
-                        className={styles.chartArea} 
-                        d="M0,120 Q50,115 80,110 T150,100 T200,95 T250,85 T300,60 T350,40 T400,20 L400,150 L0,150 Z"
-                        fill="url(#chartGradient)"
-                    />
-                    <path 
-                        className={styles.chartLine} 
-                        d="M0,120 Q50,115 80,110 T150,100 T200,95 T250,85 T300,60 T350,40 T400,20" 
-                        fill="none" 
-                        strokeWidth="2.5"
-                    />
+                    {chartData.length > 0 && (
+                        <>
+                            <path 
+                                className={styles.chartArea} 
+                                d={generateAreaPath()}
+                                fill="url(#chartGradient)"
+                            />
+                            <path 
+                                className={styles.chartLine} 
+                                d={generateChartPath()} 
+                                fill="none" 
+                                strokeWidth="2.5"
+                            />
+                        </>
+                    )}
                 </svg>
                 
                 {/* Y-Axis Labels */}
                 <div className={styles.yAxisLabels}>
-                    <span>{formatCurrency(portfolioData.totalValue * 1.02)}</span>
-                    <span>{formatCurrency(portfolioData.totalValue * 1.01)}</span>
-                    <span>{formatCurrency(portfolioData.totalValue)}</span>
-                    <span>{formatCurrency(portfolioData.totalValue * 0.99)}</span>
-                    <span>{formatCurrency(portfolioData.totalValue * 0.98)}</span>
+                    <span>{formatCurrency(chartMax * 1.01)}</span>
+                    <span>{formatCurrency(chartMax * 1.005)}</span>
+                    <span>{formatCurrency((chartMax + chartMin) / 2)}</span>
+                    <span>{formatCurrency(chartMin * 0.995)}</span>
+                    <span>{formatCurrency(chartMin * 0.99)}</span>
                 </div>
             </div>
 
             {/* X-Axis Labels */}
             <div className={styles.xAxisLabels}>
-                <span>9:30</span>
-                <span>10:30</span>
-                <span>11:30</span>
-                <span>12:30</span>
-                <span>13:30</span>
-                <span>14:30</span>
-                <span>15:30</span>
+                {generateTimeLabels().map((label, index) => (
+                    <span key={index}>{label}</span>
+                ))}
             </div>
 
             {/* Time Filters */}

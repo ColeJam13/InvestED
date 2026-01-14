@@ -58,6 +58,7 @@
     height: 180px;
     position: relative;
     margin-bottom: 0.5rem;
+    padding-right: 50px;
 }
 
 .chartSvg {
@@ -67,6 +68,9 @@
 
 .chartLine {
     stroke: var(--accent-green);
+    stroke-width: 1;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 .chartArea {
@@ -75,7 +79,7 @@
 
 .yAxisLabels {
     position: absolute;
-    right: 0;
+    right: -40px;
     top: 0;
     bottom: 0;
     display: flex;
@@ -84,6 +88,7 @@
     font-size: 0.7rem;
     color: var(--text-muted);
     padding: 0.25rem 0;
+    width: 80px;
 }
 
 .xAxisLabels {
@@ -93,6 +98,7 @@
     color: var(--text-muted);
     margin-bottom: 1rem;
     padding: 0 0.5rem;
+    padding-right: 50px;
 }
 
 /* Time Filters */
@@ -101,6 +107,8 @@
     align-items: center;
     gap: 0.5rem;
     margin-bottom: 1rem;
+    padding-right: 50px;
+    justify-content: space-between;
 }
 
 .timeBtn {
@@ -113,6 +121,7 @@
     transition: all 0.2s;
     background: transparent;
     color: var(--text-muted);
+    flex: 0 0 auto; 
 }
 
 .timeBtn:hover {
