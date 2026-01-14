@@ -15,6 +15,7 @@ const GradCapDollar = ({ size = 24 }) => (
         strokeLinecap="round" 
         strokeLinejoin="round"
     >
+<<<<<<< Updated upstream
         {/* Cap top - shifted right to center visually */}
         <polygon points="18 1 4 9 18 17 32 9 18 1" />
         {/* Cap base */}
@@ -24,6 +25,17 @@ const GradCapDollar = ({ size = 24 }) => (
         {/* Dollar sign as tassel end */}
         <text 
             x="32" 
+=======
+        {/* Cap top - larger and centered */}
+        <polygon points="16 1 2 9 16 17 30 9 16 1" />
+        {/* Cap base */}
+        <path d="M6 11v7c0 2.5 4 5 10 5s10-2.5 10-5v-7" />
+        {/* Tassel string */}
+        <line x1="30" y1="9" x2="30" y2="15" />
+        {/* Dollar sign as tassel end */}
+        <text 
+            x="30" 
+>>>>>>> Stashed changes
             y="23" 
             fontSize="11" 
             fontWeight="bold" 

@@ -338,9 +338,22 @@
     box-shadow: 0 6px 16px rgba(30, 58, 95, 0.5);
 }
 
+<<<<<<< Updated upstream
 /* Bigger and wider logo icon box */
 .logoIcon {
     width: 58px;
     height: 52px;
     border-radius: 12px;
+=======
+/* Larger logo icon box */
+.logoIcon {
+    width: 46px;
+    height: 46px;
+}
+
+/* Larger logo icon box */
+.logoIcon {
+    width: 52px;
+    height: 52px;
+>>>>>>> Stashed changes
 }
