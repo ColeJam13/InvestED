@@ -1,20 +1,11 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import styles from './PortfolioView.module.css';
+import axios from 'axios';
 
 const PortfolioView = () => {
-    const [positions, setPositions] = useState([
-        { id: 1, symbol: 'AAPL', name: 'Apple Inc.', shares: 15, avgCost: 142.50, currentPrice: 178.25, type: 'stock', sector: 'Technology' },
-        { id: 2, symbol: 'GOOGL', name: 'Alphabet Inc.', shares: 8, avgCost: 125.00, currentPrice: 141.80, type: 'stock', sector: 'Technology' },
-        { id: 3, symbol: 'BTC', name: 'Bitcoin', shares: 0.5, avgCost: 42000, currentPrice: 67500, type: 'crypto', sector: 'Crypto' },
-        { id: 4, symbol: 'MSFT', name: 'Microsoft Corp.', shares: 12, avgCost: 310.00, currentPrice: 378.50, type: 'stock', sector: 'Technology' },
-        { id: 5, symbol: 'ETH', name: 'Ethereum', shares: 3.2, avgCost: 2200, currentPrice: 3450, type: 'crypto', sector: 'Crypto' },
-        { id: 6, symbol: 'AMZN', name: 'Amazon.com Inc.', shares: 10, avgCost: 145.00, currentPrice: 178.25, type: 'stock', sector: 'Consumer' },
-        { id: 7, symbol: 'TSLA', name: 'Tesla Inc.', shares: 20, avgCost: 195.00, currentPrice: 248.50, type: 'stock', sector: 'Automotive' },
-        { id: 8, symbol: 'JPM', name: 'JPMorgan Chase', shares: 25, avgCost: 148.00, currentPrice: 195.75, type: 'stock', sector: 'Financial' },
-        { id: 9, symbol: 'NVDA', name: 'NVIDIA Corp.', shares: 5, avgCost: 450.00, currentPrice: 875.30, type: 'stock', sector: 'Technology' },
-        { id: 10, symbol: 'SOL', name: 'Solana', shares: 50, avgCost: 85.00, currentPrice: 142.60, type: 'crypto', sector: 'Crypto' },
-    ]);
-
+    const [positions, setPositions] = useState([]);
+    const [portfolios, setPortfolios] = useState([]);
+    const [selectedPortfolioId, setSelectedPortfolioId] = useState('all');
     const [filter, setFilter] = useState('all');
     const [sortBy, setSortBy] = useState('value');
     const [sortOrder, setSortOrder] = useState('desc');
@@ -23,23 +14,58 @@ const PortfolioView = () => {
     const [selectedPosition, setSelectedPosition] = useState(null);
     const [sellAmount, setSellAmount] = useState('');
     const [showConfirmation, setShowConfirmation] = useState(false);
+    const [loading, setLoading] = useState(true);
+
+    // Fetch portfolios and positions
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const [portfoliosRes, positionsRes] = await Promise.all([
+                    axios.get('http://localhost:8080/api/portfolios/user/1'),
+                    axios.get('http://localhost:8080/api/portfolios/user/1/all-positions')
+                ]);
+                
+                setPortfolios(portfoliosRes.data);
+                setPositions(positionsRes.data);
+            } catch (error) {
+                console.error('Error fetching portfolio data:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+        // Refresh every 30 seconds
+        const interval = setInterval(fetchData, 30000);
+        return () => clearInterval(interval);
+    }, []);
 
     // Calculate position metrics
     const calculateMetrics = (position) => {
-        const marketValue = position.shares * position.currentPrice;
-        const costBasis = position.shares * position.avgCost;
+        const marketValue = position.quantity * position.currentPrice;
+        const costBasis = position.quantity * position.averageBuyPrice;
         const gainLoss = marketValue - costBasis;
-        const gainLossPercent = ((position.currentPrice - position.avgCost) / position.avgCost) * 100;
+        const gainLossPercent = ((position.currentPrice - position.averageBuyPrice) / position.averageBuyPrice) * 100;
         return { marketValue, costBasis, gainLoss, gainLossPercent };
     };
 
     // Filter and sort positions
     const filteredPositions = useMemo(() => {
         let result = positions.filter(p => {
-            const matchesFilter = filter === 'all' || p.type === filter || p.sector === filter;
+            // Portfolio filter
+            const matchesPortfolio = selectedPortfolioId === 'all' || p.portfolioId === parseInt(selectedPortfolioId);
+            
+            // Asset type filter
+            const matchesFilter = filter === 'all' || 
+                                  (filter === 'stock' && p.assetType === 'STOCK') ||
+                                  (filter === 'crypto' && p.assetType === 'CRYPTO');
+            
+            // Search filter
             const matchesSearch = p.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
                                   p.name.toLowerCase().includes(searchTerm.toLowerCase());
-            return matchesFilter && matchesSearch;
+            
+            return matchesPortfolio && matchesFilter && matchesSearch;
         });
 
         result.sort((a, b) => {
@@ -61,7 +87,7 @@ const PortfolioView = () => {
                     comparison = metricsA.gainLossPercent - metricsB.gainLossPercent;
                     break;
                 case 'shares':
-                    comparison = a.shares - b.shares;
+                    comparison = a.quantity - b.quantity;
                     break;
                 default:
                     comparison = metricsA.marketValue - metricsB.marketValue;
@@ -70,20 +96,22 @@ const PortfolioView = () => {
         });
 
         return result;
-    }, [positions, filter, sortBy, sortOrder, searchTerm]);
+    }, [positions, selectedPortfolioId, filter, sortBy, sortOrder, searchTerm]);
 
     // Portfolio totals
     const portfolioTotals = useMemo(() => {
-        return positions.reduce((acc, p) => {
+        return filteredPositions.reduce((acc, p) => {
             const metrics = calculateMetrics(p);
             acc.totalValue += metrics.marketValue;
             acc.totalCost += metrics.costBasis;
             acc.totalGainLoss += metrics.gainLoss;
             return acc;
         }, { totalValue: 0, totalCost: 0, totalGainLoss: 0 });
-    }, [positions]);
+    }, [filteredPositions]);
 
-    const totalGainLossPercent = ((portfolioTotals.totalValue - portfolioTotals.totalCost) / portfolioTotals.totalCost) * 100;
+    const totalGainLossPercent = portfolioTotals.totalCost > 0 
+        ? ((portfolioTotals.totalValue - portfolioTotals.totalCost) / portfolioTotals.totalCost) * 100 
+        : 0;
 
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat('en-US', {
@@ -124,24 +152,16 @@ const PortfolioView = () => {
         setShowConfirmation(true);
     };
 
-    const confirmSell = () => {
+    const confirmSell = async () => {
         const sharesToSell = parseFloat(sellAmount);
-        if (sharesToSell > 0 && sharesToSell <= selectedPosition.shares) {
-            setPositions(prev => prev.map(p => {
-                if (p.id === selectedPosition.id) {
-                    const newShares = p.shares - sharesToSell;
-                    if (newShares <= 0) {
-                        return null;
-                    }
-                    return { ...p, shares: newShares };
-                }
-                return p;
-            }).filter(Boolean));
+        if (sharesToSell > 0 && sharesToSell <= selectedPosition.quantity) {
+            // TODO: Implement sell endpoint
+            alert('Sell functionality coming soon!');
+            setShowSellModal(false);
+            setSelectedPosition(null);
+            setSellAmount('');
+            setShowConfirmation(false);
         }
-        setShowSellModal(false);
-        setSelectedPosition(null);
-        setSellAmount('');
-        setShowConfirmation(false);
     };
 
     const getSortIcon = (column) => {
@@ -149,7 +169,18 @@ const PortfolioView = () => {
         return sortOrder === 'asc' ? '↑' : '↓';
     };
 
-    const sectors = [...new Set(positions.map(p => p.sector))];
+    const sectors = [...new Set(positions.map(p => p.assetType))];
+
+    if (loading) {
+        return (
+            <div className={styles.container}>
+                <div className={styles.header}>
+                    <h1 className={styles.title}>Portfolio</h1>
+                </div>
+                <div className={styles.loadingState}>Loading portfolio data...</div>
+            </div>
+        );
+    }
 
     return (
         <div className={styles.container}>
@@ -197,8 +228,26 @@ const PortfolioView = () => {
                 </div>
             </div>
 
-            {/* Filters and Search */}
+            {/* Controls */}
             <div className={styles.controls}>
+                {/* Portfolio Selector */}
+                <div className={styles.portfolioSelector}>
+                    <label htmlFor="portfolio-select">Portfolio:</label>
+                    <select 
+                        id="portfolio-select"
+                        value={selectedPortfolioId} 
+                        onChange={(e) => setSelectedPortfolioId(e.target.value)}
+                        className={styles.portfolioSelect}
+                    >
+                        <option value="all">All Portfolios</option>
+                        {portfolios.map((portfolio) => (
+                            <option key={portfolio.id} value={portfolio.id}>
+                                {portfolio.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
                 <div className={styles.searchBox}>
                     <span className={styles.searchIcon}>🔍</span>
                     <input
@@ -229,94 +278,91 @@ const PortfolioView = () => {
                     >
                         🪙 Crypto
                     </button>
-                    {sectors.map(sector => (
-                        <button
-                            key={sector}
-                            className={`${styles.filterBtn} ${filter === sector ? styles.active : ''}`}
-                            onClick={() => setFilter(sector)}
-                        >
-                            {sector}
-                        </button>
-                    ))}
                 </div>
             </div>
 
             {/* Positions Table */}
-            <div className={styles.tableContainer}>
-                <table className={styles.table}>
-                    <thead>
-                        <tr>
-                            <th onClick={() => handleSort('symbol')} className={styles.sortable}>
-                                Asset {getSortIcon('symbol')}
-                            </th>
-                            <th onClick={() => handleSort('shares')} className={styles.sortable}>
-                                Shares {getSortIcon('shares')}
-                            </th>
-                            <th>Avg Cost</th>
-                            <th>Price</th>
-                            <th onClick={() => handleSort('value')} className={styles.sortable}>
-                                Value {getSortIcon('value')}
-                            </th>
-                            <th onClick={() => handleSort('gainLoss')} className={styles.sortable}>
-                                Gain/Loss {getSortIcon('gainLoss')}
-                            </th>
-                            <th onClick={() => handleSort('gainLossPercent')} className={styles.sortable}>
-                                Return {getSortIcon('gainLossPercent')}
-                            </th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredPositions.map((position) => {
-                            const metrics = calculateMetrics(position);
-                            const isPositive = metrics.gainLoss >= 0;
-                            
-                            return (
-                                <tr key={position.id}>
-                                    <td>
-                                        <div className={styles.assetCell}>
-                                            <span className={styles.assetSymbol}>{position.symbol}</span>
-                                            <span className={styles.assetName}>{position.name}</span>
-                                        </div>
-                                    </td>
-                                    <td>{formatShares(position.shares)}</td>
-                                    <td>{formatCurrency(position.avgCost)}</td>
-                                    <td>{formatCurrency(position.currentPrice)}</td>
-                                    <td className={styles.valueCell}>{formatCurrency(metrics.marketValue)}</td>
-                                    <td>
-                                        <span className={`${styles.gainLoss} ${isPositive ? styles.positive : styles.negative}`}>
-                                            {isPositive ? '▲' : '▼'} {formatCurrency(Math.abs(metrics.gainLoss))}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span className={`${styles.returnBadge} ${isPositive ? styles.positive : styles.negative}`}>
-                                            {formatPercent(metrics.gainLossPercent)}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <button
-                                            className={styles.sellBtn}
-                                            onClick={() => openSellModal(position)}
-                                        >
-                                            Sell
-                                        </button>
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
-            </div>
-
-            {filteredPositions.length === 0 && (
+            {filteredPositions.length > 0 ? (
+                <div className={styles.tableContainer}>
+                    <table className={styles.table}>
+                        <thead>
+                            <tr>
+                                <th onClick={() => handleSort('symbol')} className={styles.sortable}>
+                                    Asset {getSortIcon('symbol')}
+                                </th>
+                                <th>Portfolio</th>
+                                <th onClick={() => handleSort('shares')} className={styles.sortable}>
+                                    Shares {getSortIcon('shares')}
+                                </th>
+                                <th>Avg Cost</th>
+                                <th>Price</th>
+                                <th onClick={() => handleSort('value')} className={styles.sortable}>
+                                    Value {getSortIcon('value')}
+                                </th>
+                                <th onClick={() => handleSort('gainLoss')} className={styles.sortable}>
+                                    Gain/Loss {getSortIcon('gainLoss')}
+                                </th>
+                                <th onClick={() => handleSort('gainLossPercent')} className={styles.sortable}>
+                                    Return {getSortIcon('gainLossPercent')}
+                                </th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredPositions.map((position) => {
+                                const metrics = calculateMetrics(position);
+                                const isPositive = metrics.gainLoss >= 0;
+                                
+                                return (
+                                    <tr key={position.id}>
+                                        <td>
+                                            <div className={styles.assetCell}>
+                                                <span className={styles.assetSymbol}>{position.symbol}</span>
+                                                <span className={styles.assetName}>{position.name}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span className={styles.portfolioBadge}>
+                                                {position.portfolioName}
+                                            </span>
+                                        </td>
+                                        <td>{formatShares(position.quantity)}</td>
+                                        <td>{formatCurrency(position.averageBuyPrice)}</td>
+                                        <td>{formatCurrency(position.currentPrice)}</td>
+                                        <td className={styles.valueCell}>{formatCurrency(metrics.marketValue)}</td>
+                                        <td>
+                                            <span className={`${styles.gainLoss} ${isPositive ? styles.positive : styles.negative}`}>
+                                                {isPositive ? '▲' : '▼'} {formatCurrency(Math.abs(metrics.gainLoss))}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span className={`${styles.returnBadge} ${isPositive ? styles.positive : styles.negative}`}>
+                                                {formatPercent(metrics.gainLossPercent)}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <button
+                                                className={styles.sellBtn}
+                                                onClick={() => openSellModal(position)}
+                                            >
+                                                Sell
+                                            </button>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+            ) : (
                 <div className={styles.emptyState}>
-                    <div className={styles.emptyIcon}>📭</div>
+                    <div className={styles.emptyIcon}>🔭</div>
                     <h3>No positions found</h3>
-                    <p>Try adjusting your filters or search term</p>
+                    <p>{searchTerm ? 'Try adjusting your search term' : 'Buy your first asset to get started!'}</p>
                 </div>
             )}
 
-            {/* Sell Modal */}
+            {/* Sell Modal - keeping existing modal code */}
             {showSellModal && selectedPosition && (
                 <div className={styles.modalOverlay} onClick={() => setShowSellModal(false)}>
                     <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -331,7 +377,7 @@ const PortfolioView = () => {
                                     <div className={styles.positionInfo}>
                                         <div className={styles.infoRow}>
                                             <span>Current Holdings</span>
-                                            <span>{formatShares(selectedPosition.shares)} shares</span>
+                                            <span>{formatShares(selectedPosition.quantity)} shares</span>
                                         </div>
                                         <div className={styles.infoRow}>
                                             <span>Current Price</span>
@@ -339,7 +385,7 @@ const PortfolioView = () => {
                                         </div>
                                         <div className={styles.infoRow}>
                                             <span>Market Value</span>
-                                            <span>{formatCurrency(selectedPosition.shares * selectedPosition.currentPrice)}</span>
+                                            <span>{formatCurrency(selectedPosition.quantity * selectedPosition.currentPrice)}</span>
                                         </div>
                                     </div>
 
@@ -352,13 +398,13 @@ const PortfolioView = () => {
                                             placeholder="0.00"
                                             step="0.0001"
                                             min="0.0001"
-                                            max={selectedPosition.shares}
+                                            max={selectedPosition.quantity}
                                             required
                                         />
                                         <button
                                             type="button"
                                             className={styles.maxBtn}
-                                            onClick={() => setSellAmount(selectedPosition.shares.toString())}
+                                            onClick={() => setSellAmount(selectedPosition.quantity.toString())}
                                         >
                                             MAX
                                         </button>

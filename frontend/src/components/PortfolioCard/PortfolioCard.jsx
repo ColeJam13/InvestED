@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styles from './PortfolioCard.module.css';
+import axios from 'axios';
 
 const PortfolioCard = () => {
     const [activeTime, setActiveTime] = useState('1D');
     const [activeFilter, setActiveFilter] = useState('all');
+    const [portfolioData, setPortfolioData] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     const timeFilters = ['Live', '1D', '1W', '1M', '3M', '1Y', 'All'];
     const assetFilters = [
@@ -12,23 +15,80 @@ const PortfolioCard = () => {
         { id: 'crypto', label: 'Crypto Only' },
     ];
 
+    useEffect(() => {
+        const fetchPortfolioData = async () => {
+            setLoading(true);
+            try {
+                const response = await axios.get('http://localhost:8080/api/portfolios/user/1/summary');
+                setPortfolioData(response.data);
+            } catch (error) {
+                console.error('Error fetching portfolio data:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchPortfolioData();
+        // Refresh every 30 seconds
+        const interval = setInterval(fetchPortfolioData, 30000);
+        return () => clearInterval(interval);
+    }, []);
+
+    const formatCurrency = (amount) => {
+        if (!amount) return '$0.00';
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        }).format(amount);
+    };
+
+    const formatPercent = (value) => {
+        if (!value) return '+0.00%';
+        const sign = value >= 0 ? '+' : '';
+        return `${sign}${parseFloat(value).toFixed(2)}%`;
+    };
+
+    if (loading) {
+        return (
+            <div className={styles.card}>
+                <div className={styles.portfolioLabel}>Total Portfolio Value</div>
+                <div className={styles.portfolioValue}>Loading...</div>
+            </div>
+        );
+    }
+
+    if (!portfolioData) {
+        return (
+            <div className={styles.card}>
+                <div className={styles.portfolioLabel}>Total Portfolio Value</div>
+                <div className={styles.portfolioValue}>Error loading data</div>
+            </div>
+        );
+    }
+
+    const isPositive = portfolioData.totalGainLoss >= 0;
+
     return (
         <div className={styles.card}>
             <div className={styles.portfolioLabel}>Total Portfolio Value</div>
-            <div className={styles.portfolioValue}>$50,243.89</div>
+            <div className={styles.portfolioValue}>{formatCurrency(portfolioData.totalValue)}</div>
             
             <div className={styles.portfolioMeta}>
-                <span className={styles.portfolioChange}>+$1,234.56 (+2.52%)</span>
+                <span className={`${styles.portfolioChange} ${isPositive ? styles.positive : styles.negative}`}>
+                    {isPositive ? '+' : ''}{formatCurrency(portfolioData.totalGainLoss)} ({formatPercent(portfolioData.totalGainLossPercent)})
+                </span>
                 <span className={styles.cashBadge}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <rect x="2" y="6" width="20" height="12" rx="2"></rect>
                         <circle cx="12" cy="12" r="2"></circle>
                     </svg>
-                    Cash Available: $5,000.00
+                    Cash Available: {formatCurrency(portfolioData.totalCash)}
                 </span>
             </div>
 
-            {/* Chart */}
+            {/* Chart - placeholder for now */}
             <div className={styles.chartContainer}>
                 <svg className={styles.chartSvg} viewBox="0 0 400 150" preserveAspectRatio="none">
                     <defs>
@@ -52,11 +112,11 @@ const PortfolioCard = () => {
                 
                 {/* Y-Axis Labels */}
                 <div className={styles.yAxisLabels}>
-                    <span>$50.4k</span>
-                    <span>$50.2k</span>
-                    <span>$49.2k</span>
-                    <span>$49.0k</span>
-                    <span>$48.6k</span>
+                    <span>{formatCurrency(portfolioData.totalValue * 1.02)}</span>
+                    <span>{formatCurrency(portfolioData.totalValue * 1.01)}</span>
+                    <span>{formatCurrency(portfolioData.totalValue)}</span>
+                    <span>{formatCurrency(portfolioData.totalValue * 0.99)}</span>
+                    <span>{formatCurrency(portfolioData.totalValue * 0.98)}</span>
                 </div>
             </div>
 

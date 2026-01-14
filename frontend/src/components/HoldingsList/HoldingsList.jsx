@@ -1,44 +1,152 @@
+import { useState, useEffect } from 'react';
 import styles from './HoldingsList.module.css';
+import axios from 'axios';
 
-const HoldingsList = ({ onNavigate }) => {
-    const holdings = [
-        { symbol: 'BTC', name: 'Bitcoin', value: '$34,500.00', change: '+2.5%', positive: true },
-        { symbol: 'ETH', name: 'Ethereum', value: '$6,125.00', change: '+1.8%', positive: true },
-        { symbol: 'AAPL', name: 'Apple Inc.', value: '$1,850.00', change: '-0.5%', positive: false },
-    ];
+const HoldingsList = () => {
+    const [holdings, setHoldings] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    const handleViewAll = (e) => {
-        e.preventDefault();
-        if (onNavigate) {
-            onNavigate('portfolio');
-        }
+    useEffect(() => {
+        const fetchHoldings = async () => {
+            setLoading(true);
+            try {
+                const response = await axios.get('http://localhost:8080/api/portfolios/user/1/all-positions');
+                setHoldings(response.data);
+            } catch (error) {
+                console.error('Error fetching holdings:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchHoldings();
+        // Refresh every 30 seconds
+        const interval = setInterval(fetchHoldings, 30000);
+        return () => clearInterval(interval);
+    }, []);
+
+    const formatCurrency = (amount) => {
+        if (!amount) return '$0.00';
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        }).format(amount);
     };
+
+    const formatShares = (shares) => {
+        return shares < 1 ? parseFloat(shares).toFixed(4) : parseFloat(shares).toFixed(2);
+    };
+
+    const calculateGainLoss = (quantity, avgPrice, currentPrice) => {
+        const costBasis = quantity * avgPrice;
+        const marketValue = quantity * currentPrice;
+        const gainLoss = marketValue - costBasis;
+        const gainLossPercent = ((currentPrice - avgPrice) / avgPrice) * 100;
+        return { gainLoss, gainLossPercent };
+    };
+
+    const getAssetColor = (symbol) => {
+        // Color mapping for common assets
+        const colors = {
+            'AAPL': '#FF6B6B',
+            'BTC': '#F7931A',
+            'TSLA': '#E31937',
+            'ETH': '#627EEA',
+            'GOOGL': '#4285F4',
+            'AMZN': '#FF9900',
+            'MSFT': '#00A4EF',
+            'META': '#0668E1',
+            'NVDA': '#76B900',
+        };
+        return colors[symbol] || '#80C4B7'; // Default teal
+    };
+
+    if (loading) {
+        return (
+            <div className={styles.section}>
+                <div className={styles.sectionHeader}>
+                    <div className={styles.sectionTitle}>
+                        <span className={styles.icon}>📊</span>
+                        Your Holdings
+                    </div>
+                </div>
+                <div className={styles.holdingsCard}>
+                    <div className={styles.loadingState}>Loading holdings...</div>
+                </div>
+            </div>
+        );
+    }
+
+    if (holdings.length === 0) {
+        return (
+            <div className={styles.section}>
+                <div className={styles.sectionHeader}>
+                    <div className={styles.sectionTitle}>
+                        <span className={styles.icon}>📊</span>
+                        Your Holdings (0)
+                    </div>
+                </div>
+                <div className={styles.holdingsCard}>
+                    <div className={styles.emptyState}>
+                        <div className={styles.emptyIcon}>📈</div>
+                        <p>No holdings yet</p>
+                        <span className={styles.emptyHint}>Buy your first asset to get started!</span>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className={styles.section}>
             <div className={styles.sectionHeader}>
                 <div className={styles.sectionTitle}>
-                    <span className={styles.icon}>💼</span>
-                    Top Holdings
+                    <span className={styles.icon}>📊</span>
+                    Your Holdings ({holdings.length})
+                    <span className={styles.infoIcon}>ℹ</span>
                 </div>
-                <a href="#" className={styles.viewAll} onClick={handleViewAll}>View All →</a>
+                <a href="#" className={styles.viewAll}>View All →</a>
             </div>
             
-            <div className={styles.holdingsList}>
-                {holdings.map((holding, index) => (
-                    <div key={index} className={styles.holdingItem}>
-                        <div className={styles.holdingInfo}>
-                            <span className={styles.holdingSymbol}>{holding.symbol}</span>
-                            <span className={styles.holdingName}>{holding.name}</span>
-                        </div>
-                        <div className={styles.holdingValue}>
-                            <span className={styles.value}>{holding.value}</span>
-                            <span className={`${styles.change} ${holding.positive ? styles.positive : styles.negative}`}>
-                                {holding.change}
-                            </span>
-                        </div>
-                    </div>
-                ))}
+            <div className={styles.holdingsCard}>
+                <div className={styles.holdingsList}>
+                    {holdings.map((holding) => {
+                        const { gainLoss, gainLossPercent } = calculateGainLoss(
+                            holding.quantity,
+                            holding.averageBuyPrice,
+                            holding.currentPrice
+                        );
+                        const marketValue = holding.quantity * holding.currentPrice;
+                        const isPositive = gainLoss >= 0;
+
+                        return (
+                            <div key={holding.id} className={styles.holdingItem}>
+                                <div className={styles.holdingLeft}>
+                                    <div 
+                                        className={styles.holdingIcon}
+                                        style={{ backgroundColor: getAssetColor(holding.symbol) }}
+                                    >
+                                        {holding.symbol}
+                                    </div>
+                                    <div className={styles.holdingInfo}>
+                                        <span className={styles.holdingName}>{holding.name}</span>
+                                        <span className={styles.holdingShares}>
+                                            {formatShares(holding.quantity)} shares • {holding.portfolioName}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className={styles.holdingRight}>
+                                    <div className={styles.holdingValue}>{formatCurrency(marketValue)}</div>
+                                    <div className={`${styles.holdingChange} ${isPositive ? styles.positive : styles.negative}`}>
+                                        {isPositive ? '+' : ''}{formatCurrency(Math.abs(gainLoss))} ({isPositive ? '+' : ''}{gainLossPercent.toFixed(2)}%)
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
             </div>
         </div>
     );

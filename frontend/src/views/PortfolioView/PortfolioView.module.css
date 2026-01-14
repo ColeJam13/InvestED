@@ -476,3 +476,54 @@
     .summaryIcon { width: 40px; height: 40px; font-size: 1.5rem; }
     .summaryValue { font-size: 1rem; }
 }
+
+.loadingState {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-muted);
+    font-size: 1rem;
+}
+
+.portfolioSelector {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 0.5rem 1rem;
+}
+
+.portfolioSelector label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.portfolioSelect {
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+    padding: 0.25rem;
+}
+
+.portfolioSelect option {
+    background: var(--bg-card);
+    color: var(--text-primary);
+}
+
+.portfolioBadge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
