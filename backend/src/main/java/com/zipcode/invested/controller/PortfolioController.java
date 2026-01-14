@@ -1,6 +1,8 @@
 package com.zipcode.invested.controller;
 
+import com.zipcode.invested.dto.BuyRequest;
 import com.zipcode.invested.portfolio.Portfolio;
+import com.zipcode.invested.position.PortfolioPosition;
 import com.zipcode.invested.service.PortfolioService;
 import com.zipcode.invested.service.UserService;
 import com.zipcode.invested.user.User;
@@ -12,6 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/portfolios")
+@CrossOrigin(origins = "http://localhost:5173")
 public class PortfolioController {
 
     private final PortfolioService portfolioService;
@@ -50,5 +53,19 @@ public class PortfolioController {
         body.setUser(user);
         Portfolio saved = portfolioService.save(body);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    }
+    
+    // NEW ENDPOINT - Buy asset
+    @PostMapping("/{portfolioId}/buy")
+    public ResponseEntity<?> buyAsset(
+            @PathVariable Long portfolioId,
+            @RequestBody BuyRequest buyRequest
+    ) {
+        try {
+            PortfolioPosition position = portfolioService.executeBuy(portfolioId, buyRequest);
+            return ResponseEntity.ok(position);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { marketService } from '../../services/marketService';
 import StockComparison from '../StockComparison';
+import BuyModal from '../BuyModal';
 import styles from './AssetDetails.module.css';
 
 function AssetDetails({ symbol }) {
   const [quote, setQuote] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showComparison, setShowComparison] = useState(false);
+  const [showBuyModal, setShowBuyModal] = useState(false);
 
   useEffect(() => {
     const fetchQuote = async () => {
@@ -25,6 +27,11 @@ function AssetDetails({ symbol }) {
       fetchQuote();
     }
   }, [symbol]);
+
+  const handleBuySuccess = () => {
+    alert('Purchase successful! 🎉');
+    // You could also refresh the quote or redirect to portfolio
+  };
 
   if (loading) return <div className={styles.loading}>Loading...</div>;
   if (!quote) return <div className={styles.error}>Unable to load asset details</div>;
@@ -64,7 +71,12 @@ function AssetDetails({ symbol }) {
         </div>
 
         <div className={styles.actionButtons}>
-          <button className={styles.buyButton}>Buy {quote.symbol}</button>
+          <button 
+            className={styles.buyButton}
+            onClick={() => setShowBuyModal(true)}
+          >
+            Buy {quote.symbol}
+          </button>
           <button 
             className={styles.compareButton}
             onClick={() => setShowComparison(true)}
@@ -78,6 +90,15 @@ function AssetDetails({ symbol }) {
         <StockComparison
           baseSymbol={symbol}
           onClose={() => setShowComparison(false)}
+        />
+      )}
+
+      {showBuyModal && (
+        <BuyModal
+          asset={{ symbol: quote.symbol, name: quote.name, type: 'STOCK' }}
+          currentPrice={parseFloat(quote.close)}
+          onClose={() => setShowBuyModal(false)}
+          onSuccess={handleBuySuccess}
         />
       )}
     </>

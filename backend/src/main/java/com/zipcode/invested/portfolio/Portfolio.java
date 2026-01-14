@@ -3,6 +3,7 @@ package com.zipcode.invested.portfolio;
 import com.zipcode.invested.user.User;
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 @Entity
@@ -20,6 +21,10 @@ public class Portfolio {
     @Column(nullable = false, length = 120)
     private String name;
 
+    // NEW FIELD - Cash balance for this portfolio
+    @Column(nullable = false, precision = 19, scale = 2)
+    private BigDecimal cashBalance = BigDecimal.valueOf(10000.00); // Default starting balance
+
     @Column(nullable = false)
     private Instant createdAt = Instant.now();
 
@@ -28,14 +33,19 @@ public class Portfolio {
     public Portfolio(User user, String name) {
         this.user = user;
         this.name = name;
+        this.cashBalance = BigDecimal.valueOf(10000.00); // Start with $10k paper money
     }
 
+    // Getters
     public Long getId() { return id; }
     public User getUser() { return user; }
     public String getName() { return name; }
+    public BigDecimal getCashBalance() { return cashBalance; }
     public Instant getCreatedAt() { return createdAt; }
 
+    // Setters
     public void setUser(User user) { this.user = user; }
     public void setName(String name) { this.name = name; }
+    public void setCashBalance(BigDecimal cashBalance) { this.cashBalance = cashBalance; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 }
