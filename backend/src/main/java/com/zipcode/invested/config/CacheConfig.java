@@ -2,9 +2,12 @@ package com.zipcode.invested.config;
 
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
+import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import com.github.benmanes.caffeine.cache.Caffeine;
+
+import java.util.concurrent.TimeUnit;
 
 @Configuration
 @EnableCaching
@@ -12,10 +15,11 @@ public class CacheConfig {
     
     @Bean
     public CacheManager cacheManager() {
-        return new ConcurrentMapCacheManager(
-            "quotes",      // Cache for stock/crypto quotes
-            "search",      // Cache for symbol search results
-            "trending"     // Cache for trending quotes
-        );
+        CaffeineCacheManager cacheManager = new CaffeineCacheManager("quotes", "search", "trending");
+        cacheManager.setCaffeine(Caffeine.newBuilder()
+            .expireAfterWrite(1, TimeUnit.MINUTES)  // Cache expires after 1 minute
+            .maximumSize(1000)  // Max 1000 entries
+            .recordStats());  // Enable cache stats for monitoring
+        return cacheManager;
     }
 }

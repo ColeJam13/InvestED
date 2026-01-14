@@ -125,3 +125,40 @@
 .holdingChange.negative {
     color: var(--accent-red);
 }
+
+.loadingState {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.emptyState {
+    text-align: center;
+    padding: 2rem;
+}
+
+.emptyIcon {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+}
+
+.emptyState p {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.emptyHint {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.positive {
+    color: var(--accent-green);
+}
+
+.negative {
+    color: var(--accent-red);
+}

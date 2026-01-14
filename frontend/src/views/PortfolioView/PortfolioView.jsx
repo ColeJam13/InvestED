@@ -1,21 +1,12 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Briefcase, DollarSign, TrendingUp, TrendingDown, BarChart3, Search, AlertTriangle, Inbox } from 'lucide-react';
 import styles from './PortfolioView.module.css';
+import axios from 'axios';
 
 const PortfolioView = () => {
-    const [positions, setPositions] = useState([
-        { id: 1, symbol: 'AAPL', name: 'Apple Inc.', shares: 15, avgCost: 142.50, currentPrice: 178.25, type: 'stock', sector: 'Technology' },
-        { id: 2, symbol: 'GOOGL', name: 'Alphabet Inc.', shares: 8, avgCost: 125.00, currentPrice: 141.80, type: 'stock', sector: 'Technology' },
-        { id: 3, symbol: 'BTC', name: 'Bitcoin', shares: 0.5, avgCost: 42000, currentPrice: 67500, type: 'crypto', sector: 'Crypto' },
-        { id: 4, symbol: 'MSFT', name: 'Microsoft Corp.', shares: 12, avgCost: 310.00, currentPrice: 378.50, type: 'stock', sector: 'Technology' },
-        { id: 5, symbol: 'ETH', name: 'Ethereum', shares: 3.2, avgCost: 2200, currentPrice: 3450, type: 'crypto', sector: 'Crypto' },
-        { id: 6, symbol: 'AMZN', name: 'Amazon.com Inc.', shares: 10, avgCost: 145.00, currentPrice: 178.25, type: 'stock', sector: 'Consumer' },
-        { id: 7, symbol: 'TSLA', name: 'Tesla Inc.', shares: 20, avgCost: 195.00, currentPrice: 248.50, type: 'stock', sector: 'Automotive' },
-        { id: 8, symbol: 'JPM', name: 'JPMorgan Chase', shares: 25, avgCost: 148.00, currentPrice: 195.75, type: 'stock', sector: 'Financial' },
-        { id: 9, symbol: 'NVDA', name: 'NVIDIA Corp.', shares: 5, avgCost: 450.00, currentPrice: 875.30, type: 'stock', sector: 'Technology' },
-        { id: 10, symbol: 'SOL', name: 'Solana', shares: 50, avgCost: 85.00, currentPrice: 142.60, type: 'crypto', sector: 'Crypto' },
-    ]);
-
+    const [positions, setPositions] = useState([]);
+    const [portfolios, setPortfolios] = useState([]);
+    const [selectedPortfolioId, setSelectedPortfolioId] = useState('all');
     const [filter, setFilter] = useState('all');
     const [sortBy, setSortBy] = useState('value');
     const [sortOrder, setSortOrder] = useState('desc');
@@ -24,21 +15,50 @@ const PortfolioView = () => {
     const [selectedPosition, setSelectedPosition] = useState(null);
     const [sellAmount, setSellAmount] = useState('');
     const [showConfirmation, setShowConfirmation] = useState(false);
+    const [loading, setLoading] = useState(true);
+
+    const fetchData = useCallback(async () => {
+        console.log('Fetching portfolio data...', new Date().toLocaleTimeString());
+        setLoading(true);
+        try {
+            const [portfoliosRes, positionsRes] = await Promise.all([
+                axios.get('http://localhost:8080/api/portfolios/user/1'),
+                axios.get('http://localhost:8080/api/portfolios/user/1/all-positions')
+            ]);
+            
+            setPortfolios(portfoliosRes.data);
+            setPositions(positionsRes.data);
+            console.log('Portfolio data updated', positionsRes.data);
+        } catch (error) {
+            console.error('Error fetching portfolio data:', error);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchData();
+        const interval = setInterval(fetchData, 30000);
+        return () => clearInterval(interval);
+    }, [fetchData]);
 
     const calculateMetrics = (position) => {
-        const marketValue = position.shares * position.currentPrice;
-        const costBasis = position.shares * position.avgCost;
+        const marketValue = position.quantity * position.currentPrice;
+        const costBasis = position.quantity * position.averageBuyPrice;
         const gainLoss = marketValue - costBasis;
-        const gainLossPercent = ((position.currentPrice - position.avgCost) / position.avgCost) * 100;
+        const gainLossPercent = position.averageBuyPrice > 0 
+            ? ((position.currentPrice - position.averageBuyPrice) / position.averageBuyPrice) * 100 
+            : 0;
         return { marketValue, costBasis, gainLoss, gainLossPercent };
     };
 
     const filteredPositions = useMemo(() => {
         let result = positions.filter(p => {
-            const matchesFilter = filter === 'all' || p.type === filter || p.sector === filter;
-            const matchesSearch = p.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                  p.name.toLowerCase().includes(searchTerm.toLowerCase());
-            return matchesFilter && matchesSearch;
+            const matchesPortfolio = selectedPortfolioId === 'all' || p.portfolioId === parseInt(selectedPortfolioId);
+            const matchesFilter = filter === 'all' || p.assetType?.toLowerCase() === filter;
+            const matchesSearch = p.symbol?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                  p.name?.toLowerCase().includes(searchTerm.toLowerCase());
+            return matchesPortfolio && matchesFilter && matchesSearch;
         });
 
         result.sort((a, b) => {
@@ -48,7 +68,7 @@ const PortfolioView = () => {
             let comparison = 0;
             switch (sortBy) {
                 case 'symbol':
-                    comparison = a.symbol.localeCompare(b.symbol);
+                    comparison = (a.symbol || '').localeCompare(b.symbol || '');
                     break;
                 case 'value':
                     comparison = metricsA.marketValue - metricsB.marketValue;
@@ -60,7 +80,7 @@ const PortfolioView = () => {
                     comparison = metricsA.gainLossPercent - metricsB.gainLossPercent;
                     break;
                 case 'shares':
-                    comparison = a.shares - b.shares;
+                    comparison = a.quantity - b.quantity;
                     break;
                 default:
                     comparison = metricsA.marketValue - metricsB.marketValue;
@@ -69,19 +89,25 @@ const PortfolioView = () => {
         });
 
         return result;
-    }, [positions, filter, sortBy, sortOrder, searchTerm]);
+    }, [positions, selectedPortfolioId, filter, sortBy, sortOrder, searchTerm]);
 
     const portfolioTotals = useMemo(() => {
-        return positions.reduce((acc, p) => {
+        const positionsToSum = selectedPortfolioId === 'all' 
+            ? positions 
+            : positions.filter(p => p.portfolioId === parseInt(selectedPortfolioId));
+            
+        return positionsToSum.reduce((acc, p) => {
             const metrics = calculateMetrics(p);
             acc.totalValue += metrics.marketValue;
             acc.totalCost += metrics.costBasis;
             acc.totalGainLoss += metrics.gainLoss;
             return acc;
         }, { totalValue: 0, totalCost: 0, totalGainLoss: 0 });
-    }, [positions]);
+    }, [positions, selectedPortfolioId]);
 
-    const totalGainLossPercent = ((portfolioTotals.totalValue - portfolioTotals.totalCost) / portfolioTotals.totalCost) * 100;
+    const totalGainLossPercent = portfolioTotals.totalCost > 0 
+        ? ((portfolioTotals.totalValue - portfolioTotals.totalCost) / portfolioTotals.totalCost) * 100 
+        : 0;
 
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat('en-US', {
@@ -122,19 +148,19 @@ const PortfolioView = () => {
         setShowConfirmation(true);
     };
 
-    const confirmSell = () => {
+    const confirmSell = async () => {
         const sharesToSell = parseFloat(sellAmount);
-        if (sharesToSell > 0 && sharesToSell <= selectedPosition.shares) {
-            setPositions(prev => prev.map(p => {
-                if (p.id === selectedPosition.id) {
-                    const newShares = p.shares - sharesToSell;
-                    if (newShares <= 0) {
-                        return null;
-                    }
-                    return { ...p, shares: newShares };
-                }
-                return p;
-            }).filter(Boolean));
+        if (sharesToSell > 0 && sharesToSell <= selectedPosition.quantity) {
+            try {
+                await axios.post(`http://localhost:8080/api/portfolios/${selectedPosition.portfolioId}/sell`, {
+                    symbol: selectedPosition.symbol,
+                    quantity: sharesToSell,
+                    price: selectedPosition.currentPrice
+                });
+                fetchData();
+            } catch (error) {
+                console.error('Error selling position:', error);
+            }
         }
         setShowSellModal(false);
         setSelectedPosition(null);
@@ -147,7 +173,18 @@ const PortfolioView = () => {
         return sortOrder === 'asc' ? '↑' : '↓';
     };
 
-    const sectors = [...new Set(positions.map(p => p.sector))];
+    const assetTypes = [...new Set(positions.map(p => p.assetType).filter(Boolean))];
+
+    if (loading && positions.length === 0) {
+        return (
+            <div className={styles.container}>
+                <div className={styles.header}>
+                    <h1 className={styles.title}>Portfolio</h1>
+                    <p className={styles.subtitle}>Loading your positions...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className={styles.container}>
@@ -156,6 +193,18 @@ const PortfolioView = () => {
                     <h1 className={styles.title}>Portfolio</h1>
                     <p className={styles.subtitle}>Manage your investment positions</p>
                 </div>
+                {portfolios.length > 0 && (
+                    <select 
+                        className={styles.portfolioSelect}
+                        value={selectedPortfolioId}
+                        onChange={(e) => setSelectedPortfolioId(e.target.value)}
+                    >
+                        <option value="all">All Portfolios</option>
+                        {portfolios.map(p => (
+                            <option key={p.id} value={p.id}>{p.name}</option>
+                        ))}
+                    </select>
+                )}
             </div>
 
             <div className={styles.summaryCards}>
@@ -214,25 +263,13 @@ const PortfolioView = () => {
                     >
                         All
                     </button>
-                    <button
-                        className={`${styles.filterBtn} ${filter === 'stock' ? styles.active : ''}`}
-                        onClick={() => setFilter('stock')}
-                    >
-                        Stocks
-                    </button>
-                    <button
-                        className={`${styles.filterBtn} ${filter === 'crypto' ? styles.active : ''}`}
-                        onClick={() => setFilter('crypto')}
-                    >
-                        Crypto
-                    </button>
-                    {sectors.map(sector => (
+                    {assetTypes.map(type => (
                         <button
-                            key={sector}
-                            className={`${styles.filterBtn} ${filter === sector ? styles.active : ''}`}
-                            onClick={() => setFilter(sector)}
+                            key={type}
+                            className={`${styles.filterBtn} ${filter === type.toLowerCase() ? styles.active : ''}`}
+                            onClick={() => setFilter(type.toLowerCase())}
                         >
-                            {sector}
+                            {type}
                         </button>
                     ))}
                 </div>
@@ -275,8 +312,8 @@ const PortfolioView = () => {
                                             <span className={styles.assetName}>{position.name}</span>
                                         </div>
                                     </td>
-                                    <td>{formatShares(position.shares)}</td>
-                                    <td>{formatCurrency(position.avgCost)}</td>
+                                    <td>{formatShares(position.quantity)}</td>
+                                    <td>{formatCurrency(position.averageBuyPrice)}</td>
                                     <td>{formatCurrency(position.currentPrice)}</td>
                                     <td className={styles.valueCell}>{formatCurrency(metrics.marketValue)}</td>
                                     <td>
@@ -304,7 +341,7 @@ const PortfolioView = () => {
                 </table>
             </div>
 
-            {filteredPositions.length === 0 && (
+            {filteredPositions.length === 0 && !loading && (
                 <div className={styles.emptyState}>
                     <Inbox size={64} className={styles.emptyIcon} />
                     <h3>No positions found</h3>
@@ -326,7 +363,7 @@ const PortfolioView = () => {
                                     <div className={styles.positionInfo}>
                                         <div className={styles.infoRow}>
                                             <span>Current Holdings</span>
-                                            <span>{formatShares(selectedPosition.shares)} shares</span>
+                                            <span>{formatShares(selectedPosition.quantity)} shares</span>
                                         </div>
                                         <div className={styles.infoRow}>
                                             <span>Current Price</span>
@@ -334,7 +371,7 @@ const PortfolioView = () => {
                                         </div>
                                         <div className={styles.infoRow}>
                                             <span>Market Value</span>
-                                            <span>{formatCurrency(selectedPosition.shares * selectedPosition.currentPrice)}</span>
+                                            <span>{formatCurrency(selectedPosition.quantity * selectedPosition.currentPrice)}</span>
                                         </div>
                                     </div>
 
@@ -347,13 +384,13 @@ const PortfolioView = () => {
                                             placeholder="0.00"
                                             step="0.0001"
                                             min="0.0001"
-                                            max={selectedPosition.shares}
+                                            max={selectedPosition.quantity}
                                             required
                                         />
                                         <button
                                             type="button"
                                             className={styles.maxBtn}
-                                            onClick={() => setSellAmount(selectedPosition.shares.toString())}
+                                            onClick={() => setSellAmount(selectedPosition.quantity.toString())}
                                         >
                                             MAX
                                         </button>

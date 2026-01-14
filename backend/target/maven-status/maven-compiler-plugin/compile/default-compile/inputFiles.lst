@@ -4,6 +4,7 @@
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/asset/Asset.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/asset/AssetRepository.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/config/CacheConfig.java
+/Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/config/DataInitializer.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/config/FinnhubConfig.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/config/TwelveDataConfig.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/controller/AIConversationController.java
@@ -14,6 +15,7 @@
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/controller/PortfolioSnapshotController.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/controller/RiskProfileController.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/controller/UserController.java
+/Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/dto/BuyRequest.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/portfolio/Portfolio.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/portfolio/PortfolioRepository.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/position/PortfolioPosition.java
@@ -27,9 +29,12 @@
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/service/PortfolioService.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/service/PortfolioSnapshotService.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/service/RiskProfileService.java
+/Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/service/TransactionService.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/service/TwelveDataService.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/service/UserService.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/snapshot/PortfolioSnapshot.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/snapshot/PortfolioSnapshotRepository.java
+/Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/transaction/Transaction.java
+/Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/transaction/TransactionRepository.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/user/User.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/user/UserRepository.java

@@ -178,3 +178,11 @@
         flex-wrap: wrap;
     }
 }
+
+.positive {
+    color: var(--accent-green);
+}
+
+.negative {
+    color: var(--accent-red);
+}
