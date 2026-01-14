@@ -1079,3 +1079,17 @@
         font-size: 0.85rem;
     }
 }
+
+/* Fix style option icons for dark mode */
+.styleOptionIcon {
+    color: var(--style-color, var(--text-primary));
+}
+
+:global(body.dark-mode) .styleOptionIcon {
+    color: var(--style-color, #FFFFFF);
+}
+
+.styleOption:hover .styleOptionIcon,
+.styleOption.selected .styleOptionIcon {
+    color: var(--style-color);
+}
