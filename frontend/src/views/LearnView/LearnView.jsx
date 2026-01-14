@@ -24,6 +24,7 @@ const LearnView = () => {
             difficulty: 'Beginner',
             icon: BookOpen,
             completed: true,
+            progress: 100,
         },
         {
             id: 2,
@@ -34,6 +35,7 @@ const LearnView = () => {
             difficulty: 'Beginner',
             icon: TrendingUp,
             completed: true,
+            progress: 100,
         },
         {
             id: 3,
@@ -44,6 +46,7 @@ const LearnView = () => {
             difficulty: 'Intermediate',
             icon: Search,
             completed: false,
+            progress: 45,
         },
         {
             id: 4,
@@ -54,6 +57,7 @@ const LearnView = () => {
             difficulty: 'Intermediate',
             icon: DollarSign,
             completed: false,
+            progress: 0,
         },
         {
             id: 5,
@@ -64,6 +68,7 @@ const LearnView = () => {
             difficulty: 'Beginner',
             icon: Coins,
             completed: false,
+            progress: 0,
         },
         {
             id: 6,
@@ -74,6 +79,7 @@ const LearnView = () => {
             difficulty: 'Intermediate',
             icon: BarChart3,
             completed: false,
+            progress: 0,
         },
         {
             id: 7,
@@ -84,6 +90,7 @@ const LearnView = () => {
             difficulty: 'Advanced',
             icon: AlertTriangle,
             completed: false,
+            progress: 0,
         },
         {
             id: 8,
@@ -94,6 +101,7 @@ const LearnView = () => {
             difficulty: 'Beginner',
             icon: Target,
             completed: true,
+            progress: 100,
         },
         {
             id: 9,
@@ -104,6 +112,7 @@ const LearnView = () => {
             difficulty: 'Intermediate',
             icon: Calendar,
             completed: false,
+            progress: 0,
         },
         {
             id: 10,
@@ -114,6 +123,7 @@ const LearnView = () => {
             difficulty: 'Advanced',
             icon: Scale,
             completed: false,
+            progress: 0,
         },
     ];
 
@@ -127,55 +137,66 @@ const LearnView = () => {
     const completedCount = lessons.filter(l => l.completed).length;
     const progressPercent = Math.round((completedCount / lessons.length) * 100);
 
-    const featuredLesson = lessons.find(l => !l.completed) || lessons[0];
+    const featuredLesson = lessons.find(l => !l.completed && l.progress > 0) || lessons.find(l => !l.completed) || lessons[0];
+
+    const getDifficultyClass = (difficulty) => {
+        switch (difficulty.toLowerCase()) {
+            case 'beginner': return styles.beginner;
+            case 'intermediate': return styles.intermediate;
+            case 'advanced': return styles.advanced;
+            default: return styles.beginner;
+        }
+    };
 
     return (
-        <div className={styles.container}>
+        <div className={styles.learnContainer}>
+            {/* Header */}
             <div className={styles.header}>
-                <h1 className={styles.title}>Learn</h1>
-                <p className={styles.subtitle}>Master investing with bite-sized lessons</p>
-            </div>
-
-            {/* Progress Card */}
-            <div className={styles.progressCard}>
-                <div className={styles.progressInfo}>
-                    <h3>Your Progress</h3>
-                    <p>{completedCount} of {lessons.length} lessons completed</p>
+                <div className={styles.headerContent}>
+                    <h1 className={styles.title}>Learn</h1>
+                    <p className={styles.subtitle}>Master investing with bite-sized lessons</p>
                 </div>
-                <div className={styles.progressBarContainer}>
-                    <div className={styles.progressBar}>
-                        <div 
-                            className={styles.progressFill} 
-                            style={{ width: `${progressPercent}%` }}
-                        ></div>
+                <div className={styles.stats}>
+                    <div className={styles.statItem}>
+                        <span className={styles.statValue}>{completedCount}</span>
+                        <span className={styles.statLabel}>Completed</span>
                     </div>
-                    <span className={styles.progressPercent}>{progressPercent}%</span>
+                    <div className={styles.statItem}>
+                        <span className={styles.statValue}>{progressPercent}%</span>
+                        <span className={styles.statLabel}>Progress</span>
+                    </div>
                 </div>
             </div>
 
             {/* Featured Lesson */}
             <div className={styles.featuredSection}>
-                <h2 className={styles.sectionTitle}>Continue Learning</h2>
                 <div className={styles.featuredCard}>
                     <div className={styles.featuredIcon}>
-                        <featuredLesson.icon size={32} />
+                        <featuredLesson.icon size={48} />
                     </div>
                     <div className={styles.featuredContent}>
-                        <span className={styles.featuredBadge}>{featuredLesson.difficulty}</span>
-                        <h3>{featuredLesson.title}</h3>
-                        <p>{featuredLesson.description}</p>
+                        <span className={styles.featuredLabel}>CONTINUE LEARNING</span>
+                        <h2 className={styles.featuredTitle}>{featuredLesson.title}</h2>
+                        <p className={styles.featuredDescription}>{featuredLesson.description}</p>
                         <div className={styles.featuredMeta}>
-                            <span className={styles.duration}><Clock size={14} /> {featuredLesson.duration}</span>
-                            <button className={styles.startBtn}>
-                                Start Lesson <ChevronRight size={18} />
-                            </button>
+                            <span className={styles.duration}>
+                                <Clock size={14} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+                                {featuredLesson.duration}
+                            </span>
+                            <span className={`${styles.difficulty} ${getDifficultyClass(featuredLesson.difficulty)}`}>
+                                {featuredLesson.difficulty}
+                            </span>
                         </div>
                     </div>
+                    <button className={styles.startButton}>
+                        {featuredLesson.progress > 0 ? 'Continue' : 'Start'} Lesson
+                        <ChevronRight size={18} style={{ marginLeft: '4px', verticalAlign: 'middle' }} />
+                    </button>
                 </div>
             </div>
 
-            {/* Categories */}
-            <div className={styles.categories}>
+            {/* Category Filters */}
+            <div className={styles.categoryFilters}>
                 {categories.map(cat => (
                     <button
                         key={cat.id}
@@ -187,51 +208,59 @@ const LearnView = () => {
                 ))}
             </div>
 
-            {/* Search */}
-            <div className={styles.searchBox}>
-                <Search size={18} className={styles.searchIcon} />
-                <input
-                    type="text"
-                    placeholder="Search lessons..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className={styles.searchInput}
-                />
-            </div>
-
             {/* Lessons Grid */}
             <div className={styles.lessonsGrid}>
                 {filteredLessons.map(lesson => {
                     const IconComponent = lesson.icon;
                     return (
-                        <div key={lesson.id} className={`${styles.lessonCard} ${lesson.completed ? styles.completed : ''}`}>
+                        <div key={lesson.id} className={styles.lessonCard}>
                             <div className={styles.lessonHeader}>
                                 <div className={styles.lessonIcon}>
-                                    <IconComponent size={24} />
+                                    <IconComponent size={32} />
                                 </div>
                                 {lesson.completed && (
-                                    <CheckCircle size={20} className={styles.completedIcon} />
+                                    <div className={styles.completedBadge}>
+                                        <CheckCircle size={16} />
+                                    </div>
                                 )}
                             </div>
                             <h3 className={styles.lessonTitle}>{lesson.title}</h3>
                             <p className={styles.lessonDescription}>{lesson.description}</p>
                             <div className={styles.lessonMeta}>
-                                <span className={styles.duration}><Clock size={14} /> {lesson.duration}</span>
-                                <span className={styles.difficulty}>{lesson.difficulty}</span>
+                                <span className={styles.duration}>
+                                    <Clock size={14} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+                                    {lesson.duration}
+                                </span>
+                                <span className={`${styles.difficulty} ${getDifficultyClass(lesson.difficulty)}`}>
+                                    {lesson.difficulty}
+                                </span>
                             </div>
+                            {lesson.progress > 0 && lesson.progress < 100 && (
+                                <div className={styles.progressBar}>
+                                    <div 
+                                        className={styles.progressFill} 
+                                        style={{ width: `${lesson.progress}%` }}
+                                    />
+                                </div>
+                            )}
+                            <button className={styles.lessonButton}>
+                                {lesson.completed ? 'Review' : lesson.progress > 0 ? 'Continue' : 'Start'}
+                            </button>
                         </div>
                     );
                 })}
             </div>
 
-            {/* AI Mentor Card */}
-            <div className={styles.mentorCard}>
-                <div className={styles.mentorIcon}><Bot size={32} /></div>
+            {/* AI Mentor Promo */}
+            <div className={styles.mentorPromo}>
+                <div className={styles.mentorIcon}>
+                    <Bot size={40} />
+                </div>
                 <div className={styles.mentorContent}>
                     <h3>Need Help?</h3>
-                    <p>Ask our AI advisor any investing questions</p>
+                    <p>Ask our AI advisor any investing questions you have while learning.</p>
                 </div>
-                <button className={styles.askBtn}>Ask Now</button>
+                <button className={styles.mentorButton}>Ask AI Advisor</button>
             </div>
         </div>
     );
