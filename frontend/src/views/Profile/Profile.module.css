@@ -348,3 +348,14 @@
 .settingIcon {
     flex-shrink: 0;
 }
+
+/* Fix settings icon spacing */
+.settingContent {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.settingIcon {
+    flex-shrink: 0;
+}

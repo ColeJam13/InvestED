@@ -3,7 +3,7 @@ import ThemeToggle from '../ThemeToggle';
 import { marketService } from '../../services/marketService';
 import styles from './Header.module.css';
 
-const Header = () => {
+const Header = ({ onNavigate }) => {
     const [marketData, setMarketData] = useState([
         { symbol: 'BTC', price: '$69,420', change: '+1.9%', positive: true },
         { symbol: 'AAPL', price: '$185.34', change: '+1.2%', positive: true },
@@ -15,14 +15,12 @@ const Header = () => {
         { symbol: 'ETH', price: '$2,450', change: '+3.2%', positive: true },
     ]);
 
-    // Optional: Fetch real market data
     useEffect(() => {
         const fetchMarketData = async () => {
             try {
                 const symbols = ['AAPL', 'GOOGL', 'TSLA', 'META', 'NVDA', 'AMZN'];
                 const promises = symbols.map(symbol => marketService.getAssetQuote(symbol));
                 const results = await Promise.all(promises);
-                
                 const formattedData = results
                     .filter(quote => quote && quote.close)
                     .map(quote => ({
@@ -31,24 +29,25 @@ const Header = () => {
                         change: `${parseFloat(quote.percent_change) >= 0 ? '+' : ''}${parseFloat(quote.percent_change).toFixed(2)}%`,
                         positive: parseFloat(quote.percent_change) >= 0
                     }));
-                
                 if (formattedData.length > 0) {
                     setMarketData(formattedData);
                 }
             } catch (error) {
                 console.error('Failed to fetch market data:', error);
-                // Keep default data on error
             }
         };
-
         fetchMarketData();
-        // Refresh every 60 seconds
         const interval = setInterval(fetchMarketData, 60000);
         return () => clearInterval(interval);
     }, []);
 
-    // Duplicate the data for seamless marquee loop
     const duplicatedData = [...marketData, ...marketData];
+
+    const handleAvatarClick = () => {
+        if (onNavigate) {
+            onNavigate('profile');
+        }
+    };
 
     return (
         <header className={styles.header}>
@@ -59,8 +58,8 @@ const Header = () => {
                     <div className={styles.marqueeContainer}>
                         <div className={styles.marquee}>
                             {duplicatedData.map((item, index) => (
-                                <div 
-                                    key={index} 
+                                <div
+                                    key={index}
                                     className={`${styles.tickerItem} ${item.positive ? styles.positive : styles.negative}`}
                                 >
                                     <span className={styles.tickerSymbol}>{item.symbol}</span>
@@ -75,7 +74,9 @@ const Header = () => {
             <div className={styles.headerRight}>
                 <span className={styles.welcomeText}>Welcome back, Jordan!</span>
                 <ThemeToggle />
-                <div className={styles.avatar}>JM</div>
+                <button className={styles.avatarButton} onClick={handleAvatarClick}>
+                    <div className={styles.avatar}>JM</div>
+                </button>
             </div>
         </header>
     );
