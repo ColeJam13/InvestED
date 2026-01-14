@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { BarChart3, TrendingUp, Info } from 'lucide-react';
 import styles from './HoldingsList.module.css';
 import axios from 'axios';
 
@@ -48,7 +49,6 @@ const HoldingsList = () => {
     };
 
     const getAssetColor = (symbol) => {
-        // Color mapping for common assets
         const colors = {
             'AAPL': '#FF6B6B',
             'BTC': '#F7931A',
@@ -60,7 +60,7 @@ const HoldingsList = () => {
             'META': '#0668E1',
             'NVDA': '#76B900',
         };
-        return colors[symbol] || '#80C4B7'; // Default teal
+        return colors[symbol] || '#80C4B7';
     };
 
     if (loading) {
@@ -68,7 +68,7 @@ const HoldingsList = () => {
             <div className={styles.section}>
                 <div className={styles.sectionHeader}>
                     <div className={styles.sectionTitle}>
-                        <span className={styles.icon}>📊</span>
+                        <BarChart3 size={20} className={styles.icon} />
                         Your Holdings
                     </div>
                 </div>
@@ -84,13 +84,13 @@ const HoldingsList = () => {
             <div className={styles.section}>
                 <div className={styles.sectionHeader}>
                     <div className={styles.sectionTitle}>
-                        <span className={styles.icon}>📊</span>
+                        <BarChart3 size={20} className={styles.icon} />
                         Your Holdings (0)
                     </div>
                 </div>
                 <div className={styles.holdingsCard}>
                     <div className={styles.emptyState}>
-                        <div className={styles.emptyIcon}>📈</div>
+                        <TrendingUp size={48} className={styles.emptyIcon} />
                         <p>No holdings yet</p>
                         <span className={styles.emptyHint}>Buy your first asset to get started!</span>
                     </div>
@@ -103,13 +103,13 @@ const HoldingsList = () => {
         <div className={styles.section}>
             <div className={styles.sectionHeader}>
                 <div className={styles.sectionTitle}>
-                    <span className={styles.icon}>📊</span>
+                    <BarChart3 size={20} className={styles.icon} />
                     Your Holdings ({holdings.length})
-                    <span className={styles.infoIcon}>ℹ</span>
+                    <Info size={16} className={styles.infoIcon} />
                 </div>
                 <a href="#" className={styles.viewAll}>View All →</a>
             </div>
-            
+
             <div className={styles.holdingsCard}>
                 <div className={styles.holdingsList}>
                     {holdings.map((holding) => {
@@ -124,7 +124,7 @@ const HoldingsList = () => {
                         return (
                             <div key={holding.id} className={styles.holdingItem}>
                                 <div className={styles.holdingLeft}>
-                                    <div 
+                                    <div
                                         className={styles.holdingIcon}
                                         style={{ backgroundColor: getAssetColor(holding.symbol) }}
                                     >

@@ -1,319 +1,237 @@
 import { useState } from 'react';
+import { BookOpen, TrendingUp, Search, DollarSign, Coins, BarChart3, AlertTriangle, Target, Calendar, Scale, Clock, Bot, ChevronRight, CheckCircle } from 'lucide-react';
 import styles from './LearnView.module.css';
 
 const LearnView = () => {
-    const [activeCategory, setActiveCategory] = useState('all');
-    const [expandedLesson, setExpandedLesson] = useState(null);
+    const [selectedCategory, setSelectedCategory] = useState('all');
+    const [searchTerm, setSearchTerm] = useState('');
 
     const categories = [
-        { id: 'all', label: 'All Topics' },
-        { id: 'basics', label: 'Investing Basics' },
-        { id: 'stocks', label: 'Stocks' },
-        { id: 'crypto', label: 'Crypto' },
-        { id: 'risk', label: 'Risk Management' },
-        { id: 'strategies', label: 'Strategies' },
+        { id: 'all', name: 'All Lessons' },
+        { id: 'basics', name: 'Basics' },
+        { id: 'stocks', name: 'Stocks' },
+        { id: 'crypto', name: 'Crypto' },
+        { id: 'strategy', name: 'Strategy' },
     ];
 
-    const featuredLesson = {
-        id: 'featured',
-        title: 'Welcome to InvestED',
-        description: 'Learn how to use the platform and start your investment education journey risk-free with paper money.',
-        duration: '5 min',
-        difficulty: 'Beginner',
-        category: 'basics',
-        icon: '🎓',
-        progress: 0,
-    };
-
     const lessons = [
-        // Investing Basics
         {
             id: 1,
-            title: 'What is Investing?',
-            description: 'Understand the fundamentals of investing and why it matters for building wealth over time.',
+            title: 'Introduction to Investing',
+            description: 'Learn the fundamentals of investing and why it matters for your financial future.',
+            category: 'basics',
             duration: '10 min',
             difficulty: 'Beginner',
-            category: 'basics',
-            icon: '📚',
-            progress: 100,
+            icon: BookOpen,
+            completed: true,
         },
         {
             id: 2,
-            title: 'Understanding Market Basics',
-            description: 'Learn how financial markets work, including exchanges, trading hours, and market participants.',
+            title: 'Understanding Stock Markets',
+            description: 'Discover how stock markets work and how to read market indicators.',
+            category: 'stocks',
             duration: '15 min',
             difficulty: 'Beginner',
-            category: 'basics',
-            icon: '🏛️',
-            progress: 60,
+            icon: TrendingUp,
+            completed: true,
         },
         {
             id: 3,
-            title: 'Paper Trading vs Real Trading',
-            description: 'Discover the benefits of practicing with simulated money before investing real funds.',
-            duration: '8 min',
-            difficulty: 'Beginner',
-            category: 'basics',
-            icon: '📝',
-            progress: 0,
+            title: 'Technical Analysis Basics',
+            description: 'Learn to read charts and identify patterns in stock movements.',
+            category: 'stocks',
+            duration: '20 min',
+            difficulty: 'Intermediate',
+            icon: Search,
+            completed: false,
         },
-        // Stocks
         {
             id: 4,
-            title: 'Stocks 101',
-            description: 'Learn what stocks are, how they work, and why companies issue shares to the public.',
+            title: 'Dividend Investing',
+            description: 'Build passive income through dividend-paying stocks.',
+            category: 'strategy',
             duration: '12 min',
-            difficulty: 'Beginner',
-            category: 'stocks',
-            icon: '📈',
-            progress: 0,
+            difficulty: 'Intermediate',
+            icon: DollarSign,
+            completed: false,
         },
         {
             id: 5,
-            title: 'Reading Stock Quotes',
-            description: 'Understand price, volume, market cap, P/E ratio, and other key metrics when evaluating stocks.',
-            duration: '15 min',
+            title: 'Cryptocurrency Fundamentals',
+            description: 'Understand blockchain technology and major cryptocurrencies.',
+            category: 'crypto',
+            duration: '18 min',
             difficulty: 'Beginner',
-            category: 'stocks',
-            icon: '🔍',
-            progress: 0,
+            icon: Coins,
+            completed: false,
         },
         {
             id: 6,
-            title: 'Dividends Explained',
-            description: 'Learn how dividend-paying stocks work and how to evaluate dividend yield and payout ratios.',
-            duration: '10 min',
+            title: 'Portfolio Diversification',
+            description: 'Learn how to spread risk across different asset classes.',
+            category: 'strategy',
+            duration: '14 min',
             difficulty: 'Intermediate',
-            category: 'stocks',
-            icon: '💰',
-            progress: 0,
+            icon: BarChart3,
+            completed: false,
         },
-        // Crypto
         {
             id: 7,
-            title: 'Crypto 101',
-            description: 'Understand blockchain technology, cryptocurrencies, and how digital assets differ from traditional investments.',
-            duration: '15 min',
-            difficulty: 'Beginner',
-            category: 'crypto',
-            icon: '₿',
-            progress: 0,
+            title: 'Risk Management',
+            description: 'Protect your investments with proper risk management strategies.',
+            category: 'strategy',
+            duration: '16 min',
+            difficulty: 'Advanced',
+            icon: AlertTriangle,
+            completed: false,
         },
         {
             id: 8,
-            title: 'Bitcoin vs Altcoins',
-            description: 'Learn the differences between Bitcoin and alternative cryptocurrencies like Ethereum.',
-            duration: '12 min',
-            difficulty: 'Intermediate',
-            category: 'crypto',
-            icon: '🪙',
-            progress: 0,
+            title: 'Setting Investment Goals',
+            description: 'Create clear financial goals and a roadmap to achieve them.',
+            category: 'basics',
+            duration: '8 min',
+            difficulty: 'Beginner',
+            icon: Target,
+            completed: true,
         },
         {
             id: 9,
-            title: 'Crypto Volatility',
-            description: 'Understand why crypto markets are more volatile and how to manage expectations.',
-            duration: '10 min',
+            title: 'Retirement Planning',
+            description: 'Plan for your future with smart retirement investment strategies.',
+            category: 'strategy',
+            duration: '20 min',
             difficulty: 'Intermediate',
-            category: 'crypto',
-            icon: '📊',
-            progress: 0,
+            icon: Calendar,
+            completed: false,
         },
-        // Risk Management
         {
             id: 10,
-            title: 'Understanding Risk',
-            description: 'Learn about different types of investment risk including market risk, volatility, and liquidity risk.',
-            duration: '12 min',
-            difficulty: 'Beginner',
-            category: 'risk',
-            icon: '⚠️',
-            progress: 0,
-        },
-        {
-            id: 11,
-            title: 'Alpha & Beta Explained',
-            description: 'Understand risk metrics like Alpha and Beta and how to use them to match your risk tolerance.',
-            duration: '15 min',
-            difficulty: 'Intermediate',
-            category: 'risk',
-            icon: '📐',
-            progress: 0,
-        },
-        {
-            id: 12,
-            title: 'Diversification Strategies',
-            description: 'Learn why "don\'t put all eggs in one basket" matters and how to build a diversified portfolio.',
-            duration: '12 min',
-            difficulty: 'Intermediate',
-            category: 'risk',
-            icon: '🥚',
-            progress: 0,
-        },
-        // Strategies
-        {
-            id: 13,
-            title: 'Goal-Based Investing',
-            description: 'Learn how to align your investments with specific goals like saving for a house or retirement.',
-            duration: '10 min',
-            difficulty: 'Beginner',
-            category: 'strategies',
-            icon: '🎯',
-            progress: 0,
-        },
-        {
-            id: 14,
-            title: 'Dollar-Cost Averaging',
-            description: 'Understand this popular strategy of investing fixed amounts at regular intervals.',
-            duration: '8 min',
-            difficulty: 'Beginner',
-            category: 'strategies',
-            icon: '📅',
-            progress: 0,
-        },
-        {
-            id: 15,
-            title: 'Common Beginner Mistakes',
-            description: 'Learn about emotional decision-making, timing the market, and other pitfalls to avoid.',
-            duration: '12 min',
-            difficulty: 'Beginner',
-            category: 'strategies',
-            icon: '🚫',
-            progress: 0,
-        },
-        {
-            id: 16,
-            title: 'Value vs Growth Investing',
-            description: 'Explore different investment philosophies from Warren Buffett to Peter Lynch.',
+            title: 'Tax-Efficient Investing',
+            description: 'Minimize taxes and maximize returns with smart strategies.',
+            category: 'strategy',
             duration: '15 min',
             difficulty: 'Advanced',
-            category: 'strategies',
-            icon: '⚖️',
-            progress: 0,
+            icon: Scale,
+            completed: false,
         },
     ];
 
-    const filteredLessons = activeCategory === 'all' 
-        ? lessons 
-        : lessons.filter(lesson => lesson.category === activeCategory);
+    const filteredLessons = lessons.filter(lesson => {
+        const matchesCategory = selectedCategory === 'all' || lesson.category === selectedCategory;
+        const matchesSearch = lesson.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                             lesson.description.toLowerCase().includes(searchTerm.toLowerCase());
+        return matchesCategory && matchesSearch;
+    });
 
-    const completedCount = lessons.filter(l => l.progress === 100).length;
-    const inProgressCount = lessons.filter(l => l.progress > 0 && l.progress < 100).length;
+    const completedCount = lessons.filter(l => l.completed).length;
+    const progressPercent = Math.round((completedCount / lessons.length) * 100);
 
-    const getDifficultyColor = (difficulty) => {
-        switch (difficulty) {
-            case 'Beginner': return styles.beginner;
-            case 'Intermediate': return styles.intermediate;
-            case 'Advanced': return styles.advanced;
-            default: return '';
-        }
-    };
+    const featuredLesson = lessons.find(l => !l.completed) || lessons[0];
 
     return (
-        <div className={styles.learnContainer}>
-            {/* Header */}
+        <div className={styles.container}>
             <div className={styles.header}>
-                <div className={styles.headerContent}>
-                    <h1 className={styles.title}>Learn</h1>
-                    <p className={styles.subtitle}>
-                        Build your investment knowledge risk-free
-                    </p>
+                <h1 className={styles.title}>Learn</h1>
+                <p className={styles.subtitle}>Master investing with bite-sized lessons</p>
+            </div>
+
+            {/* Progress Card */}
+            <div className={styles.progressCard}>
+                <div className={styles.progressInfo}>
+                    <h3>Your Progress</h3>
+                    <p>{completedCount} of {lessons.length} lessons completed</p>
                 </div>
-                <div className={styles.stats}>
-                    <div className={styles.statItem}>
-                        <span className={styles.statValue}>{completedCount}</span>
-                        <span className={styles.statLabel}>Completed</span>
+                <div className={styles.progressBarContainer}>
+                    <div className={styles.progressBar}>
+                        <div 
+                            className={styles.progressFill} 
+                            style={{ width: `${progressPercent}%` }}
+                        ></div>
                     </div>
-                    <div className={styles.statItem}>
-                        <span className={styles.statValue}>{inProgressCount}</span>
-                        <span className={styles.statLabel}>In Progress</span>
-                    </div>
-                    <div className={styles.statItem}>
-                        <span className={styles.statValue}>{lessons.length}</span>
-                        <span className={styles.statLabel}>Total Lessons</span>
-                    </div>
+                    <span className={styles.progressPercent}>{progressPercent}%</span>
                 </div>
             </div>
 
             {/* Featured Lesson */}
             <div className={styles.featuredSection}>
+                <h2 className={styles.sectionTitle}>Continue Learning</h2>
                 <div className={styles.featuredCard}>
-                    <div className={styles.featuredIcon}>{featuredLesson.icon}</div>
+                    <div className={styles.featuredIcon}>
+                        <featuredLesson.icon size={32} />
+                    </div>
                     <div className={styles.featuredContent}>
-                        <span className={styles.featuredLabel}>CONTINUE LEARNING</span>
-                        <h2 className={styles.featuredTitle}>{featuredLesson.title}</h2>
-                        <p className={styles.featuredDescription}>{featuredLesson.description}</p>
+                        <span className={styles.featuredBadge}>{featuredLesson.difficulty}</span>
+                        <h3>{featuredLesson.title}</h3>
+                        <p>{featuredLesson.description}</p>
                         <div className={styles.featuredMeta}>
-                            <span className={styles.duration}>⏱️ {featuredLesson.duration}</span>
-                            <span className={`${styles.difficulty} ${getDifficultyColor(featuredLesson.difficulty)}`}>
-                                {featuredLesson.difficulty}
-                            </span>
+                            <span className={styles.duration}><Clock size={14} /> {featuredLesson.duration}</span>
+                            <button className={styles.startBtn}>
+                                Start Lesson <ChevronRight size={18} />
+                            </button>
                         </div>
                     </div>
-                    <button className={styles.startButton}>
-                        Start Learning →
-                    </button>
                 </div>
             </div>
 
-            {/* Category Filters */}
-            <div className={styles.categoryFilters}>
-                {categories.map((category) => (
+            {/* Categories */}
+            <div className={styles.categories}>
+                {categories.map(cat => (
                     <button
-                        key={category.id}
-                        className={`${styles.categoryBtn} ${activeCategory === category.id ? styles.active : ''}`}
-                        onClick={() => setActiveCategory(category.id)}
+                        key={cat.id}
+                        className={`${styles.categoryBtn} ${selectedCategory === cat.id ? styles.active : ''}`}
+                        onClick={() => setSelectedCategory(cat.id)}
                     >
-                        {category.label}
+                        {cat.name}
                     </button>
                 ))}
+            </div>
+
+            {/* Search */}
+            <div className={styles.searchBox}>
+                <Search size={18} className={styles.searchIcon} />
+                <input
+                    type="text"
+                    placeholder="Search lessons..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className={styles.searchInput}
+                />
             </div>
 
             {/* Lessons Grid */}
             <div className={styles.lessonsGrid}>
-                {filteredLessons.map((lesson) => (
-                    <div 
-                        key={lesson.id} 
-                        className={styles.lessonCard}
-                        onClick={() => setExpandedLesson(expandedLesson === lesson.id ? null : lesson.id)}
-                    >
-                        <div className={styles.lessonHeader}>
-                            <div className={styles.lessonIcon}>{lesson.icon}</div>
-                            {lesson.progress === 100 && (
-                                <span className={styles.completedBadge}>✓</span>
-                            )}
-                        </div>
-                        <h3 className={styles.lessonTitle}>{lesson.title}</h3>
-                        <p className={styles.lessonDescription}>{lesson.description}</p>
-                        <div className={styles.lessonMeta}>
-                            <span className={styles.duration}>⏱️ {lesson.duration}</span>
-                            <span className={`${styles.difficulty} ${getDifficultyColor(lesson.difficulty)}`}>
-                                {lesson.difficulty}
-                            </span>
-                        </div>
-                        {lesson.progress > 0 && lesson.progress < 100 && (
-                            <div className={styles.progressBar}>
-                                <div 
-                                    className={styles.progressFill} 
-                                    style={{ width: `${lesson.progress}%` }}
-                                ></div>
+                {filteredLessons.map(lesson => {
+                    const IconComponent = lesson.icon;
+                    return (
+                        <div key={lesson.id} className={`${styles.lessonCard} ${lesson.completed ? styles.completed : ''}`}>
+                            <div className={styles.lessonHeader}>
+                                <div className={styles.lessonIcon}>
+                                    <IconComponent size={24} />
+                                </div>
+                                {lesson.completed && (
+                                    <CheckCircle size={20} className={styles.completedIcon} />
+                                )}
                             </div>
-                        )}
-                        <button className={styles.lessonButton}>
-                            {lesson.progress === 100 ? 'Review' : lesson.progress > 0 ? 'Continue' : 'Start'}
-                        </button>
-                    </div>
-                ))}
+                            <h3 className={styles.lessonTitle}>{lesson.title}</h3>
+                            <p className={styles.lessonDescription}>{lesson.description}</p>
+                            <div className={styles.lessonMeta}>
+                                <span className={styles.duration}><Clock size={14} /> {lesson.duration}</span>
+                                <span className={styles.difficulty}>{lesson.difficulty}</span>
+                            </div>
+                        </div>
+                    );
+                })}
             </div>
 
-            {/* AI Mentor Promo */}
-            <div className={styles.mentorPromo}>
-                <div className={styles.mentorIcon}>🤖</div>
+            {/* AI Mentor Card */}
+            <div className={styles.mentorCard}>
+                <div className={styles.mentorIcon}><Bot size={32} /></div>
                 <div className={styles.mentorContent}>
-                    <h3>Need Personalized Guidance?</h3>
-                    <p>Our AI Advisor can explain concepts based on your portfolio and answer your specific questions.</p>
+                    <h3>Need Help?</h3>
+                    <p>Ask our AI advisor any investing questions</p>
                 </div>
-                <button className={styles.mentorButton}>Talk to AI Advisor</button>
+                <button className={styles.askBtn}>Ask Now</button>
             </div>
         </div>
     );
