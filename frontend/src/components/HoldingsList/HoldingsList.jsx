@@ -1,3 +1,4 @@
+import { Briefcase } from 'lucide-react';
 import styles from './HoldingsList.module.css';
 
 const HoldingsList = ({ onNavigate }) => {
@@ -18,7 +19,7 @@ const HoldingsList = ({ onNavigate }) => {
         <div className={styles.section}>
             <div className={styles.sectionHeader}>
                 <div className={styles.sectionTitle}>
-                    <span className={styles.icon}>💼</span>
+                    <Briefcase size={20} className={styles.icon} />
                     Top Holdings
                 </div>
                 <a href="#" className={styles.viewAll} onClick={handleViewAll}>View All →</a>

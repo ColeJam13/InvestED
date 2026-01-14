@@ -1,3 +1,4 @@
+import { Target } from 'lucide-react';
 import styles from './GoalCard.module.css';
 
 const GoalCard = ({ onNavigate }) => {
@@ -20,7 +21,7 @@ const GoalCard = ({ onNavigate }) => {
         <div className={styles.section}>
             <div className={styles.sectionHeader}>
                 <div className={styles.sectionTitle}>
-                    <span className={styles.icon}>🎯</span>
+                    <Target size={20} className={styles.icon} />
                     Featured Goal
                 </div>
                 <a href="#" className={styles.viewAll} onClick={handleViewAll}>View All →</a>

@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { Briefcase, DollarSign, TrendingUp, TrendingDown, BarChart3, Search, AlertTriangle, Inbox } from 'lucide-react';
 import styles from './PortfolioView.module.css';
 
 const PortfolioView = () => {
@@ -24,7 +25,6 @@ const PortfolioView = () => {
     const [sellAmount, setSellAmount] = useState('');
     const [showConfirmation, setShowConfirmation] = useState(false);
 
-    // Calculate position metrics
     const calculateMetrics = (position) => {
         const marketValue = position.shares * position.currentPrice;
         const costBasis = position.shares * position.avgCost;
@@ -33,7 +33,6 @@ const PortfolioView = () => {
         return { marketValue, costBasis, gainLoss, gainLossPercent };
     };
 
-    // Filter and sort positions
     const filteredPositions = useMemo(() => {
         let result = positions.filter(p => {
             const matchesFilter = filter === 'all' || p.type === filter || p.sector === filter;
@@ -72,7 +71,6 @@ const PortfolioView = () => {
         return result;
     }, [positions, filter, sortBy, sortOrder, searchTerm]);
 
-    // Portfolio totals
     const portfolioTotals = useMemo(() => {
         return positions.reduce((acc, p) => {
             const metrics = calculateMetrics(p);
@@ -145,7 +143,7 @@ const PortfolioView = () => {
     };
 
     const getSortIcon = (column) => {
-        if (sortBy !== column) return '↕️';
+        if (sortBy !== column) return '↕';
         return sortOrder === 'asc' ? '↑' : '↓';
     };
 
@@ -153,7 +151,6 @@ const PortfolioView = () => {
 
     return (
         <div className={styles.container}>
-            {/* Header */}
             <div className={styles.header}>
                 <div className={styles.headerContent}>
                     <h1 className={styles.title}>Portfolio</h1>
@@ -161,24 +158,25 @@ const PortfolioView = () => {
                 </div>
             </div>
 
-            {/* Portfolio Summary */}
             <div className={styles.summaryCards}>
                 <div className={styles.summaryCard}>
-                    <div className={styles.summaryIcon}>💼</div>
+                    <div className={styles.summaryIcon}><Briefcase size={24} /></div>
                     <div className={styles.summaryInfo}>
                         <span className={styles.summaryLabel}>Total Value</span>
                         <span className={styles.summaryValue}>{formatCurrency(portfolioTotals.totalValue)}</span>
                     </div>
                 </div>
                 <div className={styles.summaryCard}>
-                    <div className={styles.summaryIcon}>💵</div>
+                    <div className={styles.summaryIcon}><DollarSign size={24} /></div>
                     <div className={styles.summaryInfo}>
                         <span className={styles.summaryLabel}>Cost Basis</span>
                         <span className={styles.summaryValue}>{formatCurrency(portfolioTotals.totalCost)}</span>
                     </div>
                 </div>
                 <div className={styles.summaryCard}>
-                    <div className={styles.summaryIcon}>{portfolioTotals.totalGainLoss >= 0 ? '📈' : '📉'}</div>
+                    <div className={styles.summaryIcon}>
+                        {portfolioTotals.totalGainLoss >= 0 ? <TrendingUp size={24} /> : <TrendingDown size={24} />}
+                    </div>
                     <div className={styles.summaryInfo}>
                         <span className={styles.summaryLabel}>Total Gain/Loss</span>
                         <span className={`${styles.summaryValue} ${portfolioTotals.totalGainLoss >= 0 ? styles.positive : styles.negative}`}>
@@ -187,7 +185,7 @@ const PortfolioView = () => {
                     </div>
                 </div>
                 <div className={styles.summaryCard}>
-                    <div className={styles.summaryIcon}>📊</div>
+                    <div className={styles.summaryIcon}><BarChart3 size={24} /></div>
                     <div className={styles.summaryInfo}>
                         <span className={styles.summaryLabel}>Return</span>
                         <span className={`${styles.summaryValue} ${totalGainLossPercent >= 0 ? styles.positive : styles.negative}`}>
@@ -197,10 +195,9 @@ const PortfolioView = () => {
                 </div>
             </div>
 
-            {/* Filters and Search */}
             <div className={styles.controls}>
                 <div className={styles.searchBox}>
-                    <span className={styles.searchIcon}>🔍</span>
+                    <Search size={18} className={styles.searchIcon} />
                     <input
                         type="text"
                         placeholder="Search positions..."
@@ -221,13 +218,13 @@ const PortfolioView = () => {
                         className={`${styles.filterBtn} ${filter === 'stock' ? styles.active : ''}`}
                         onClick={() => setFilter('stock')}
                     >
-                        📊 Stocks
+                        Stocks
                     </button>
                     <button
                         className={`${styles.filterBtn} ${filter === 'crypto' ? styles.active : ''}`}
                         onClick={() => setFilter('crypto')}
                     >
-                        🪙 Crypto
+                        Crypto
                     </button>
                     {sectors.map(sector => (
                         <button
@@ -241,7 +238,6 @@ const PortfolioView = () => {
                 </div>
             </div>
 
-            {/* Positions Table */}
             <div className={styles.tableContainer}>
                 <table className={styles.table}>
                     <thead>
@@ -310,13 +306,12 @@ const PortfolioView = () => {
 
             {filteredPositions.length === 0 && (
                 <div className={styles.emptyState}>
-                    <div className={styles.emptyIcon}>📭</div>
+                    <Inbox size={64} className={styles.emptyIcon} />
                     <h3>No positions found</h3>
                     <p>Try adjusting your filters or search term</p>
                 </div>
             )}
 
-            {/* Sell Modal */}
             {showSellModal && selectedPosition && (
                 <div className={styles.modalOverlay} onClick={() => setShowSellModal(false)}>
                     <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -393,7 +388,7 @@ const PortfolioView = () => {
                                 </div>
 
                                 <div className={styles.confirmationContent}>
-                                    <div className={styles.confirmIcon}>⚠️</div>
+                                    <div className={styles.confirmIcon}><AlertTriangle size={48} /></div>
                                     <h3>Are you sure?</h3>
                                     <p>You are about to sell:</p>
                                     
