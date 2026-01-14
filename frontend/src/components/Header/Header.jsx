@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { TrendingUp } from 'lucide-react';
+import { GraduationCap } from 'lucide-react';
 import ThemeToggle from '../ThemeToggle';
 import { marketService } from '../../services/marketService';
 import styles from './Header.module.css';
@@ -62,11 +62,12 @@ const Header = ({ onNavigate }) => {
                 <button className={styles.logoButton} onClick={handleLogoClick}>
                     <div className={styles.logo}>
                         <div className={styles.logoIcon}>
-                            <TrendingUp size={20} />
+                            <GraduationCap size={22} />
                         </div>
-                        <span className={styles.logoText}>
-                            Invest<span className={styles.logoHighlight}>ED</span>
-                        </span>
+                        <div className={styles.logoText}>
+                            <span className={styles.logoInvest}>INVEST</span>
+                            <span className={styles.logoEd}>ED</span>
+                        </div>
                     </div>
                 </button>
                 <div className={styles.tickerWrapper}>
