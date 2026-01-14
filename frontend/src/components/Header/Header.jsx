@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { TrendingUp } from 'lucide-react';
 import ThemeToggle from '../ThemeToggle';
 import { marketService } from '../../services/marketService';
 import styles from './Header.module.css';
@@ -49,10 +50,25 @@ const Header = ({ onNavigate }) => {
         }
     };
 
+    const handleLogoClick = () => {
+        if (onNavigate) {
+            onNavigate('home');
+        }
+    };
+
     return (
         <header className={styles.header}>
             <div className={styles.headerLeft}>
-                <div className={styles.logo}>InvestED</div>
+                <button className={styles.logoButton} onClick={handleLogoClick}>
+                    <div className={styles.logo}>
+                        <div className={styles.logoIcon}>
+                            <TrendingUp size={20} />
+                        </div>
+                        <span className={styles.logoText}>
+                            Invest<span className={styles.logoHighlight}>ED</span>
+                        </span>
+                    </div>
+                </button>
                 <div className={styles.tickerWrapper}>
                     <span className={styles.tickerLabel}>MARKET MOVERS</span>
                     <div className={styles.marqueeContainer}>
