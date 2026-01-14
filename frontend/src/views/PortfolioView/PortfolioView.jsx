@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import styles from './PortfolioView.module.css';
 import axios from 'axios';
 
@@ -17,29 +17,31 @@ const PortfolioView = () => {
     const [loading, setLoading] = useState(true);
 
     // Fetch portfolios and positions
-    useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                const [portfoliosRes, positionsRes] = await Promise.all([
-                    axios.get('http://localhost:8080/api/portfolios/user/1'),
-                    axios.get('http://localhost:8080/api/portfolios/user/1/all-positions')
-                ]);
-                
-                setPortfolios(portfoliosRes.data);
-                setPositions(positionsRes.data);
-            } catch (error) {
-                console.error('Error fetching portfolio data:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
+    const fetchData = useCallback(async () => {
+        console.log('🔄 Fetching portfolio data...', new Date().toLocaleTimeString());
+        setLoading(true);
+        try {
+            const [portfoliosRes, positionsRes] = await Promise.all([
+                axios.get('http://localhost:8080/api/portfolios/user/1'),
+                axios.get('http://localhost:8080/api/portfolios/user/1/all-positions')
+            ]);
+            
+            setPortfolios(portfoliosRes.data);
+            setPositions(positionsRes.data);
+            console.log('✅ Portfolio data updated', positionsRes.data);
+        } catch (error) {
+            console.error('Error fetching portfolio data:', error);
+        } finally {
+            setLoading(false);
+        }
+    }, []); // Empty dependency array since it doesn't depend on any props/state
 
+    useEffect(() => {
         fetchData();
         // Refresh every 30 seconds
         const interval = setInterval(fetchData, 30000);
         return () => clearInterval(interval);
-    }, []);
+    }, [fetchData]); // Add fetchData as dependency
 
     // Calculate position metrics
     const calculateMetrics = (position) => {
