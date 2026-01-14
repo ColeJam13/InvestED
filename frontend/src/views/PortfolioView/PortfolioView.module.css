@@ -527,3 +527,12 @@
     font-weight: 500;
     color: var(--text-secondary);
 }
+/* Fix icon backgrounds */
+.summaryIcon {
+    background: transparent;
+    color: var(--text-muted);
+}
+
+.summaryIcon svg {
+    stroke: var(--accent-green);
+}
