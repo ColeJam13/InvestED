@@ -4,6 +4,7 @@
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/asset/Asset.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/asset/AssetRepository.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/config/CacheConfig.java
+/Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/config/CorsConfig.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/config/DataInitializer.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/config/FinnhubConfig.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/config/TwelveDataConfig.java
