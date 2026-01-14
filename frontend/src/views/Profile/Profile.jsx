@@ -1,21 +1,91 @@
 import styles from './Profile.module.css';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Shield, Scale, Rocket, ChevronRight, User, Lock, Bell, LogOut, Check } from 'lucide-react';
 import ThemeToggle from '../../components/ThemeToggle';
+import { portfolioService } from '../../services/portfolioService';
 
 function Profile() {
-  const [riskProfile, setRiskProfile] = useState('moderate');
+  const userId = 1; // Hardcoded for demo
   
-  const userData = {
-    name: 'Jordan Mitchell',
-    email: 'jordan.mitchell@email.com',
-    initials: 'JM',
-    memberSince: 'January 2025',
-    portfolioValue: '$50,243.89',
-    cashAvailable: '$5,000.00',
-    totalGain: '+$4,123.45',
-    totalGainPercent: '+8.92%',
-    isPositive: true
+  const [riskProfile, setRiskProfile] = useState('moderate');
+  const [userData, setUserData] = useState(null);
+  const [portfolioSummary, setPortfolioSummary] = useState(null);
+  const [topHoldings, setTopHoldings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [savingRisk, setSavingRisk] = useState(false);
+
+  // Fetch all data on mount
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Fetch user, summary, and positions (required)
+        const [user, summary, positions] = await Promise.all([
+          portfolioService.getUser(userId),
+          portfolioService.getPortfolioSummary(userId),
+          portfolioService.getAllPositions(userId)
+        ]);
+
+        setUserData({
+          name: user.displayName,
+          email: user.email,
+          initials: user.displayName.split(' ').map(n => n[0]).join('').toUpperCase(),
+          memberSince: new Date(user.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+        });
+
+        setPortfolioSummary({
+          totalValue: summary.totalValue,
+          cashAvailable: summary.totalCash,
+          totalGain: summary.totalGainLoss,
+          totalGainPercent: summary.totalGainLossPercent,
+          isPositive: summary.totalGainLoss >= 0
+        });
+
+        // Get top 3 holdings by value
+        const sorted = [...positions]
+          .sort((a, b) => (b.quantity * b.currentPrice) - (a.quantity * a.currentPrice))
+          .slice(0, 3);
+        setTopHoldings(sorted);
+
+        // Try to fetch risk profile (optional)
+        try {
+          const risk = await portfolioService.getRiskProfile(userId);
+          if (risk) {
+            setRiskProfile(risk.riskLevel.toLowerCase());
+          }
+        } catch (riskError) {
+          console.log('Risk profile not available, using default');
+        }
+
+      } catch (err) {
+        console.error('Error fetching profile data:', err);
+        setError('Failed to load profile data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [userId]);
+
+  // Handler to save risk profile
+  const handleRiskChange = async (newRisk) => {
+    setSavingRisk(true);
+    try {
+      await portfolioService.updateRiskProfile(userId, {
+        riskLevel: newRisk.toUpperCase(),
+        riskScore: newRisk === 'conservative' ? 3 : newRisk === 'moderate' ? 5 : 7
+      });
+      setRiskProfile(newRisk);
+    } catch (err) {
+      console.error('Error saving risk profile:', err);
+      alert('Failed to save risk profile');
+    } finally {
+      setSavingRisk(false);
+    }
   };
 
   const goals = [
@@ -48,6 +118,30 @@ function Profile() {
     }
   ];
 
+  if (loading) {
+    return (
+      <div className={styles.profileView}>
+        <div className={styles.loadingState}>
+          <div className={styles.spinner}></div>
+          <p>Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.profileView}>
+        <div className={styles.errorState}>
+          <p>{error}</p>
+          <button onClick={() => window.location.reload()}>Retry</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!userData || !portfolioSummary) return null;
+
   return (
     <div className={styles.profileView}>
       {/* Left Column */}
@@ -68,24 +162,55 @@ function Profile() {
           <div className={styles.portfolioStats}>
             <div className={styles.statItem}>
               <span className={styles.statLabel}>Total Value</span>
-              <span className={styles.statValue}>{userData.portfolioValue}</span>
+              <span className={styles.statValue}>{portfolioService.formatCurrency(portfolioSummary.totalValue)}</span>
             </div>
             <div className={styles.statItem}>
               <span className={styles.statLabel}>Cash Available</span>
-              <span className={styles.statValue}>{userData.cashAvailable}</span>
+              <span className={styles.statValue}>{portfolioService.formatCurrency(portfolioSummary.cashAvailable)}</span>
             </div>
             <div className={styles.statItem}>
               <span className={styles.statLabel}>Total Gain/Loss</span>
               <div className={styles.gainLoss}>
-                <span className={`${styles.statValue} ${userData.isPositive ? styles.positive : styles.negative}`}>
-                  {userData.totalGain}
+                <span className={`${styles.statValue} ${portfolioSummary.isPositive ? styles.positive : styles.negative}`}>
+                  {portfolioService.formatCurrency(portfolioSummary.totalGain)}
                 </span>
-                <span className={`${styles.percentage} ${userData.isPositive ? styles.positive : styles.negative}`}>
-                  {userData.totalGainPercent}
+                <span className={`${styles.percentage} ${portfolioSummary.isPositive ? styles.positive : styles.negative}`}>
+                  {portfolioService.formatPercent(portfolioSummary.totalGainPercent)}
                 </span>
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Top Holdings Card */}
+        <div className={styles.card}>
+          <h3 className={styles.cardTitle}>Top Holdings</h3>
+          {topHoldings.length > 0 ? (
+            <div className={styles.topHoldings}>
+              {topHoldings.map((holding, index) => {
+                const value = holding.quantity * holding.currentPrice;
+                const gainLoss = value - (holding.quantity * holding.averageBuyPrice);
+                const isPositive = gainLoss >= 0;
+                
+                return (
+                  <div key={index} className={styles.holdingRow}>
+                    <div className={styles.holdingInfo}>
+                      <span className={styles.holdingSymbol}>{holding.symbol}</span>
+                      <span className={styles.holdingName}>{holding.name}</span>
+                    </div>
+                    <div className={styles.holdingValue}>
+                      <span className={styles.holdingAmount}>{portfolioService.formatCurrency(value)}</span>
+                      <span className={`${styles.holdingGain} ${isPositive ? styles.positive : styles.negative}`}>
+                        {portfolioService.formatCurrency(Math.abs(gainLoss))} ({portfolioService.formatPercent((gainLoss / (holding.quantity * holding.averageBuyPrice)) * 100)})
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p className={styles.noHoldings}>No holdings yet. Start investing!</p>
+          )}
         </div>
 
         {/* Goals Overview Card */}
@@ -132,8 +257,8 @@ function Profile() {
               return (
                 <div
                   key={profile.id}
-                  className={`${styles.riskOption} ${riskProfile === profile.id ? styles.selected : ''}`}
-                  onClick={() => setRiskProfile(profile.id)}
+                  className={`${styles.riskOption} ${riskProfile === profile.id ? styles.selected : ''} ${savingRisk ? styles.disabled : ''}`}
+                  onClick={() => !savingRisk && handleRiskChange(profile.id)}
                 >
                   <div className={styles.riskHeader}>
                     <IconComponent size={20} className={styles.riskIcon} />

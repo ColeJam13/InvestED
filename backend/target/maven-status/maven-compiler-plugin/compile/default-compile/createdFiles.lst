@@ -1,4 +1,5 @@
 com/zipcode/invested/transaction/Transaction.class
+com/zipcode/invested/config/CorsConfig.class
 com/zipcode/invested/controller/UserController.class
 com/zipcode/invested/position/PortfolioPositionRepository.class
 com/zipcode/invested/controller/AIConversationController.class
