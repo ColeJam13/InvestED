@@ -337,3 +337,10 @@
 :global(body.dark-mode) .logoButton:hover .logoIcon {
     box-shadow: 0 6px 16px rgba(30, 58, 95, 0.5);
 }
+
+/* Bigger and wider logo icon box */
+.logoIcon {
+    width: 58px;
+    height: 52px;
+    border-radius: 12px;
+}

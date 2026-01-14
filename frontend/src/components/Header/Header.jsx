@@ -1,8 +1,40 @@
 import { useState, useEffect } from 'react';
-import { GraduationCap } from 'lucide-react';
 import ThemeToggle from '../ThemeToggle';
 import { marketService } from '../../services/marketService';
 import styles from './Header.module.css';
+
+// Custom graduation cap with dollar sign tassel
+const GradCapDollar = ({ size = 24 }) => (
+    <svg 
+        width={size} 
+        height={size} 
+        viewBox="0 0 36 28" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+    >
+        {/* Cap top - shifted right to center visually */}
+        <polygon points="18 1 4 9 18 17 32 9 18 1" />
+        {/* Cap base */}
+        <path d="M8 11v7c0 2.5 4 5 10 5s10-2.5 10-5v-7" />
+        {/* Tassel string */}
+        <line x1="32" y1="9" x2="32" y2="15" />
+        {/* Dollar sign as tassel end */}
+        <text 
+            x="32" 
+            y="23" 
+            fontSize="11" 
+            fontWeight="bold" 
+            textAnchor="middle" 
+            fill="currentColor" 
+            stroke="none"
+        >
+            $
+        </text>
+    </svg>
+);
 
 const Header = ({ onNavigate }) => {
     const [marketData, setMarketData] = useState([
@@ -62,7 +94,7 @@ const Header = ({ onNavigate }) => {
                 <button className={styles.logoButton} onClick={handleLogoClick}>
                     <div className={styles.logo}>
                         <div className={styles.logoIcon}>
-                            <GraduationCap size={22} />
+                            <GradCapDollar size={38} />
                         </div>
                         <div className={styles.logoText}>
                             <span className={styles.logoInvest}>INVEST</span>

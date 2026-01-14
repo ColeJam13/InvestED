@@ -1108,3 +1108,485 @@
     color: var(--style-color);
 }
 
+
+/* Greeting Bubble Styles */
+.greetingBubble {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 1.5rem;
+    max-width: 600px;
+    box-shadow: var(--shadow);
+}
+
+.greetingHeader {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.greetingIcon {
+    color: var(--accent-green);
+}
+
+.greetingTitle {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.greetingText {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 1.25rem;
+    font-size: 0.95rem;
+}
+
+.greetingFeatures {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.featureItem {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.featureItem svg {
+    color: var(--accent-green);
+    flex-shrink: 0;
+}
+
+/* Style Change Bubble */
+.styleChangeBubble {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 1rem;
+    border-left: 4px solid var(--accent-green);
+    max-width: 500px;
+}
+
+.styleChangeHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.styleChangeTitle {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.styleChangeText {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* ========== AI ADVISOR VIEW LAYOUT ========== */
+.aiAdvisorView {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 60px);
+    max-height: calc(100vh - 60px);
+    background: var(--bg-primary);
+    max-width: 1100px;
+    margin: 0 auto;
+    position: relative;
+}
+
+/* ========== TOOLBAR ========== */
+.toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    z-index: 10;
+}
+
+:global(body.light-mode) .toolbar {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #6B8DD6 100%);
+}
+
+.toolbarLeft {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.toolbarTitle {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #FFFFFF;
+}
+
+.toolbarRight {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.toolbarBtn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #FFFFFF;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.toolbarBtn:hover,
+.toolbarBtn.active {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+.activeStyle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.75rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid;
+    border-radius: 20px;
+    color: #FFFFFF;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.activeStyle .clearStyleBtn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s;
+}
+
+.activeStyle .clearStyleBtn:hover {
+    color: #EF4444;
+}
+
+/* ========== STYLE SELECTOR PANEL ========== */
+.styleSelectorHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.styleSelectorHeader h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.closeStyleSelector {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.closeStyleSelector:hover {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.styleSelectorContent {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.categoryTitle {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.styleGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.styleOption {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-left: 4px solid;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+}
+
+.styleOption:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.styleOption.selectedOption {
+    background: var(--bg-card);
+    border-color: var(--accent-green);
+}
+
+.styleOptionContent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.styleOptionName {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.styleOptionDesc {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.selectedCheck {
+    color: var(--accent-green);
+}
+
+/* ========== USER MESSAGE BUBBLE ========== */
+.userBubble {
+    max-width: 75%;
+    padding: 1rem 1.25rem;
+    border-radius: 18px;
+    border-bottom-right-radius: 4px;
+    background: linear-gradient(135deg, #E07A5F 0%, #F2A07B 100%);
+    color: #FFFFFF;
+    box-shadow: 0 4px 12px rgba(224, 122, 95, 0.3);
+    margin-left: auto;
+}
+
+.userBubble p {
+    margin: 0;
+    line-height: 1.6;
+}
+
+.userBubble .messageTime {
+    display: block;
+    text-align: right;
+    font-size: 0.65rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 0.5rem;
+}
+
+/* ========== AI MESSAGE STYLES ========== */
+.messageBubble p {
+    margin: 0 0 0.5rem 0;
+    line-height: 1.6;
+}
+
+.messageActions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.actionBtn {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.actionBtn:hover {
+    background: var(--bg-primary);
+    color: var(--accent-green);
+}
+
+.messageTime {
+    display: block;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+}
+
+/* ========== EDUCATION BUBBLE ========== */
+.educationBubble {
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(124, 58, 237, 0.05) 100%);
+    border: 1px solid rgba(124, 58, 237, 0.3);
+    border-left: 4px solid #7C3AED;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    max-width: 75%;
+}
+
+:global(body.dark-mode) .educationBubble {
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.2) 0%, rgba(124, 58, 237, 0.1) 100%);
+}
+
+.educationBubble .educationHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    color: #7C3AED;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.educationIcon {
+    color: #7C3AED;
+}
+
+.educationBubble .educationContent p {
+    margin: 0;
+    color: var(--text-primary);
+    line-height: 1.6;
+    font-size: 0.9rem;
+}
+
+/* ========== PORTFOLIO BUBBLE ========== */
+.portfolioBubble {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    max-width: 75%;
+}
+
+.portfolioText {
+    margin: 0 0 0.75rem 0;
+    line-height: 1.6;
+    color: var(--text-primary);
+}
+
+.portfolioSnapshot {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: var(--bg-primary);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+}
+
+.snapshotItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.snapshotSymbol {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.snapshotValue {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.snapshotChange {
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.snapshotChange.positive {
+    color: var(--accent-green);
+}
+
+.snapshotChange.negative {
+    color: #EF4444;
+}
+
+/* ========== LOADING & ERROR STATES ========== */
+.portfolioLoading,
+.portfolioError,
+.noHoldings {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--border-color);
+    border-top-color: var(--accent-green);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 0.5rem;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ========== RESPONSIVE FIXES ========== */
+@media (max-width: 768px) {
+    .toolbar {
+        padding: 0.75rem 1rem;
+    }
+    
+    .toolbarTitle {
+        font-size: 0.95rem;
+    }
+    
+    .toolbarBtn {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .activeStyle {
+        font-size: 0.7rem;
+        padding: 0.3rem 0.5rem;
+    }
+    
+    .styleOption {
+        padding: 0.6rem 0.75rem;
+    }
+    
+    .userBubble,
+    .messageBubble,
+    .educationBubble,
+    .portfolioBubble {
+        max-width: 85%;
+    }
+}
