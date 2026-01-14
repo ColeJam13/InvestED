@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { Menu, Bot, Palette, BarChart3, Download, X, Send, Copy, Check, Diamond, Rocket, TrendingUp, DollarSign, Star, Zap, Target, Shield, Scale, Flame, Leaf, Building2, Sprout, Lightbulb, AlertTriangle } from 'lucide-react';
 import styles from './AIAdvisorView.module.css';
 
 const AIAdvisorView = () => {
@@ -12,7 +13,6 @@ const AIAdvisorView = () => {
     const [copiedId, setCopiedId] = useState(null);
     const messagesEndRef = useRef(null);
 
-    // Mock chat history
     const chatHistory = [
         { id: 1, title: 'Portfolio diversification', date: 'Today', preview: 'How should I diversify my...' },
         { id: 2, title: 'Value investing basics', date: 'Yesterday', preview: 'What makes a stock undervalued...' },
@@ -21,7 +21,6 @@ const AIAdvisorView = () => {
         { id: 5, title: 'Dividend strategies', date: 'Jan 5', preview: 'How do I build passive income...' },
     ];
 
-    // Mock portfolio data
     const portfolioData = {
         totalValue: '$50,243.89',
         todayChange: '+$1,234.56',
@@ -34,43 +33,40 @@ const AIAdvisorView = () => {
             { symbol: 'TSLA', name: 'Tesla Inc.', value: '$1,250.00', change: '+5.7%', positive: true },
             { symbol: 'ETH', name: 'Ethereum', value: '$6,125.00', change: '+1.5%', positive: true },
         ],
-        topPerformer: { symbol: 'TSLA', change: '+5.7%' },
-        topLoser: { symbol: 'BTC', change: '-1.2%' },
     };
 
-    // Investing styles
     const styleCategories = [
         {
             category: 'By Philosophy',
             styles: [
-                { id: 'value', name: 'Value Investing', icon: '💎', description: 'Find undervalued stocks the market overlooked', color: '#1E3A5F' },
-                { id: 'growth', name: 'Growth Investing', icon: '🚀', description: 'Target companies with high growth potential', color: '#7C3AED' },
-                { id: 'momentum', name: 'Momentum Investing', icon: '📈', description: 'Invest in assets that are currently trending', color: '#EA580C' },
-                { id: 'income', name: 'Income Investing', icon: '💰', description: 'Generate regular income from dividends & bonds', color: '#059669' },
-                { id: 'quality', name: 'Quality Investing', icon: '⭐', description: 'Seek companies with strong fundamentals', color: '#2563EB' },
+                { id: 'value', name: 'Value Investing', icon: Diamond, description: 'Find undervalued stocks', color: '#1E3A5F' },
+                { id: 'growth', name: 'Growth Investing', icon: Rocket, description: 'Target high growth potential', color: '#7C3AED' },
+                { id: 'momentum', name: 'Momentum Investing', icon: TrendingUp, description: 'Follow market trends', color: '#EA580C' },
+                { id: 'income', name: 'Income Investing', icon: DollarSign, description: 'Generate regular income', color: '#059669' },
+                { id: 'quality', name: 'Quality Investing', icon: Star, description: 'Strong fundamentals', color: '#2563EB' },
             ]
         },
         {
             category: 'By Strategy',
             styles: [
-                { id: 'active', name: 'Active Investing', icon: '⚡', description: 'Frequent trading to try to beat the market', color: '#DC2626' },
-                { id: 'passive', name: 'Passive Investing', icon: '🎯', description: 'Match market performance with index funds', color: '#0891B2' },
+                { id: 'active', name: 'Active Investing', icon: Zap, description: 'Frequent trading', color: '#DC2626' },
+                { id: 'passive', name: 'Passive Investing', icon: Target, description: 'Index fund approach', color: '#0891B2' },
             ]
         },
         {
             category: 'By Risk Tolerance',
             styles: [
-                { id: 'conservative', name: 'Conservative', icon: '🛡️', description: 'Prioritize capital preservation & stability', color: '#4B5563' },
-                { id: 'moderate', name: 'Moderate', icon: '⚖️', description: 'Balance risk and return with diversification', color: '#8B5CF6' },
-                { id: 'aggressive', name: 'Aggressive', icon: '🔥', description: 'Seek maximum returns with higher risk', color: '#EF4444' },
+                { id: 'conservative', name: 'Conservative', icon: Shield, description: 'Capital preservation', color: '#4B5563' },
+                { id: 'moderate', name: 'Moderate', icon: Scale, description: 'Balanced approach', color: '#8B5CF6' },
+                { id: 'aggressive', name: 'Aggressive', icon: Flame, description: 'Maximum returns', color: '#EF4444' },
             ]
         },
         {
             category: 'By Focus',
             styles: [
-                { id: 'esg', name: 'Socially Responsible (ESG)', icon: '🌱', description: 'Incorporate environmental & social factors', color: '#10B981' },
-                { id: 'largecap', name: 'Large-Cap Focus', icon: '🏢', description: 'Focus on established, large companies', color: '#6366F1' },
-                { id: 'smallcap', name: 'Small-Cap Focus', icon: '🌱', description: 'Target smaller companies with growth potential', color: '#F59E0B' },
+                { id: 'esg', name: 'ESG Investing', icon: Leaf, description: 'Socially responsible', color: '#10B981' },
+                { id: 'largecap', name: 'Large-Cap Focus', icon: Building2, description: 'Established companies', color: '#6366F1' },
+                { id: 'smallcap', name: 'Small-Cap Focus', icon: Sprout, description: 'Growth potential', color: '#F59E0B' },
             ]
         }
     ];
@@ -209,10 +205,10 @@ const AIAdvisorView = () => {
         const lowerQuestion = question.toLowerCase();
         const styleContext = selectedStyle ? ` From a ${selectedStyle.name.toLowerCase()} perspective,` : '';
         
-        if (lowerQuestion.includes('portfolio') || lowerQuestion.includes('holdings') || lowerQuestion.includes('my stocks')) {
+        if (lowerQuestion.includes('portfolio') || lowerQuestion.includes('holdings')) {
             return {
                 type: 'standard',
-                content: `${styleContext} looking at your portfolio, I can see you have a diversified mix of assets. Your total value is ${portfolioData.totalValue} with ${portfolioData.holdings.length} holdings. This shows a good foundation for building long-term wealth.`,
+                content: `${styleContext} looking at your portfolio, I can see you have a diversified mix of assets. Your total value is ${portfolioData.totalValue} with ${portfolioData.holdings.length} holdings.`,
                 portfolioRef: portfolioData.holdings.slice(0, 2)
             };
         }
@@ -220,10 +216,10 @@ const AIAdvisorView = () => {
         if (lowerQuestion.includes('what is') || lowerQuestion.includes('explain') || lowerQuestion.includes('how do')) {
             return {
                 type: 'standard',
-                content: `${styleContext} that's a great question for building your investment knowledge. Understanding these concepts is key to making informed decisions.`,
+                content: `${styleContext} that's a great question for building your investment knowledge.`,
                 education: {
-                    title: '💡 Key Concept',
-                    content: getEducationalContent(lowerQuestion)
+                    title: 'Key Concept',
+                    content: 'Understanding these fundamentals is crucial for making informed investment decisions.'
                 }
             };
         }
@@ -231,25 +227,18 @@ const AIAdvisorView = () => {
         if (lowerQuestion.includes('risk')) {
             return {
                 type: 'standard',
-                content: `${styleContext} understanding risk is crucial for any investor. Your risk tolerance should align with your time horizon and financial goals.`,
+                content: `${styleContext} understanding risk is crucial for any investor.`,
                 education: {
-                    title: '⚠️ Risk Insight',
-                    content: 'Risk tolerance varies by individual. Consider your time horizon, financial goals, and how you\'d feel if your portfolio dropped 20% temporarily.'
+                    title: 'Risk Insight',
+                    content: 'Risk tolerance varies by individual. Consider your time horizon and financial goals.'
                 }
             };
         }
 
         return {
             type: 'standard',
-            content: `${styleContext} That's a thoughtful question. Let me share some educational insights that can help you make more informed investment decisions.`
+            content: `${styleContext} That's a thoughtful question. Let me share some educational insights.`
         };
-    };
-
-    const getEducationalContent = (question) => {
-        if (question.includes('diversif')) return "Diversification means spreading investments across different assets to reduce risk. If one investment falls, others may hold steady or rise.";
-        if (question.includes('stock') && question.includes('bond')) return "Stocks represent ownership in companies with higher risk/reward. Bonds are loans to entities with lower risk and steady income.";
-        if (question.includes('etf') || question.includes('index')) return "ETFs (Exchange-Traded Funds) let you invest in many stocks at once, providing instant diversification at low cost.";
-        return "This is a fundamental concept in investing. Understanding it will help you make more informed decisions about your portfolio.";
     };
 
     const handleCopyMessage = (messageId, content) => {
@@ -288,10 +277,11 @@ const AIAdvisorView = () => {
         
         switch (message.messageType) {
             case 'style-change':
+                const StyleIcon = message.style.icon;
                 return (
                     <div className={`${styles.styleChangeBubble} ${isLatest ? styles.slideIn : ''}`} style={{ '--style-color': message.style.color }}>
                         <div className={styles.styleChangeHeader}>
-                            <span className={styles.styleIcon}>{message.style.icon}</span>
+                            <StyleIcon size={20} className={styles.styleIcon} />
                             <span className={styles.styleName}>{message.style.name}</span>
                         </div>
                         <p>{message.content}</p>
@@ -303,6 +293,7 @@ const AIAdvisorView = () => {
                 return (
                     <div className={`${styles.educationCallout} ${isLatest ? styles.slideIn : ''}`}>
                         <div className={styles.educationHeader}>
+                            <Lightbulb size={18} />
                             <span className={styles.educationTitle}>{message.title}</span>
                         </div>
                         <p className={styles.educationContent}>{message.content}</p>
@@ -313,7 +304,8 @@ const AIAdvisorView = () => {
                 return (
                     <div className={`${styles.portfolioReference} ${isLatest ? styles.slideIn : ''}`}>
                         <div className={styles.portfolioRefHeader}>
-                            <span>📊 Referenced Holdings</span>
+                            <BarChart3 size={16} />
+                            <span>Referenced Holdings</span>
                         </div>
                         <div className={styles.portfolioRefList}>
                             {message.holdings.map((holding, idx) => (
@@ -340,7 +332,7 @@ const AIAdvisorView = () => {
                                     className={styles.copyBtn}
                                     onClick={() => handleCopyMessage(message.id, message.content)}
                                 >
-                                    {copiedId === message.id ? '✓ Copied' : '📋 Copy'}
+                                    {copiedId === message.id ? <><Check size={12} /> Copied</> : <><Copy size={12} /> Copy</>}
                                 </button>
                             )}
                         </div>
@@ -351,28 +343,33 @@ const AIAdvisorView = () => {
 
     return (
         <div className={styles.chatContainer}>
-            {/* Gradient Header */}
+            {/* Header */}
             <div className={styles.chatHeader}>
-                <button 
-                    className={styles.historyToggle}
-                    onClick={() => setShowHistorySidebar(!showHistorySidebar)}
-                >
-                    ☰
+                <button className={styles.historyToggle} onClick={() => setShowHistorySidebar(!showHistorySidebar)}>
+                    <Menu size={20} />
                 </button>
                 <div className={styles.chatHeaderInfo}>
-                    <div className={`${styles.chatAvatar} ${isTyping ? styles.pulse : ''}`}>🤖</div>
+                    <div className={`${styles.chatAvatar} ${isTyping ? styles.pulse : ''}`}>
+                        <Bot size={24} />
+                    </div>
                     <div>
                         <h2 className={styles.chatAdvisorName}>AI Financial Advisor</h2>
                         <span className={styles.chatAdvisorStyle}>
                             {selectedStyle ? (
                                 <>
                                     <span className={styles.activeStyleBadge} style={{ '--style-color': selectedStyle.color }}>
-                                        {selectedStyle.icon} {selectedStyle.name}
+                                        {(() => {
+                                            const Icon = selectedStyle.icon;
+                                            return <Icon size={14} />;
+                                        })()}
+                                        {selectedStyle.name}
                                     </span>
-                                    <button className={styles.clearStyleBtn} onClick={handleClearStyle}>✕</button>
+                                    <button className={styles.clearStyleBtn} onClick={handleClearStyle}>
+                                        <X size={14} />
+                                    </button>
                                 </>
                             ) : (
-                                <span className={styles.onlineStatus}>● Online</span>
+                                <span className={styles.onlineStatus}>Online</span>
                             )}
                         </span>
                     </div>
@@ -383,21 +380,17 @@ const AIAdvisorView = () => {
                         onClick={() => setShowStyleSelector(!showStyleSelector)}
                         title="Change Style"
                     >
-                        🎨
+                        <Palette size={20} />
                     </button>
                     <button 
                         className={`${styles.headerButton} ${showPortfolioPanel ? styles.active : ''}`}
                         onClick={() => setShowPortfolioPanel(!showPortfolioPanel)}
                         title="Portfolio"
                     >
-                        📊
+                        <BarChart3 size={20} />
                     </button>
-                    <button 
-                        className={styles.headerButton}
-                        onClick={handleExportChat}
-                        title="Export Chat"
-                    >
-                        📥
+                    <button className={styles.headerButton} onClick={handleExportChat} title="Export Chat">
+                        <Download size={20} />
                     </button>
                 </div>
             </div>
@@ -414,17 +407,20 @@ const AIAdvisorView = () => {
                             <div key={idx} className={styles.styleCategory}>
                                 <h4>{category.category}</h4>
                                 <div className={styles.styleOptions}>
-                                    {category.styles.map((style) => (
-                                        <button
-                                            key={style.id}
-                                            className={`${styles.styleOption} ${selectedStyle?.id === style.id ? styles.selected : ''}`}
-                                            onClick={() => handleStyleSelect(style)}
-                                            style={{ '--style-color': style.color }}
-                                        >
-                                            <span className={styles.styleOptionIcon}>{style.icon}</span>
-                                            <span className={styles.styleOptionName}>{style.name}</span>
-                                        </button>
-                                    ))}
+                                    {category.styles.map((style) => {
+                                        const StyleIcon = style.icon;
+                                        return (
+                                            <button
+                                                key={style.id}
+                                                className={`${styles.styleOption} ${selectedStyle?.id === style.id ? styles.selected : ''}`}
+                                                onClick={() => handleStyleSelect(style)}
+                                                style={{ '--style-color': style.color }}
+                                            >
+                                                <StyleIcon size={18} className={styles.styleOptionIcon} />
+                                                <span className={styles.styleOptionName}>{style.name}</span>
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         ))}
@@ -437,9 +433,7 @@ const AIAdvisorView = () => {
                 <div className={`${styles.historySidebar} ${showHistorySidebar ? styles.open : ''}`}>
                     <div className={styles.sidebarHeader}>
                         <h3>Chat History</h3>
-                        <button className={styles.newChatBtn} onClick={handleNewChat}>
-                            + New Chat
-                        </button>
+                        <button className={styles.newChatBtn} onClick={handleNewChat}>+ New Chat</button>
                     </div>
                     <div className={styles.historyList}>
                         {chatHistory.map((chat) => (
@@ -456,7 +450,9 @@ const AIAdvisorView = () => {
                 <div className={`${styles.portfolioPanel} ${showPortfolioPanel ? styles.open : ''}`}>
                     <div className={styles.portfolioPanelHeader}>
                         <h3>Your Portfolio</h3>
-                        <button className={styles.panelClose} onClick={() => setShowPortfolioPanel(false)}>×</button>
+                        <button className={styles.panelClose} onClick={() => setShowPortfolioPanel(false)}>
+                            <X size={20} />
+                        </button>
                     </div>
                     <div className={styles.portfolioSummary}>
                         <div className={styles.portfolioTotal}>
@@ -506,7 +502,7 @@ const AIAdvisorView = () => {
                             >
                                 {message.type === 'ai' && message.messageType !== 'education' && message.messageType !== 'portfolio-reference' && (
                                     <div className={`${styles.messageAvatar} ${isTyping && index === messages.length - 1 ? styles.pulse : ''}`}>
-                                        🤖
+                                        <Bot size={18} />
                                     </div>
                                 )}
                                 {renderMessage(message, index)}
@@ -515,7 +511,9 @@ const AIAdvisorView = () => {
 
                         {isTyping && (
                             <div className={`${styles.message} ${styles.aiMessage}`}>
-                                <div className={`${styles.messageAvatar} ${styles.pulse}`}>🤖</div>
+                                <div className={`${styles.messageAvatar} ${styles.pulse}`}>
+                                    <Bot size={18} />
+                                </div>
                                 <div className={styles.typingIndicator}>
                                     <span className={styles.typingText}>Typing</span>
                                     <span className={styles.typingDots}>
@@ -559,9 +557,7 @@ const AIAdvisorView = () => {
                         onClick={() => handleSendMessage(inputValue)}
                         disabled={!inputValue.trim()}
                     >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
-                        </svg>
+                        <Send size={20} />
                     </button>
                 </div>
                 <p className={styles.inputDisclaimer}>
