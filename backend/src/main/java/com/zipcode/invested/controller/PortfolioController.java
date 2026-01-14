@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.math.RoundingMode;
 
 @RestController
 @RequestMapping("/api/portfolios")
@@ -158,7 +159,7 @@ public class PortfolioController {
         BigDecimal totalGainLoss = totalValue.subtract(totalCostBasis);
         BigDecimal totalGainLossPercent = BigDecimal.ZERO;
         if (totalCostBasis.compareTo(BigDecimal.ZERO) > 0) {
-            totalGainLossPercent = totalGainLoss.divide(totalCostBasis, 4, BigDecimal.ROUND_HALF_UP)
+            totalGainLossPercent = totalGainLoss.divide(totalCostBasis, 4, RoundingMode.HALF_UP)
                                                  .multiply(BigDecimal.valueOf(100));
         }
 
