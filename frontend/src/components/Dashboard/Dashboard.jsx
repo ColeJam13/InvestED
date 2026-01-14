@@ -3,13 +3,13 @@ import GoalCard from '../GoalCard';
 import HoldingsList from '../HoldingsList';
 import styles from './Dashboard.module.css';
 
-const Dashboard = () => {
+const Dashboard = ({ onNavigate }) => {
     return (
         <main className={styles.main}>
             <PortfolioCard />
             
             <div className={styles.bottomSection}>
-                <GoalCard />
+                <GoalCard onNavigate={onNavigate} />
                 <HoldingsList />
             </div>
         </main>
