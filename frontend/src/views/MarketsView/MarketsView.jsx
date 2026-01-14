@@ -1,5 +1,6 @@
 import * as styles from './MarketsView.module.css';
 import React, { useState, useEffect } from 'react';
+import { Flame, TrendingUp } from 'lucide-react';
 import AssetSearch from '../../components/AssetSearch';
 import AssetDetails from '../../components/AssetDetails';
 import { marketService } from '../../services/marketService';
@@ -38,7 +39,6 @@ function MarketsView() {
         ]);
       }
     };
-
     fetchTrending();
     const interval = setInterval(fetchTrending, 5 * 60 * 1000);
     
@@ -52,7 +52,7 @@ function MarketsView() {
         <AssetSearch onAssetSelect={setSelectedSymbol} />
         
         <div className={styles.trendingSection}>
-          <h2>🔥 Trending Today</h2>
+          <h2><Flame size={24} style={{ verticalAlign: 'middle', marginRight: '8px' }} />Trending Today</h2>
           <div className={styles.trendingList}>
             {trendingAssets.map((asset) => (
               <div 
@@ -78,7 +78,7 @@ function MarketsView() {
           <AssetDetails symbol={selectedSymbol} />
         ) : (
           <div className={styles.emptyState}>
-            <div className={styles.emptyIcon}>📈</div>
+            <TrendingUp size={64} className={styles.emptyIcon} />
             <h2>Select an asset to view details</h2>
             <p>Search for a stock or crypto above, or click on a trending asset to get started.</p>
             <div className={styles.quickActions}>
