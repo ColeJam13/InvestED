@@ -1,11 +1,11 @@
 import styles from './Profile.module.css';
 import React, { useState } from 'react';
+import { Shield, Scale, Rocket, ChevronRight, User, Lock, Bell, LogOut, Check } from 'lucide-react';
 import ThemeToggle from '../../components/ThemeToggle';
 
 function Profile() {
   const [riskProfile, setRiskProfile] = useState('moderate');
   
-  // Mock user data - you'll replace this with real data later
   const userData = {
     name: 'Jordan Mitchell',
     email: 'jordan.mitchell@email.com',
@@ -28,21 +28,21 @@ function Profile() {
     {
       id: 'conservative',
       label: 'Conservative',
-      icon: '🛡️',
+      icon: Shield,
       description: 'Lower risk, steady growth. Focus on bonds and stable stocks.',
       allocation: '70% Bonds, 30% Stocks'
     },
     {
       id: 'moderate',
       label: 'Moderate',
-      icon: '⚖️',
+      icon: Scale,
       description: 'Balanced risk and reward. Diversified portfolio.',
       allocation: '50% Stocks, 40% Bonds, 10% Crypto'
     },
     {
       id: 'aggressive',
       label: 'Aggressive',
-      icon: '🚀',
+      icon: Rocket,
       description: 'Higher risk, higher potential returns. Growth-focused.',
       allocation: '80% Stocks, 15% Crypto, 5% Bonds'
     }
@@ -127,23 +127,26 @@ function Profile() {
           </p>
           
           <div className={styles.riskProfiles}>
-            {riskProfiles.map((profile) => (
-              <div
-                key={profile.id}
-                className={`${styles.riskOption} ${riskProfile === profile.id ? styles.selected : ''}`}
-                onClick={() => setRiskProfile(profile.id)}
-              >
-                <div className={styles.riskHeader}>
-                  <span className={styles.riskIcon}>{profile.icon}</span>
-                  <span className={styles.riskLabel}>{profile.label}</span>
-                  {riskProfile === profile.id && (
-                    <span className={styles.checkmark}>✓</span>
-                  )}
+            {riskProfiles.map((profile) => {
+              const IconComponent = profile.icon;
+              return (
+                <div
+                  key={profile.id}
+                  className={`${styles.riskOption} ${riskProfile === profile.id ? styles.selected : ''}`}
+                  onClick={() => setRiskProfile(profile.id)}
+                >
+                  <div className={styles.riskHeader}>
+                    <IconComponent size={20} className={styles.riskIcon} />
+                    <span className={styles.riskLabel}>{profile.label}</span>
+                    {riskProfile === profile.id && (
+                      <Check size={18} className={styles.checkmark} />
+                    )}
+                  </div>
+                  <p className={styles.riskDescription}>{profile.description}</p>
+                  <p className={styles.riskAllocation}>{profile.allocation}</p>
                 </div>
-                <p className={styles.riskDescription}>{profile.description}</p>
-                <p className={styles.riskAllocation}>{profile.allocation}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
@@ -152,16 +155,25 @@ function Profile() {
           <h3 className={styles.cardTitle}>Account Settings</h3>
           <div className={styles.settingsList}>
             <button className={styles.settingButton}>
-              <span>Edit Profile</span>
-              <span>→</span>
+              <span className={styles.settingContent}>
+                <User size={18} className={styles.settingIcon} />
+                Edit Profile
+              </span>
+              <ChevronRight size={18} />
             </button>
             <button className={styles.settingButton}>
-              <span>Change Password</span>
-              <span>→</span>
+              <span className={styles.settingContent}>
+                <Lock size={18} className={styles.settingIcon} />
+                Change Password
+              </span>
+              <ChevronRight size={18} />
             </button>
             <button className={styles.settingButton}>
-              <span>Notification Preferences</span>
-              <span>→</span>
+              <span className={styles.settingContent}>
+                <Bell size={18} className={styles.settingIcon} />
+                Notification Preferences
+              </span>
+              <ChevronRight size={18} />
             </button>
           </div>
         </div>
@@ -180,6 +192,7 @@ function Profile() {
 
         {/* Logout Button */}
         <button className={styles.logoutButton}>
+          <LogOut size={18} />
           <span>Logout</span>
         </button>
       </div>
