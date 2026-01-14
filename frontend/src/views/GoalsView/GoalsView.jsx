@@ -4,9 +4,6 @@ import styles from './GoalsView.module.css';
 const GoalsView = () => {
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [selectedGoal, setSelectedGoal] = useState(null);
-    const [editingGoal, setEditingGoal] = useState(null);
-    const [showContributeModal, setShowContributeModal] = useState(false);
-    const [contributionAmount, setContributionAmount] = useState('');
     const [filter, setFilter] = useState('all');
 
     // Mock goals data (would come from API)
@@ -172,29 +169,9 @@ const GoalsView = () => {
         });
     };
 
-    const parseNumber = (value) => {
-        if (!value) return 0;
-        const cleaned = value.toString().replace(/[,\s$]/g, '');
-        const num = parseFloat(cleaned);
-        return isNaN(num) ? 0 : num;
-    };
-
-    const formatNumberInput = (value) => {
-        if (!value) return '';
-        const cleaned = value.replace(/[^0-9.]/g, '');
-        const parts = cleaned.split('.');
-        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-        return parts.join('.');
-    };
-
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        
-        if (['targetAmount', 'currentAmount', 'monthlyContribution'].includes(name)) {
-            setFormData(prev => ({ ...prev, [name]: formatNumberInput(value) }));
-        } else {
-            setFormData(prev => ({ ...prev, [name]: value }));
-        }
+        setFormData(prev => ({ ...prev, [name]: value }));
     };
 
     const handleCreateGoal = (e) => {
@@ -204,103 +181,17 @@ const GoalsView = () => {
             id: Date.now(),
             title: formData.title,
             description: formData.description,
-            targetAmount: parseNumber(formData.targetAmount),
-            currentAmount: parseNumber(formData.currentAmount),
+            targetAmount: parseFloat(formData.targetAmount),
+            currentAmount: parseFloat(formData.currentAmount) || 0,
             deadline: formData.deadline,
             category: formData.category,
             icon: categoryIcons[formData.category],
             color: categoryColors[formData.category],
-            monthlyContribution: parseNumber(formData.monthlyContribution),
+            monthlyContribution: parseFloat(formData.monthlyContribution) || 0,
             createdAt: new Date().toISOString().split('T')[0],
         };
 
         setGoals(prev => [newGoal, ...prev]);
-        resetForm();
-        setShowCreateForm(false);
-    };
-
-    const handleEditGoal = (e) => {
-        e.preventDefault();
-        
-        setGoals(prev => prev.map(g => {
-            if (g.id === editingGoal.id) {
-                return {
-                    ...g,
-                    title: formData.title,
-                    description: formData.description,
-                    targetAmount: parseNumber(formData.targetAmount),
-                    currentAmount: parseNumber(formData.currentAmount),
-                    deadline: formData.deadline,
-                    category: formData.category,
-                    icon: categoryIcons[formData.category],
-                    color: categoryColors[formData.category],
-                    monthlyContribution: parseNumber(formData.monthlyContribution),
-                };
-            }
-            return g;
-        }));
-        
-        // Update selected goal if viewing details
-        if (selectedGoal && selectedGoal.id === editingGoal.id) {
-            setSelectedGoal({
-                ...selectedGoal,
-                title: formData.title,
-                description: formData.description,
-                targetAmount: parseNumber(formData.targetAmount),
-                currentAmount: parseNumber(formData.currentAmount),
-                deadline: formData.deadline,
-                category: formData.category,
-                icon: categoryIcons[formData.category],
-                color: categoryColors[formData.category],
-                monthlyContribution: parseNumber(formData.monthlyContribution),
-            });
-        }
-        
-        resetForm();
-        setEditingGoal(null);
-    };
-
-    const handleDeleteGoal = (goalId) => {
-        setGoals(prev => prev.filter(g => g.id !== goalId));
-        setSelectedGoal(null);
-    };
-
-    const handleAddContribution = (e) => {
-        e.preventDefault();
-        const amount = parseNumber(contributionAmount);
-        
-        if (amount > 0 && selectedGoal) {
-            setGoals(prev => prev.map(g => {
-                if (g.id === selectedGoal.id) {
-                    return { ...g, currentAmount: g.currentAmount + amount };
-                }
-                return g;
-            }));
-            
-            setSelectedGoal(prev => ({
-                ...prev,
-                currentAmount: prev.currentAmount + amount
-            }));
-            
-            setContributionAmount('');
-            setShowContributeModal(false);
-        }
-    };
-
-    const openEditModal = (goal) => {
-        setFormData({
-            title: goal.title,
-            description: goal.description,
-            targetAmount: goal.targetAmount.toLocaleString(),
-            currentAmount: goal.currentAmount.toLocaleString(),
-            deadline: goal.deadline,
-            category: goal.category,
-            monthlyContribution: goal.monthlyContribution.toLocaleString(),
-        });
-        setEditingGoal(goal);
-    };
-
-    const resetForm = () => {
         setFormData({
             title: '',
             description: '',
@@ -310,84 +201,12 @@ const GoalsView = () => {
             category: 'savings',
             monthlyContribution: '',
         });
+        setShowCreateForm(false);
     };
 
-    // AI Suggestions based on goal
-    const getAISuggestions = (goal) => {
-        const progress = calculateProgress(goal.currentAmount, goal.targetAmount);
-        const remaining = goal.targetAmount - goal.currentAmount;
-        const monthsLeft = Math.ceil((new Date(goal.deadline) - new Date()) / (1000 * 60 * 60 * 24 * 30));
-        const requiredMonthly = monthsLeft > 0 ? remaining / monthsLeft : remaining;
-        
-        const suggestions = [];
-        
-        // Progress-based suggestions
-        if (progress < 25) {
-            suggestions.push({
-                icon: '🚀',
-                title: 'Boost Your Start',
-                description: `You're just getting started! Consider setting up automatic transfers of ${formatCurrency(Math.ceil(requiredMonthly / 4))} weekly to build momentum.`
-            });
-        }
-        
-        if (goal.monthlyContribution < requiredMonthly) {
-            suggestions.push({
-                icon: '📈',
-                title: 'Increase Contributions',
-                description: `To meet your deadline, consider increasing monthly contributions from ${formatCurrency(goal.monthlyContribution)} to ${formatCurrency(Math.ceil(requiredMonthly))}.`
-            });
-        }
-        
-        // Category-specific suggestions
-        if (goal.category === 'savings' || goal.category === 'emergency') {
-            suggestions.push({
-                icon: '🏦',
-                title: 'High-Yield Savings',
-                description: 'Move funds to a high-yield savings account (4-5% APY) to earn interest while saving toward your goal.'
-            });
-        }
-        
-        if (goal.category === 'investment') {
-            suggestions.push({
-                icon: '📊',
-                title: 'Dollar-Cost Averaging',
-                description: 'Invest a fixed amount regularly regardless of market conditions to reduce timing risk and build wealth steadily.'
-            });
-        }
-        
-        if (goal.category === 'travel') {
-            suggestions.push({
-                icon: '✈️',
-                title: 'Travel Rewards',
-                description: 'Consider using a travel rewards credit card for everyday purchases to earn points toward your trip.'
-            });
-        }
-        
-        if (goal.category === 'purchase') {
-            suggestions.push({
-                icon: '🔍',
-                title: 'Price Tracking',
-                description: 'Set up price alerts for your target purchase. Prices often drop during sales events or off-seasons.'
-            });
-        }
-        
-        // General tips
-        if (progress >= 75) {
-            suggestions.push({
-                icon: '🎯',
-                title: 'Almost There!',
-                description: `You're ${progress}% to your goal! Stay focused - consider a small spending freeze to cross the finish line faster.`
-            });
-        }
-        
-        suggestions.push({
-            icon: '💡',
-            title: 'Side Income Boost',
-            description: 'Explore side income opportunities like freelancing or selling unused items to accelerate your progress.'
-        });
-        
-        // Return top 3 most relevant suggestions
-        return suggestions.slice(0, 3);
+    const handleDeleteGoal = (goalId) => {
+        setGoals(prev => prev.filter(g => g.id !== goalId));
+        setSelectedGoal(null);
     };
 
     // Calculate totals
@@ -567,22 +386,24 @@ const GoalsView = () => {
                                 <div className={styles.formGroup}>
                                     <label>Target Amount *</label>
                                     <input
-                                        type="text"
+                                        type="number"
                                         name="targetAmount"
                                         value={formData.targetAmount}
                                         onChange={handleInputChange}
-                                        placeholder="10,000"
+                                        placeholder="$10,000"
+                                        min="1"
                                         required
                                     />
                                 </div>
                                 <div className={styles.formGroup}>
                                     <label>Current Amount</label>
                                     <input
-                                        type="text"
+                                        type="number"
                                         name="currentAmount"
                                         value={formData.currentAmount}
                                         onChange={handleInputChange}
-                                        placeholder="0"
+                                        placeholder="$0"
+                                        min="0"
                                     />
                                 </div>
                             </div>
@@ -601,11 +422,12 @@ const GoalsView = () => {
                                 <div className={styles.formGroup}>
                                     <label>Monthly Contribution</label>
                                     <input
-                                        type="text"
+                                        type="number"
                                         name="monthlyContribution"
                                         value={formData.monthlyContribution}
                                         onChange={handleInputChange}
-                                        placeholder="500"
+                                        placeholder="$500"
+                                        min="0"
                                     />
                                 </div>
                             </div>
@@ -632,7 +454,7 @@ const GoalsView = () => {
                                 <button 
                                     type="button" 
                                     className={styles.cancelBtn}
-                                    onClick={() => { setShowCreateForm(false); resetForm(); }}
+                                    onClick={() => setShowCreateForm(false)}
                                 >
                                     Cancel
                                 </button>
@@ -645,185 +467,10 @@ const GoalsView = () => {
                 </div>
             )}
 
-            {/* Edit Goal Modal */}
-            {editingGoal && (
-                <div className={styles.modalOverlay} onClick={() => { setEditingGoal(null); resetForm(); }}>
-                    <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-                        <div className={styles.modalHeader}>
-                            <h2>Edit Goal</h2>
-                            <button 
-                                className={styles.closeBtn}
-                                onClick={() => { setEditingGoal(null); resetForm(); }}
-                            >
-                                ×
-                            </button>
-                        </div>
-                        
-                        <form onSubmit={handleEditGoal} className={styles.form}>
-                            <div className={styles.formGroup}>
-                                <label>Goal Title *</label>
-                                <input
-                                    type="text"
-                                    name="title"
-                                    value={formData.title}
-                                    onChange={handleInputChange}
-                                    placeholder="e.g., Emergency Fund"
-                                    required
-                                />
-                            </div>
-
-                            <div className={styles.formGroup}>
-                                <label>Description</label>
-                                <textarea
-                                    name="description"
-                                    value={formData.description}
-                                    onChange={handleInputChange}
-                                    placeholder="What is this goal for?"
-                                    rows={3}
-                                />
-                            </div>
-
-                            <div className={styles.formRow}>
-                                <div className={styles.formGroup}>
-                                    <label>Target Amount *</label>
-                                    <input
-                                        type="text"
-                                        name="targetAmount"
-                                        value={formData.targetAmount}
-                                        onChange={handleInputChange}
-                                        placeholder="10,000"
-                                        required
-                                    />
-                                </div>
-                                <div className={styles.formGroup}>
-                                    <label>Current Amount</label>
-                                    <input
-                                        type="text"
-                                        name="currentAmount"
-                                        value={formData.currentAmount}
-                                        onChange={handleInputChange}
-                                        placeholder="0"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className={styles.formRow}>
-                                <div className={styles.formGroup}>
-                                    <label>Target Date *</label>
-                                    <input
-                                        type="date"
-                                        name="deadline"
-                                        value={formData.deadline}
-                                        onChange={handleInputChange}
-                                        required
-                                    />
-                                </div>
-                                <div className={styles.formGroup}>
-                                    <label>Monthly Contribution</label>
-                                    <input
-                                        type="text"
-                                        name="monthlyContribution"
-                                        value={formData.monthlyContribution}
-                                        onChange={handleInputChange}
-                                        placeholder="500"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className={styles.formGroup}>
-                                <label>Category *</label>
-                                <div className={styles.categorySelect}>
-                                    {Object.entries(categoryIcons).map(([key, icon]) => (
-                                        <button
-                                            key={key}
-                                            type="button"
-                                            className={`${styles.categoryOption} ${formData.category === key ? styles.selected : ''}`}
-                                            onClick={() => setFormData(prev => ({ ...prev, category: key }))}
-                                            style={{ '--cat-color': categoryColors[key] }}
-                                        >
-                                            <span>{icon}</span>
-                                            <span>{key.charAt(0).toUpperCase() + key.slice(1)}</span>
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className={styles.formActions}>
-                                <button 
-                                    type="button" 
-                                    className={styles.cancelBtn}
-                                    onClick={() => { setEditingGoal(null); resetForm(); }}
-                                >
-                                    Cancel
-                                </button>
-                                <button type="submit" className={styles.submitBtn}>
-                                    Save Changes
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
-
-            {/* Add Contribution Modal */}
-            {showContributeModal && selectedGoal && (
-                <div className={styles.modalOverlay} onClick={() => setShowContributeModal(false)}>
-                    <div className={styles.modalSmall} onClick={(e) => e.stopPropagation()}>
-                        <div className={styles.modalHeader}>
-                            <h2>Add Contribution</h2>
-                            <button 
-                                className={styles.closeBtn}
-                                onClick={() => setShowContributeModal(false)}
-                            >
-                                ×
-                            </button>
-                        </div>
-                        
-                        <form onSubmit={handleAddContribution} className={styles.form}>
-                            <div className={styles.contributeInfo}>
-                                <p>Adding funds to <strong>{selectedGoal.title}</strong></p>
-                                <p className={styles.contributeProgress}>
-                                    Current: {formatCurrency(selectedGoal.currentAmount)} / {formatCurrency(selectedGoal.targetAmount)}
-                                </p>
-                            </div>
-                            
-                            <div className={styles.formGroup}>
-                                <label>Amount to Add *</label>
-                                <input
-                                    type="text"
-                                    value={contributionAmount}
-                                    onChange={(e) => setContributionAmount(formatNumberInput(e.target.value))}
-                                    placeholder="500"
-                                    required
-                                    autoFocus
-                                />
-                            </div>
-
-                            <div className={styles.formActions}>
-                                <button 
-                                    type="button" 
-                                    className={styles.cancelBtn}
-                                    onClick={() => setShowContributeModal(false)}
-                                >
-                                    Cancel
-                                </button>
-                                <button 
-                                    type="submit" 
-                                    className={styles.submitBtn}
-                                    style={{ backgroundColor: selectedGoal.color }}
-                                >
-                                    Add Funds
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
-
             {/* Goal Details Modal */}
-            {selectedGoal && !editingGoal && !showContributeModal && (
+            {selectedGoal && (
                 <div className={styles.modalOverlay} onClick={() => setSelectedGoal(null)}>
-                    <div className={styles.modalLarge} onClick={(e) => e.stopPropagation()}>
+                    <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
                         <div 
                             className={styles.detailsHeader}
                             style={{ background: `linear-gradient(135deg, ${selectedGoal.color}20, ${selectedGoal.color}10)` }}
@@ -932,38 +579,12 @@ const GoalsView = () => {
                                 </div>
                             </div>
 
-                            {/* AI Suggestions */}
-                            <div className={styles.aiSuggestions}>
-                                <div className={styles.aiHeader}>
-                                    <span className={styles.aiIcon}>🤖</span>
-                                    <h3>AI Suggestions</h3>
-                                </div>
-                                <div className={styles.suggestionsList}>
-                                    {getAISuggestions(selectedGoal).map((suggestion, idx) => (
-                                        <div key={idx} className={styles.suggestionItem}>
-                                            <span className={styles.suggestionIcon}>{suggestion.icon}</span>
-                                            <div className={styles.suggestionContent}>
-                                                <h4>{suggestion.title}</h4>
-                                                <p>{suggestion.description}</p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
                             {/* Action Buttons */}
                             <div className={styles.detailsActions}>
-                                <button 
-                                    className={styles.editBtn}
-                                    onClick={() => openEditModal(selectedGoal)}
-                                >
+                                <button className={styles.editBtn}>
                                     ✏️ Edit Goal
                                 </button>
-                                <button 
-                                    className={styles.contributeBtn} 
-                                    style={{ backgroundColor: selectedGoal.color }}
-                                    onClick={() => setShowContributeModal(true)}
-                                >
+                                <button className={styles.contributeBtn} style={{ backgroundColor: selectedGoal.color }}>
                                     💰 Add Contribution
                                 </button>
                                 <button 
