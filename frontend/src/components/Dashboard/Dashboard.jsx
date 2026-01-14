@@ -10,7 +10,7 @@ const Dashboard = ({ onNavigate }) => {
             
             <div className={styles.bottomSection}>
                 <GoalCard onNavigate={onNavigate} />
-                <HoldingsList />
+                <HoldingsList onNavigate={onNavigate} />
             </div>
         </main>
     );

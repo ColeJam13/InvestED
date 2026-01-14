@@ -2,55 +2,57 @@ import styles from './BottomNav.module.css';
 
 const BottomNav = ({ activeView, onNavigate }) => {
     const navItems = [
-        {
-            id: 'home',
-            label: 'Home',
+        { 
+            id: 'home', 
+            label: 'Home', 
             icon: (
-                <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+                <svg viewBox="0 0 24 24">
                     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                     <polyline points="9 22 9 12 15 12 15 22"></polyline>
                 </svg>
-            ),
+            )
         },
-        {
-            id: 'markets',
-            label: 'Markets',
+        { 
+            id: 'markets', 
+            label: 'Markets', 
             icon: (
-                <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="18" y1="20" x2="18" y2="10"></line>
-                    <line x1="12" y1="20" x2="12" y2="4"></line>
-                    <line x1="6" y1="20" x2="6" y2="14"></line>
+                <svg viewBox="0 0 24 24">
+                    <line x1="12" y1="20" x2="12" y2="10"></line>
+                    <line x1="18" y1="20" x2="18" y2="4"></line>
+                    <line x1="6" y1="20" x2="6" y2="16"></line>
                 </svg>
-            ),
+            )
         },
-        {
-            id: 'advisor',
-            label: 'AI Advisor',
+        { 
+            id: 'portfolio', 
+            label: 'Portfolio', 
             icon: (
-                <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                <svg viewBox="0 0 24 24">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
                 </svg>
-            ),
+            )
         },
-        {
-            id: 'learn',
-            label: 'Learn',
+        { 
+            id: 'learn', 
+            label: 'Learn', 
             icon: (
-                <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
-                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                <svg viewBox="0 0 24 24">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
                 </svg>
-            ),
+            )
         },
-        {
-            id: 'profile',
-            label: 'Profile',
+        { 
+            id: 'advisor', 
+            label: 'Advisor', 
             icon: (
-                <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
+                <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 16v-4"></path>
+                    <path d="M12 8h.01"></path>
                 </svg>
-            ),
+            )
         },
     ];
 
@@ -63,7 +65,7 @@ const BottomNav = ({ activeView, onNavigate }) => {
                     onClick={() => onNavigate(item.id)}
                 >
                     {item.icon}
-                    <span>{item.label}</span>
+                    <span className={styles.label}>{item.label}</span>
                 </button>
             ))}
         </nav>
