@@ -152,20 +152,36 @@ const PortfolioView = () => {
         const sharesToSell = parseFloat(sellAmount);
         if (sharesToSell > 0 && sharesToSell <= selectedPosition.quantity) {
             try {
-                await axios.post(`http://localhost:8080/api/portfolios/${selectedPosition.portfolioId}/sell`, {
-                    symbol: selectedPosition.symbol,
-                    quantity: sharesToSell,
-                    price: selectedPosition.currentPrice
-                });
-                fetchData();
+                const response = await axios.post(
+                    `http://localhost:8080/api/portfolios/${selectedPosition.portfolioId}/sell`,
+                    {
+                        positionId: selectedPosition.id,
+                        quantity: sharesToSell,
+                        currentPrice: selectedPosition.currentPrice
+                    }
+                );
+                
+                alert(`✅ Successfully sold ${formatShares(sharesToSell)} shares of ${selectedPosition.symbol}!`);
+                
+                // Refresh data
+                const [portfoliosRes, positionsRes] = await Promise.all([
+                    axios.get('http://localhost:8080/api/portfolios/user/1'),
+                    axios.get('http://localhost:8080/api/portfolios/user/1/all-positions')
+                ]);
+                
+                setPortfolios(portfoliosRes.data);
+                setPositions(positionsRes.data);
+                
+                // Close modal
+                setShowSellModal(false);
+                setSelectedPosition(null);
+                setSellAmount('');
+                setShowConfirmation(false);
             } catch (error) {
-                console.error('Error selling position:', error);
+                console.error('Sell failed:', error);
+                alert(`❌ Sell failed: ${error.response?.data || error.message}`);
             }
         }
-        setShowSellModal(false);
-        setSelectedPosition(null);
-        setSellAmount('');
-        setShowConfirmation(false);
     };
 
     const getSortIcon = (column) => {

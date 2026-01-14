@@ -82,6 +82,34 @@ public class PortfolioController {
         }
     }
 
+    @PostMapping("/{portfolioId}/sell")
+    public ResponseEntity<?> executeSell(
+            @PathVariable Long portfolioId,
+            @RequestBody Map<String, Object> sellRequest) {
+        try {
+            Long positionId = Long.valueOf(sellRequest.get("positionId").toString());
+            BigDecimal quantity = new BigDecimal(sellRequest.get("quantity").toString());
+            BigDecimal currentPrice = new BigDecimal(sellRequest.get("currentPrice").toString());
+            
+            PortfolioPosition position = portfolioService.executeSell(portfolioId, positionId, quantity, currentPrice);
+            
+            Map<String, Object> response = new HashMap<>();
+            if (position == null) {
+                response.put("message", "Position fully closed");
+                response.put("positionClosed", true);
+            } else {
+                response.put("message", "Sell successful");
+                response.put("position", position);
+                response.put("positionClosed", false);
+            }
+            
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    // Get user's total portfolio summary (combined across all portfolios)
     @GetMapping("/user/{userId}/summary")
     public ResponseEntity<Map<String, Object>> getUserPortfolioSummary(@PathVariable Long userId) {
         User user = userService.findById(userId).orElse(null);
@@ -99,19 +127,24 @@ public class PortfolioController {
             List<PortfolioPosition> positions = positionService.findByPortfolio(portfolio);
             totalPositions += positions.size();
             
+            // Calculate portfolio value with real-time prices from Finnhub
             for (PortfolioPosition position : positions) {
                 try {
+                    // Fetch current price from Finnhub
                     String quoteJson = finnhubService.getQuote(position.getAsset().getSymbol());
                     JsonNode quoteNode = objectMapper.readTree(quoteJson);
                     BigDecimal currentPrice = BigDecimal.valueOf(quoteNode.get("c").asDouble());
                     
+                    // Calculate position value
                     BigDecimal positionValue = position.getQuantity().multiply(currentPrice);
                     totalValue = totalValue.add(positionValue);
                     
+                    // Calculate cost basis
                     BigDecimal costBasis = position.getQuantity().multiply(position.getAverageBuyPrice());
                     totalCostBasis = totalCostBasis.add(costBasis);
                 } catch (Exception e) {
                     System.err.println("Error fetching price for " + position.getAsset().getSymbol() + ": " + e.getMessage());
+                    // Fallback to average buy price if API fails
                     BigDecimal fallbackValue = position.getQuantity().multiply(position.getAverageBuyPrice());
                     totalValue = totalValue.add(fallbackValue);
                     totalCostBasis = totalCostBasis.add(fallbackValue);
@@ -119,8 +152,8 @@ public class PortfolioController {
             }
         }
         
-        totalValue = totalValue.add(totalCash); 
-        totalCostBasis = totalCostBasis.add(totalCash); 
+        totalValue = totalValue.add(totalCash); // Total value includes cash
+        totalCostBasis = totalCostBasis.add(totalCash); // Cost basis includes initial cash
         
         BigDecimal totalGainLoss = totalValue.subtract(totalCostBasis);
         BigDecimal totalGainLossPercent = BigDecimal.ZERO;
@@ -141,6 +174,7 @@ public class PortfolioController {
         return ResponseEntity.ok(summary);
     }
 
+    // Get all positions across all user's portfolios with real-time prices
     @GetMapping("/user/{userId}/all-positions")
     public ResponseEntity<List<Map<String, Object>>> getAllUserPositions(@PathVariable Long userId) {
         User user = userService.findById(userId).orElse(null);
@@ -164,6 +198,7 @@ public class PortfolioController {
                 positionData.put("averageBuyPrice", position.getAverageBuyPrice());
                 positionData.put("updatedAt", position.getUpdatedAt());
                 
+                // Fetch real-time current price from Finnhub
                 try {
                     String quoteJson = finnhubService.getQuote(position.getAsset().getSymbol());
                     JsonNode quoteNode = objectMapper.readTree(quoteJson);
@@ -171,6 +206,7 @@ public class PortfolioController {
                     positionData.put("currentPrice", currentPrice);
                 } catch (Exception e) {
                     System.err.println("Error fetching price for " + position.getAsset().getSymbol() + ": " + e.getMessage());
+                    // Fallback to average buy price
                     positionData.put("currentPrice", position.getAverageBuyPrice().doubleValue());
                 }
                 

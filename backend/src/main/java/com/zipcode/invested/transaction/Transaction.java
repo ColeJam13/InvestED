@@ -38,7 +38,7 @@ public class Transaction {
     @Column(nullable = false)
     private Instant transactionDate = Instant.now();
 
-    protected Transaction() {}
+    public Transaction() {}
 
     public Transaction(Portfolio portfolio, Asset asset, String transactionType, 
                        BigDecimal quantity, BigDecimal priceAtTransaction) {
