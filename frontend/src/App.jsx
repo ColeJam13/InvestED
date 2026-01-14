@@ -6,6 +6,7 @@ import MarketsView from './views/MarketsView';
 import LearnView from './views/LearnView';
 import AIAdvisorView from './views/AIAdvisorView';
 import GoalsView from './views/GoalsView';
+import PortfolioView from './views/PortfolioView';
 import BottomNav from './components/BottomNav';
 import './styles/global.css';
 
@@ -24,6 +25,8 @@ function App() {
                 return <AIAdvisorView />;
             case 'goals':
                 return <GoalsView />;
+            case 'portfolio':
+                return <PortfolioView />;
             case 'profile':
                 return <ComingSoon title="Profile" icon="👤" />;
             default:
@@ -42,7 +45,6 @@ function App() {
     );
 }
 
-// Placeholder for views not yet built
 const ComingSoon = ({ title, icon }) => (
     <div style={{
         display: 'flex',
