@@ -3,30 +3,25 @@ import axios from 'axios';
 const API_BASE_URL = 'http://localhost:8080/api/market';
 
 export const marketService = {
-  searchAssets: async (query) => {
+  searchAssets: async (query, type = 'stock') => {
     try {
       const response = await axios.get(`${API_BASE_URL}/search`, {
-        params: { query }
+        params: { query, type }
       });
-      
       // Log to see what we're getting
-      console.log('Finnhub search response:', response.data);
-      
-      // Transform Finnhub search response to match expected format
-      const finnhubData = response.data;
-      
-      // Finnhub returns { count: number, result: [...] }
-      if (finnhubData.result) {
+      console.log('Search response:', response.data);
+      // Return the data directly since backend now returns correct format
+      const searchData = response.data;
+      if (searchData.result) {
         return {
-          data: finnhubData.result.map(item => ({
+          data: searchData.result.map(item => ({
             symbol: item.symbol,
-            instrument_name: item.description,
-            instrument_type: item.type || 'Stock',
-            displaySymbol: item.displaySymbol
+            instrument_name: item.instrument_name || item.description,
+            instrument_type: item.instrument_type || item.type || 'Stock',
+            displaySymbol: item.displaySymbol || item.symbol
           }))
         };
       }
-      
       return { data: [] };
     } catch (error) {
       console.error('Search error:', error);
@@ -39,7 +34,6 @@ export const marketService = {
       const response = await axios.get(`${API_BASE_URL}/quote`, {
         params: { symbol }
       });
-      
       // Log to see what we're getting
       console.log('Finnhub quote response for', symbol, ':', response.data);
       
