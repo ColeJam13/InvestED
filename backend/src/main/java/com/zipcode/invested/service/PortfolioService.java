@@ -12,6 +12,8 @@ import com.zipcode.invested.transaction.TransactionRepository;
 import com.zipcode.invested.user.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.math.RoundingMode;
+
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -90,7 +92,7 @@ public class PortfolioService {
             BigDecimal currentValue = position.getQuantity().multiply(position.getAverageBuyPrice());
             BigDecimal newValue = buyRequest.getQuantity().multiply(buyRequest.getCurrentPrice());
             BigDecimal totalQuantity = position.getQuantity().add(buyRequest.getQuantity());
-            BigDecimal newAvgPrice = currentValue.add(newValue).divide(totalQuantity, 6, BigDecimal.ROUND_HALF_UP);
+            BigDecimal newAvgPrice = currentValue.add(newValue).divide(totalQuantity, 6, RoundingMode.HALF_UP);
 
             position.setQuantity(totalQuantity);
             position.setAverageBuyPrice(newAvgPrice);
