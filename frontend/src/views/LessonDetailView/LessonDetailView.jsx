@@ -1,19 +1,36 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, BookOpen, CheckCircle, XCircle, ChevronRight, ChevronLeft, Award, RotateCcw } from 'lucide-react';
 import styles from './LessonDetailView.module.css';
 import { lessonContent } from '../../data/lessonContent';
 
-const LessonDetailView = ({ lessonId, onBack }) => {
-    const [currentSection, setCurrentSection] = useState(0);
-    const [showQuiz, setShowQuiz] = useState(false);
-    const [currentQuestion, setCurrentQuestion] = useState(0);
+const LessonDetailView = ({ lessonId, onBack, initialProgress }) => {
+    const [currentSection, setCurrentSection] = useState(initialProgress?.currentSection || 0);
+    const [showQuiz, setShowQuiz] = useState(initialProgress?.showQuiz || false);
+    const [currentQuestion, setCurrentQuestion] = useState(initialProgress?.currentQuestion || 0);
     const [selectedAnswer, setSelectedAnswer] = useState(null);
     const [showResult, setShowResult] = useState(false);
-    const [score, setScore] = useState(0);
-    const [quizComplete, setQuizComplete] = useState(false);
-    const [answers, setAnswers] = useState([]);
+    const [score, setScore] = useState(initialProgress?.score || 0);
+    const [quizComplete, setQuizComplete] = useState(initialProgress?.completed || false);
+    const [answers, setAnswers] = useState(initialProgress?.answers || []);
 
     const lesson = lessonContent[lessonId];
+
+    // Save progress when navigating away
+    const saveProgress = (completed = false) => {
+        return {
+            currentSection,
+            showQuiz,
+            currentQuestion,
+            score,
+            answers,
+            quizAnswered: answers.length,
+            completed
+        };
+    };
+
+    const handleBack = (completed = false) => {
+        onBack(lessonId, saveProgress(completed));
+    };
 
     if (!lesson) {
         return (
@@ -21,7 +38,7 @@ const LessonDetailView = ({ lessonId, onBack }) => {
                 <div className={styles.notFound}>
                     <h2>Lesson Not Found</h2>
                     <p>This lesson content is coming soon!</p>
-                    <button className={styles.backBtn} onClick={onBack}>
+                    <button className={styles.backBtn} onClick={() => onBack(lessonId, null)}>
                         <ArrowLeft size={20} />
                         Back to Lessons
                     </button>
@@ -97,9 +114,23 @@ const LessonDetailView = ({ lessonId, onBack }) => {
         handleRestartQuiz();
     };
 
-    const progressPercent = showQuiz 
-        ? ((currentQuestion + 1) / totalQuestions) * 100
-        : ((currentSection + 1) / totalSections) * 100;
+    // Calculate overall progress percentage
+    const getProgressPercent = () => {
+        const totalSteps = totalSections + totalQuestions;
+        let completedSteps = currentSection;
+        
+        if (showQuiz) {
+            completedSteps = totalSections + answers.length;
+        }
+        
+        if (quizComplete) {
+            return 100;
+        }
+        
+        return Math.round((completedSteps / totalSteps) * 100);
+    };
+
+    const progressPercent = getProgressPercent();
 
     if (quizComplete) {
         const percentage = Math.round((score / totalQuestions) * 100);
@@ -148,7 +179,7 @@ const LessonDetailView = ({ lessonId, onBack }) => {
                                 Review Lesson
                             </button>
                         )}
-                        <button className={styles.backBtnLarge} onClick={onBack}>
+                        <button className={styles.backBtnLarge} onClick={() => handleBack(passed)}>
                             <ArrowLeft size={18} />
                             Back to Lessons
                         </button>
@@ -170,6 +201,7 @@ const LessonDetailView = ({ lessonId, onBack }) => {
                     </button>
                     <div className={styles.progressInfo}>
                         <span>Quiz: Question {currentQuestion + 1} of {totalQuestions}</span>
+                        <span className={styles.progressPercent}>{progressPercent}%</span>
                     </div>
                 </div>
 
@@ -240,13 +272,14 @@ const LessonDetailView = ({ lessonId, onBack }) => {
     return (
         <div className={styles.container}>
             <div className={styles.header}>
-                <button className={styles.backBtn} onClick={onBack}>
+                <button className={styles.backBtn} onClick={() => handleBack(false)}>
                     <ArrowLeft size={20} />
                     Back to Lessons
                 </button>
                 <div className={styles.progressInfo}>
                     <BookOpen size={18} />
                     <span>Section {currentSection + 1} of {totalSections}</span>
+                    <span className={styles.progressPercent}>{progressPercent}%</span>
                 </div>
             </div>
 
