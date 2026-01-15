@@ -1590,3 +1590,337 @@
         max-width: 85%;
     }
 }
+
+/* ========== LIGHT MODE FIXES FOR AI ADVISOR ========== */
+:global(body.light-mode) .aiAdvisorView {
+    background: var(--bg-primary);
+}
+
+:global(body.light-mode) .toolbar {
+    background: linear-gradient(135deg, #80C4B7 0%, #3D9B89 100%);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+:global(body.light-mode) .toolbarBtn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+:global(body.light-mode) .toolbarBtn:hover,
+:global(body.light-mode) .toolbarBtn.active {
+    background: rgba(255, 255, 255, 0.35);
+}
+
+:global(body.light-mode) .activeStyle {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+:global(body.light-mode) .greetingBubble {
+    background: #FFFFFF;
+    border: 1px solid var(--border-color);
+}
+
+:global(body.light-mode) .messageBubble {
+    background: #FFFFFF;
+}
+
+:global(body.light-mode) .userBubble {
+    background: linear-gradient(135deg, #3D9B89 0%, #80C4B7 100%);
+}
+
+:global(body.light-mode) .styleSelector {
+    background: #FFFFFF;
+    border-bottom: 1px solid var(--border-color);
+}
+
+:global(body.light-mode) .styleOption {
+    background: #FAFAFA;
+    border: 1px solid var(--border-color);
+}
+
+:global(body.light-mode) .styleOption:hover {
+    background: #FFFFFF;
+}
+
+:global(body.light-mode) .styleOption.selectedOption {
+    background: #FFFFFF;
+}
+
+:global(body.light-mode) .educationBubble {
+    background: linear-gradient(135deg, rgba(61, 155, 137, 0.1) 0%, rgba(128, 196, 183, 0.1) 100%);
+    border: 1px solid rgba(61, 155, 137, 0.3);
+    border-left: 4px solid #3D9B89;
+}
+
+:global(body.light-mode) .educationBubble .educationHeader {
+    color: #3D9B89;
+}
+
+:global(body.light-mode) .educationIcon {
+    color: #3D9B89;
+}
+
+:global(body.light-mode) .portfolioBubble {
+    background: #FFFFFF;
+    border: 1px solid var(--border-color);
+}
+
+:global(body.light-mode) .typingIndicator {
+    background: #FFFFFF;
+    border: 1px solid var(--border-color);
+}
+
+:global(body.light-mode) .quickPrompts {
+    background: #FFFFFF;
+    border-top: 1px solid var(--border-color);
+}
+
+:global(body.light-mode) .quickPromptBtn {
+    background: #FAFAFA;
+    border: 1px solid var(--border-color);
+}
+
+:global(body.light-mode) .quickPromptBtn:hover {
+    border-color: #3D9B89;
+    color: #3D9B89;
+    box-shadow: 0 4px 12px rgba(61, 155, 137, 0.2);
+}
+
+:global(body.light-mode) .inputArea {
+    background: #FFFFFF;
+    border-top: 1px solid var(--border-color);
+}
+
+:global(body.light-mode) .chatInput {
+    background: #FAFAFA;
+    border: 2px solid var(--border-color);
+}
+
+:global(body.light-mode) .chatInput:focus {
+    border-color: #3D9B89;
+    box-shadow: 0 0 0 3px rgba(61, 155, 137, 0.1);
+}
+
+:global(body.light-mode) .sendButton {
+    background: linear-gradient(135deg, #3D9B89 0%, #80C4B7 100%);
+    box-shadow: 0 4px 12px rgba(61, 155, 137, 0.3);
+}
+
+:global(body.light-mode) .sendButton:hover:not(:disabled) {
+    box-shadow: 0 6px 20px rgba(61, 155, 137, 0.4);
+}
+
+:global(body.light-mode) .messagesArea {
+    background: linear-gradient(180deg, #F5F5F5 0%, #FAFAFA 100%);
+}
+
+:global(body.light-mode) .historySidebar {
+    background: #FFFFFF;
+    border-right: 1px solid var(--border-color);
+}
+
+:global(body.light-mode) .sidebarHeader {
+    border-bottom: 1px solid var(--border-color);
+}
+
+:global(body.light-mode) .historyItem:hover {
+    background: #F5F5F5;
+}
+
+:global(body.light-mode) .portfolioPanel {
+    background: #FFFFFF;
+    border-left: 1px solid var(--border-color);
+}
+
+:global(body.light-mode) .portfolioPanelHeader {
+    border-bottom: 1px solid var(--border-color);
+}
+
+:global(body.light-mode) .portfolioSummary {
+    border-bottom: 1px solid var(--border-color);
+}
+
+:global(body.light-mode) .metaItem {
+    background: #F5F5F5;
+}
+
+:global(body.light-mode) .holdingItem {
+    border-bottom: 1px solid var(--border-color);
+}
+
+:global(body.light-mode) .messageActions {
+    border-top: 1px solid var(--border-color);
+}
+
+:global(body.light-mode) .actionBtn:hover {
+    background: #F5F5F5;
+    color: #3D9B89;
+}
+
+/* ========== LIGHT MODE FIXES FOR AI ADVISOR ========== */
+:global(body.light-mode) .aiAdvisorView {
+    background: var(--bg-primary);
+}
+
+:global(body.light-mode) .toolbar {
+    background: linear-gradient(135deg, #80C4B7 0%, #3D9B89 100%);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+:global(body.light-mode) .toolbarBtn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+:global(body.light-mode) .toolbarBtn:hover,
+:global(body.light-mode) .toolbarBtn.active {
+    background: rgba(255, 255, 255, 0.35);
+}
+
+:global(body.light-mode) .activeStyle {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+:global(body.light-mode) .greetingBubble {
+    background: #FFFFFF;
+    border: 1px solid var(--border-color);
+}
+
+:global(body.light-mode) .messageBubble {
+    background: #FFFFFF;
+}
+
+:global(body.light-mode) .userBubble {
+    background: linear-gradient(135deg, #3D9B89 0%, #80C4B7 100%);
+}
+
+:global(body.light-mode) .styleSelector {
+    background: #FFFFFF;
+    border-bottom: 1px solid var(--border-color);
+}
+
+:global(body.light-mode) .styleOption {
+    background: #FAFAFA;
+    border: 1px solid var(--border-color);
+}
+
+:global(body.light-mode) .styleOption:hover {
+    background: #FFFFFF;
+}
+
+:global(body.light-mode) .styleOption.selectedOption {
+    background: #FFFFFF;
+}
+
+:global(body.light-mode) .educationBubble {
+    background: linear-gradient(135deg, rgba(61, 155, 137, 0.1) 0%, rgba(128, 196, 183, 0.1) 100%);
+    border: 1px solid rgba(61, 155, 137, 0.3);
+    border-left: 4px solid #3D9B89;
+}
+
+:global(body.light-mode) .educationBubble .educationHeader {
+    color: #3D9B89;
+}
+
+:global(body.light-mode) .educationIcon {
+    color: #3D9B89;
+}
+
+:global(body.light-mode) .portfolioBubble {
+    background: #FFFFFF;
+    border: 1px solid var(--border-color);
+}
+
+:global(body.light-mode) .typingIndicator {
+    background: #FFFFFF;
+    border: 1px solid var(--border-color);
+}
+
+:global(body.light-mode) .quickPrompts {
+    background: #FFFFFF;
+    border-top: 1px solid var(--border-color);
+}
+
+:global(body.light-mode) .quickPromptBtn {
+    background: #FAFAFA;
+    border: 1px solid var(--border-color);
+}
+
+:global(body.light-mode) .quickPromptBtn:hover {
+    border-color: #3D9B89;
+    color: #3D9B89;
+    box-shadow: 0 4px 12px rgba(61, 155, 137, 0.2);
+}
+
+:global(body.light-mode) .inputArea {
+    background: #FFFFFF;
+    border-top: 1px solid var(--border-color);
+}
+
+:global(body.light-mode) .chatInput {
+    background: #FAFAFA;
+    border: 2px solid var(--border-color);
+}
+
+:global(body.light-mode) .chatInput:focus {
+    border-color: #3D9B89;
+    box-shadow: 0 0 0 3px rgba(61, 155, 137, 0.1);
+}
+
+:global(body.light-mode) .sendButton {
+    background: linear-gradient(135deg, #3D9B89 0%, #80C4B7 100%);
+    box-shadow: 0 4px 12px rgba(61, 155, 137, 0.3);
+}
+
+:global(body.light-mode) .sendButton:hover:not(:disabled) {
+    box-shadow: 0 6px 20px rgba(61, 155, 137, 0.4);
+}
+
+:global(body.light-mode) .messagesArea {
+    background: linear-gradient(180deg, #F5F5F5 0%, #FAFAFA 100%);
+}
+
+:global(body.light-mode) .historySidebar {
+    background: #FFFFFF;
+    border-right: 1px solid var(--border-color);
+}
+
+:global(body.light-mode) .sidebarHeader {
+    border-bottom: 1px solid var(--border-color);
+}
+
+:global(body.light-mode) .historyItem:hover {
+    background: #F5F5F5;
+}
+
+:global(body.light-mode) .portfolioPanel {
+    background: #FFFFFF;
+    border-left: 1px solid var(--border-color);
+}
+
+:global(body.light-mode) .portfolioPanelHeader {
+    border-bottom: 1px solid var(--border-color);
+}
+
+:global(body.light-mode) .portfolioSummary {
+    border-bottom: 1px solid var(--border-color);
+}
+
+:global(body.light-mode) .metaItem {
+    background: #F5F5F5;
+}
+
+:global(body.light-mode) .holdingItem {
+    border-bottom: 1px solid var(--border-color);
+}
+
+:global(body.light-mode) .messageActions {
+    border-top: 1px solid var(--border-color);
+}
+
+:global(body.light-mode) .actionBtn:hover {
+    background: #F5F5F5;
+    color: #3D9B89;
+}

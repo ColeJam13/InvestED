@@ -167,3 +167,15 @@
 .quickActionBtn:active {
   transform: translateY(0);
 }
+/* Dark mode button styles */
+:global(body.dark-mode) .quickActionBtn {
+    background: linear-gradient(135deg, #1E3A5F 0%, #2D5A87 100%);
+    color: #80C4B7;
+    border: none;
+}
+
+:global(body.dark-mode) .quickActionBtn:hover {
+    background: linear-gradient(135deg, #2D5A87 0%, #3D6A97 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(30, 58, 95, 0.4);
+}

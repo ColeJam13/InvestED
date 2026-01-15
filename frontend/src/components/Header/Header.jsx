@@ -7,24 +7,24 @@ import styles from './Header.module.css';
 const GradCapDollar = ({ size = 24 }) => (
     <svg 
         width={size} 
-        height={size} 
-        viewBox="0 0 36 28" 
+        height={size * 0.75} 
+        viewBox="0 0 40 28" 
         fill="none" 
         stroke="currentColor" 
         strokeWidth="2" 
         strokeLinecap="round" 
         strokeLinejoin="round"
     >
-        {/* Cap top - shifted right to center visually */}
+        {/* Cap top - centered in wider viewBox */}
         <polygon points="18 1 4 9 18 17 32 9 18 1" />
         {/* Cap base */}
         <path d="M8 11v7c0 2.5 4 5 10 5s10-2.5 10-5v-7" />
         {/* Tassel string */}
-        <line x1="32" y1="9" x2="32" y2="15" />
+        <line x1="32" y1="9" x2="32" y2="14" />
         {/* Dollar sign as tassel end */}
         <text 
             x="32" 
-            y="23" 
+            y="22" 
             fontSize="11" 
             fontWeight="bold" 
             textAnchor="middle" 
@@ -94,7 +94,7 @@ const Header = ({ onNavigate }) => {
                 <button className={styles.logoButton} onClick={handleLogoClick}>
                     <div className={styles.logo}>
                         <div className={styles.logoIcon}>
-                            <GradCapDollar size={38} />
+                            <GradCapDollar size={44} />
                         </div>
                         <div className={styles.logoText}>
                             <span className={styles.logoInvest}>INVEST</span>
