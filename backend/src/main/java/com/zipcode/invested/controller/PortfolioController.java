@@ -7,10 +7,9 @@ import com.zipcode.invested.service.UserService;
 import com.zipcode.invested.service.PortfolioPositionService;
 import com.zipcode.invested.service.FinnhubService;
 import com.zipcode.invested.user.User;
-
 import jakarta.validation.Valid;
-
 import com.zipcode.invested.dto.BuyRequest;
+import com.zipcode.invested.dto.SellRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -108,10 +107,11 @@ public class PortfolioController {
     @PostMapping("/{portfolioId}/sell")
     public ResponseEntity<?> executeSell(
             @PathVariable Long portfolioId,
-            @RequestBody Map<String, Object> sellRequest) {
+            @Valid @RequestBody SellRequest sellRequest
+    ) {
         try {
-           Long positionId = Long.valueOf(sellRequest.get("positionId").toString());
-           BigDecimal quantity = new BigDecimal(sellRequest.get("quantity").toString());
+                Long positionId = sellRequest.getPositionId();
+                BigDecimal quantity = sellRequest.getQuantity();
 
         Portfolio portfolio = portfolioService.findById(portfolioId)
             .orElseThrow(() -> new IllegalArgumentException("Portfolio not found: " + portfolioId));
