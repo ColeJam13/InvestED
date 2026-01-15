@@ -1,47 +1,56 @@
 package com.zipcode.invested.controller;
 
-import com.zipcode.invested.dto.BuyRequest;
-import com.zipcode.invested.dto.PortfolioSummary;
-import com.zipcode.invested.dto.SellRequest;
 import com.zipcode.invested.portfolio.Portfolio;
 import com.zipcode.invested.position.PortfolioPosition;
-import com.zipcode.invested.service.MarketDataService;
-import com.zipcode.invested.service.PortfolioPositionService;
 import com.zipcode.invested.service.PortfolioService;
-import com.zipcode.invested.service.PortfolioSummaryService;
 import com.zipcode.invested.service.UserService;
+import com.zipcode.invested.service.PortfolioPositionService;
+import com.zipcode.invested.service.FinnhubService;
 import com.zipcode.invested.user.User;
-import jakarta.validation.Valid;
+import com.zipcode.invested.dto.BuyRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zipcode.invested.dto.PortfolioSummary;
+import com.zipcode.invested.service.PortfolioSummaryService;
+import com.zipcode.invested.service.TwelveDataService;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.math.RoundingMode;
-import java.util.*;
 
 @RestController
 @RequestMapping("/api/portfolios")
+@CrossOrigin(origins = "http://localhost:5173")
 public class PortfolioController {
 
     private final PortfolioService portfolioService;
     private final UserService userService;
     private final PortfolioPositionService positionService;
+    private final FinnhubService finnhubService;
+    private final ObjectMapper objectMapper;
     private final PortfolioSummaryService portfolioSummaryService;
-    private final MarketDataService marketDataService;
+    private final TwelveDataService twelveDataService; // ADD THIS LINE
 
-    public PortfolioController(
-            PortfolioService portfolioService,
-            UserService userService,
-            PortfolioPositionService positionService,
-            MarketDataService marketDataService,
-            PortfolioSummaryService portfolioSummaryService
-    ) {
+
+    public PortfolioController(PortfolioService portfolioService, 
+                            UserService userService,
+                            PortfolioPositionService positionService,
+                            FinnhubService finnhubService, 
+                            PortfolioSummaryService portfolioSummaryService,
+                            TwelveDataService twelveDataService) { // ADD THIS PARAMETER
         this.portfolioService = portfolioService;
         this.userService = userService;
         this.positionService = positionService;
-        this.marketDataService = marketDataService;
+        this.finnhubService = finnhubService;
+        this.objectMapper = new ObjectMapper();
         this.portfolioSummaryService = portfolioSummaryService;
+        this.twelveDataService = twelveDataService; // ADD THIS LINE
     }
 
     @GetMapping
@@ -60,12 +69,17 @@ public class PortfolioController {
     public ResponseEntity<List<Portfolio>> getByUser(@PathVariable Long userId) {
         User user = userService.findById(userId).orElse(null);
         if (user == null) return ResponseEntity.notFound().build();
+
         return ResponseEntity.ok(portfolioService.findByUser(user));
     }
 
     @GetMapping("/{id}/summary")
     public ResponseEntity<PortfolioSummary> getSummary(@PathVariable Long id) {
-        return ResponseEntity.ok(portfolioSummaryService.buildSummary(id));
+        try {
+            return ResponseEntity.ok(portfolioSummaryService.buildSummary(id));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping("/user/{userId}")
@@ -79,92 +93,93 @@ public class PortfolioController {
     }
 
     @PostMapping("/{portfolioId}/buy")
-    public ResponseEntity<PortfolioPosition> executeBuy(
-            @PathVariable Long portfolioId,
-            @Valid @RequestBody BuyRequest buyRequest
-    ) {
-        BigDecimal currentPrice = marketDataService.getCurrentPrice(buyRequest.getSymbol());
-        buyRequest.setCurrentPrice(currentPrice);
-
-        PortfolioPosition position = portfolioService.executeBuy(portfolioId, buyRequest);
-        return ResponseEntity.ok(position);
+    public ResponseEntity<?> executeBuy(@PathVariable Long portfolioId, @RequestBody BuyRequest buyRequest) {
+        try {
+            PortfolioPosition position = portfolioService.executeBuy(portfolioId, buyRequest);
+            return ResponseEntity.ok(position);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PostMapping("/{portfolioId}/sell")
-    public ResponseEntity<Map<String, Object>> executeSell(
+    public ResponseEntity<?> executeSell(
             @PathVariable Long portfolioId,
-            @Valid @RequestBody SellRequest sellRequest
-    ) {
-        Long positionId = sellRequest.getPositionId();
-        BigDecimal quantity = sellRequest.getQuantity();
-
-        Portfolio portfolio = portfolioService.findById(portfolioId)
-                .orElseThrow(() -> new IllegalArgumentException("Portfolio not found: " + portfolioId));
-
-        PortfolioPosition pos = positionService.findByPortfolio(portfolio).stream()
-                .filter(p -> p.getId().equals(positionId))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Position not found in portfolio: " + positionId));
-
-        String symbol = pos.getAsset().getSymbol();
-        BigDecimal currentPrice = marketDataService.getCurrentPrice(symbol);
-
-        PortfolioPosition position = portfolioService.executeSell(portfolioId, positionId, quantity, currentPrice);
-
-        Map<String, Object> response = new HashMap<>();
-        if (position == null) {
-            response.put("message", "Position fully closed");
-            response.put("positionClosed", true);
-        } else {
-            response.put("message", "Sell successful");
-            response.put("position", position);
-            response.put("positionClosed", false);
+            @RequestBody Map<String, Object> sellRequest) {
+        try {
+            Long positionId = Long.valueOf(sellRequest.get("positionId").toString());
+            BigDecimal quantity = new BigDecimal(sellRequest.get("quantity").toString());
+            BigDecimal currentPrice = new BigDecimal(sellRequest.get("currentPrice").toString());
+            
+            PortfolioPosition position = portfolioService.executeSell(portfolioId, positionId, quantity, currentPrice);
+            
+            Map<String, Object> response = new HashMap<>();
+            if (position == null) {
+                response.put("message", "Position fully closed");
+                response.put("positionClosed", true);
+            } else {
+                response.put("message", "Sell successful");
+                response.put("position", position);
+                response.put("positionClosed", false);
+            }
+            
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-        return ResponseEntity.ok(response);
     }
 
+    // Get user's total portfolio summary (combined across all portfolios)
     @GetMapping("/user/{userId}/summary")
     public ResponseEntity<Map<String, Object>> getUserPortfolioSummary(@PathVariable Long userId) {
         User user = userService.findById(userId).orElse(null);
         if (user == null) return ResponseEntity.notFound().build();
 
         List<Portfolio> portfolios = portfolioService.findByUser(user);
-
+        
         BigDecimal totalCash = BigDecimal.ZERO;
         BigDecimal totalValue = BigDecimal.ZERO;
         BigDecimal totalCostBasis = BigDecimal.ZERO;
         int totalPositions = 0;
 
         for (Portfolio portfolio : portfolios) {
-            totalCash = totalCash.add(nz(portfolio.getCashBalance()));
+            totalCash = totalCash.add(portfolio.getCashBalance());
             List<PortfolioPosition> positions = positionService.findByPortfolio(portfolio);
             totalPositions += positions.size();
-
+            
+            // Calculate portfolio value with real-time prices from Finnhub
             for (PortfolioPosition position : positions) {
-                BigDecimal currentPrice = marketDataService.getCurrentPrice(position.getAsset().getSymbol());
-
-                if (currentPrice.compareTo(BigDecimal.ZERO) <= 0) {
-                    currentPrice = nz(position.getAverageBuyPrice());
+                try {
+                    // Fetch current price from Finnhub
+                    String quoteJson = finnhubService.getQuote(position.getAsset().getSymbol());
+                    JsonNode quoteNode = objectMapper.readTree(quoteJson);
+                    BigDecimal currentPrice = BigDecimal.valueOf(quoteNode.get("c").asDouble());
+                    
+                    // Calculate position value
+                    BigDecimal positionValue = position.getQuantity().multiply(currentPrice);
+                    totalValue = totalValue.add(positionValue);
+                    
+                    // Calculate cost basis
+                    BigDecimal costBasis = position.getQuantity().multiply(position.getAverageBuyPrice());
+                    totalCostBasis = totalCostBasis.add(costBasis);
+                } catch (Exception e) {
+                    System.err.println("Error fetching price for " + position.getAsset().getSymbol() + ": " + e.getMessage());
+                    // Fallback to average buy price if API fails
+                    BigDecimal fallbackValue = position.getQuantity().multiply(position.getAverageBuyPrice());
+                    totalValue = totalValue.add(fallbackValue);
+                    totalCostBasis = totalCostBasis.add(fallbackValue);
                 }
-
-                BigDecimal qty = nz(position.getQuantity());
-                BigDecimal positionValue = qty.multiply(currentPrice);
-                totalValue = totalValue.add(positionValue);
-
-                BigDecimal costBasis = qty.multiply(nz(position.getAverageBuyPrice()));
-                totalCostBasis = totalCostBasis.add(costBasis);
             }
         }
-
-        totalValue = totalValue.add(totalCash);
-        totalCostBasis = totalCostBasis.add(totalCash);
-
+        
+        totalValue = totalValue.add(totalCash); // Total value includes cash
+        totalCostBasis = totalCostBasis.add(totalCash); // Cost basis includes initial cash
+        
         BigDecimal totalGainLoss = totalValue.subtract(totalCostBasis);
         BigDecimal totalGainLossPercent = BigDecimal.ZERO;
         if (totalCostBasis.compareTo(BigDecimal.ZERO) > 0) {
-            totalGainLossPercent = totalGainLoss
-                    .divide(totalCostBasis, 4, RoundingMode.HALF_UP)
-                    .multiply(BigDecimal.valueOf(100));
+            totalGainLossPercent = totalGainLoss.divide(totalCostBasis, 4, RoundingMode.HALF_UP)
+                                                 .multiply(BigDecimal.valueOf(100));
         }
 
         Map<String, Object> summary = new HashMap<>();
@@ -175,10 +190,11 @@ public class PortfolioController {
         summary.put("totalGainLossPercent", totalGainLossPercent);
         summary.put("totalPositions", totalPositions);
         summary.put("portfolioCount", portfolios.size());
-
+        
         return ResponseEntity.ok(summary);
     }
 
+    // Get all positions across all user's portfolios with real-time prices
     @GetMapping("/user/{userId}/all-positions")
     public ResponseEntity<List<Map<String, Object>>> getAllUserPositions(@PathVariable Long userId) {
         User user = userService.findById(userId).orElse(null);
@@ -189,7 +205,7 @@ public class PortfolioController {
 
         for (Portfolio portfolio : portfolios) {
             List<PortfolioPosition> positions = positionService.findByPortfolio(portfolio);
-
+            
             for (PortfolioPosition position : positions) {
                 Map<String, Object> positionData = new HashMap<>();
                 positionData.put("id", position.getId());
@@ -201,21 +217,268 @@ public class PortfolioController {
                 positionData.put("quantity", position.getQuantity());
                 positionData.put("averageBuyPrice", position.getAverageBuyPrice());
                 positionData.put("updatedAt", position.getUpdatedAt());
-
-                BigDecimal currentPrice = marketDataService.getCurrentPrice(position.getAsset().getSymbol());
-                if (currentPrice.compareTo(BigDecimal.ZERO) <= 0) {
-                    currentPrice = nz(position.getAverageBuyPrice());
+                
+                // Fetch real-time current price from Finnhub
+                try {
+                    String quoteJson = finnhubService.getQuote(position.getAsset().getSymbol());
+                    JsonNode quoteNode = objectMapper.readTree(quoteJson);
+                    double currentPrice = quoteNode.get("c").asDouble();
+                    positionData.put("currentPrice", currentPrice);
+                } catch (Exception e) {
+                    System.err.println("Error fetching price for " + position.getAsset().getSymbol() + ": " + e.getMessage());
+                    // Fallback to average buy price
+                    positionData.put("currentPrice", position.getAverageBuyPrice().doubleValue());
                 }
-                positionData.put("currentPrice", currentPrice);
-
+                
                 allPositions.add(positionData);
             }
         }
-
+        
         return ResponseEntity.ok(allPositions);
     }
 
-    private BigDecimal nz(BigDecimal v) {
-        return v == null ? BigDecimal.ZERO : v;
+    @GetMapping("/user/{userId}/performance/historical")
+    public ResponseEntity<?> getHistoricalPerformance(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "1M") String range) {
+        try {
+            User user = userService.findById(userId).orElse(null);
+            if (user == null) return ResponseEntity.notFound().build();
+
+            // Calculate date range based on parameter
+            long endTimestamp = System.currentTimeMillis() / 1000; // Current time in Unix seconds
+            long startTimestamp;
+            int dataPoints;
+            
+            switch (range.toUpperCase()) {
+                case "1D":
+                    startTimestamp = endTimestamp - (24 * 60 * 60); // 1 day ago
+                    dataPoints = 24; // Hourly for 1 day (simulated)
+                    break;
+                case "1W":
+                    startTimestamp = endTimestamp - (7 * 24 * 60 * 60); // 1 week ago
+                    dataPoints = 7; // Daily for 1 week
+                    break;
+                case "1M":
+                    startTimestamp = endTimestamp - (30 * 24 * 60 * 60); // 1 month ago
+                    dataPoints = 30; // Daily for 1 month
+                    break;
+                case "3M":
+                    startTimestamp = endTimestamp - (90 * 24 * 60 * 60); // 3 months ago
+                    dataPoints = 90; // Daily for 3 months
+                    break;
+                case "1Y":
+                    startTimestamp = endTimestamp - (365 * 24 * 60 * 60); // 1 year ago
+                    dataPoints = 365; // Daily for 1 year
+                    break;
+                default:
+                    startTimestamp = endTimestamp - (30 * 24 * 60 * 60);
+                    dataPoints = 30;
+            }
+            
+            // Get user's portfolios and positions
+            List<Portfolio> portfolios = portfolioService.findByUser(user);
+            List<PortfolioPosition> allPositions = new ArrayList<>();
+            BigDecimal totalCash = BigDecimal.ZERO;
+            
+            for (Portfolio portfolio : portfolios) {
+                allPositions.addAll(positionService.findByPortfolio(portfolio));
+                totalCash = totalCash.add(portfolio.getCashBalance());
+            }
+            
+            if (allPositions.isEmpty()) {
+                // Return flat line at current cash balance if no positions
+                return ResponseEntity.ok(generateFlatPerformance(totalCash, dataPoints, startTimestamp, endTimestamp));
+            }
+            
+            // Calculate historical performance
+            Map<String, Object> performance = calculateHistoricalPerformance(
+                    allPositions, totalCash, startTimestamp, endTimestamp, dataPoints, range);
+            
+            return ResponseEntity.ok(performance);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to fetch historical performance: " + e.getMessage()));
+        }
+    }
+
+    private Map<String, Object> generateFlatPerformance(BigDecimal value, int dataPoints, long startTimestamp, long endTimestamp) {
+        List<Map<String, Object>> data = new ArrayList<>();
+        double val = value.doubleValue();
+        long timeStep = (endTimestamp - startTimestamp) / dataPoints;
+        
+        for (int i = 0; i < dataPoints; i++) {
+            Map<String, Object> point = new HashMap<>();
+            point.put("timestamp", startTimestamp + (i * timeStep));
+            point.put("value", val);
+            data.add(point);
+        }
+        
+        return Map.of(
+            "data", data, 
+            "currentValue", val, 
+            "startValue", val,
+            "change", 0, 
+            "changePercent", 0
+        );
+    }
+
+    private Map<String, Object> calculateHistoricalPerformance(
+            List<PortfolioPosition> positions, 
+            BigDecimal totalCash,
+            long startTimestamp, 
+            long endTimestamp, 
+            int dataPoints,
+            String range) throws Exception {
+        
+        // Calculate current value of each position to find top holdings
+        List<PortfolioPosition> sortedPositions = new ArrayList<>(positions);
+        sortedPositions.sort((p1, p2) -> {
+            try {
+                String quote1 = finnhubService.getQuote(p1.getAsset().getSymbol());
+                String quote2 = finnhubService.getQuote(p2.getAsset().getSymbol());
+                JsonNode node1 = objectMapper.readTree(quote1);
+                JsonNode node2 = objectMapper.readTree(quote2);
+                
+                BigDecimal value1 = p1.getQuantity().multiply(BigDecimal.valueOf(node1.get("c").asDouble()));
+                BigDecimal value2 = p2.getQuantity().multiply(BigDecimal.valueOf(node2.get("c").asDouble()));
+                
+                return value2.compareTo(value1); // Descending order
+            } catch (Exception e) {
+                return 0;
+            }
+        });
+        
+        // Take only top 5 positions to stay under API rate limits
+        List<PortfolioPosition> topPositions = sortedPositions.stream()
+                .limit(5)
+                .collect(java.util.stream.Collectors.toList());
+        
+        System.out.println("Using top " + topPositions.size() + " positions for historical data");
+        
+        // Determine interval and outputsize based on range
+        String interval;
+        int outputsize;
+        
+        switch (range.toUpperCase()) {
+            case "1D":
+            case "LIVE":
+                interval = "1h";
+                outputsize = 24;
+                break;
+            case "1W":
+                interval = "1day";
+                outputsize = 7;
+                break;
+            case "1M":
+                interval = "1day";
+                outputsize = 30;
+                break;
+            case "3M":
+                interval = "1day";
+                outputsize = 90;
+                break;
+            case "1Y":
+            case "ALL":
+                interval = "1day";
+                outputsize = 365;
+                break;
+            default:
+                interval = "1day";
+                outputsize = 30;
+        }
+        
+        // Fetch historical data for top positions with delay between calls
+        Map<String, JsonNode> historicalDataMap = new HashMap<>();
+        
+        for (PortfolioPosition position : topPositions) {
+            String symbol = position.getAsset().getSymbol();
+            System.out.println("===> Processing position for historical data: " + symbol);
+            
+            // Skip crypto for now
+            if (symbol.startsWith("CRYPTO:")) continue;
+            
+            try {
+                String histData = twelveDataService.getHistoricalData(symbol, interval, outputsize);
+                JsonNode histNode = objectMapper.readTree(histData);
+                
+                // Check if we got valid data
+                if (histNode.has("values") && histNode.get("values").isArray()) {
+                    historicalDataMap.put(symbol, histNode);
+                    System.out.println("Successfully fetched historical data for " + symbol);
+                } else if (histNode.has("status") && "error".equals(histNode.get("status").asText())) {
+                    System.err.println("TwelveData error for " + symbol + ": " + histNode.get("message").asText());
+                }
+                
+                    // Only sleep if this is the last position (cache should handle subsequent calls instantly)
+                        if (topPositions.indexOf(position) < topPositions.size() - 1) {
+                            Thread.sleep(2000); // Reduced to 2 seconds
+                        }
+                
+            } catch (Exception e) {
+                System.err.println("Error fetching historical data for " + symbol + ": " + e.getMessage());
+            }
+        }
+        
+        // Build time series data
+        List<Map<String, Object>> timeSeriesData = new ArrayList<>();
+        
+        // TwelveData returns newest first, so we need to reverse
+        int actualDataPoints = outputsize;
+        for (int i = actualDataPoints - 1; i >= 0; i--) {
+            BigDecimal portfolioValue = totalCash; // Start with cash
+            
+            // Add up position values at this point in time
+            for (PortfolioPosition position : topPositions) {
+                String symbol = position.getAsset().getSymbol();
+                
+                if (symbol.startsWith("CRYPTO:")) continue;
+                
+                JsonNode histData = historicalDataMap.get(symbol);
+                if (histData != null && histData.has("values")) {
+                    JsonNode values = histData.get("values");
+                    
+                    if (values.isArray() && i < values.size()) {
+                        JsonNode dataPoint = values.get(i);
+                        double historicalPrice = dataPoint.get("close").asDouble();
+                        BigDecimal positionValue = position.getQuantity()
+                                .multiply(BigDecimal.valueOf(historicalPrice));
+                        portfolioValue = portfolioValue.add(positionValue);
+                    }
+                }
+            }
+            
+            // For positions not in top 5, use current price (flat line)
+            for (PortfolioPosition position : positions) {
+                if (!topPositions.contains(position)) {
+                    BigDecimal positionValue = position.getQuantity()
+                            .multiply(position.getAverageBuyPrice());
+                    portfolioValue = portfolioValue.add(positionValue);
+                }
+            }
+            
+            Map<String, Object> point = new HashMap<>();
+            // Use index as timestamp placeholder (will be properly formatted on frontend)
+            point.put("timestamp", startTimestamp + ((actualDataPoints - 1 - i) * (endTimestamp - startTimestamp) / actualDataPoints));
+            point.put("value", portfolioValue.doubleValue());
+            timeSeriesData.add(point);
+        }
+        
+        // Calculate metrics
+        double startValue = timeSeriesData.isEmpty() ? 0 : (double) timeSeriesData.get(0).get("value");
+        double endValue = timeSeriesData.isEmpty() ? 0 : (double) timeSeriesData.get(timeSeriesData.size() - 1).get("value");
+        double change = endValue - startValue;
+        double changePercent = startValue > 0 ? (change / startValue) * 100 : 0;
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("data", timeSeriesData);
+        result.put("currentValue", endValue);
+        result.put("startValue", startValue);
+        result.put("change", change);
+        result.put("changePercent", changePercent);
+        result.put("range", range);
+        
+        return result;
     }
 }

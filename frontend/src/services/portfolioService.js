@@ -71,9 +71,22 @@ export const portfolioService = {
     }).format(amount);
   },
 
-  formatPercent: (value) => {
-    if (value === null || value === undefined) return '0.00%';
-    const sign = value >= 0 ? '+' : '';
-    return `${sign}${parseFloat(value).toFixed(2)}%`;
-  }
+    formatPercent: (value) => {
+      if (value === null || value === undefined) return '0.00%';
+      const sign = value >= 0 ? '+' : '';
+      return `${sign}${parseFloat(value).toFixed(2)}%`;
+    },
+
+    getHistoricalPerformance: async (userId, range = '1M') => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/portfolios/user/${userId}/performance/historical`, {
+        params: { range }
+      });
+      console.log('Historical performance response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching historical performance:', error);
+      throw error;
+    }
+  },
 };
