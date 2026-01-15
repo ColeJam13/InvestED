@@ -41,8 +41,8 @@ function AssetDetails({ symbol }) {
   return (
     <>
       <div className={styles.assetDetails}>
-        <h2>{quote.symbol}</h2>
-        <h3>{quote.name}</h3>
+        <h2>{quote.symbol.replace('CRYPTO:', '')}</h2>
+        <h3>{quote.name?.replace('CRYPTO:', '') || symbol.replace('CRYPTO:', '')}</h3>
         
         <div className={styles.priceSection}>
           <div className={styles.currentPrice}>${quote.close}</div>
@@ -75,7 +75,7 @@ function AssetDetails({ symbol }) {
             className={styles.buyButton}
             onClick={() => setShowBuyModal(true)}
           >
-            Buy {quote.symbol}
+      Buy {quote.symbol.replace('CRYPTO:', '')}
           </button>
           <button 
             className={styles.compareButton}
@@ -95,7 +95,7 @@ function AssetDetails({ symbol }) {
 
       {showBuyModal && (
         <BuyModal
-          asset={{ symbol: quote.symbol, name: quote.name, type: 'STOCK' }}
+          asset={{ symbol: quote.symbol, name: quote.name, type: quote.symbol.startsWith('CRYPTO:') ? 'CRYPTO' : 'STOCK' }}
           currentPrice={parseFloat(quote.close)}
           onClose={() => setShowBuyModal(false)}
           onSuccess={handleBuySuccess}

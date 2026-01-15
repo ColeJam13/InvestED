@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { BookOpen, TrendingUp, Search, DollarSign, Coins, BarChart3, AlertTriangle, Target, Calendar, Scale, Clock, Bot, ChevronRight, CheckCircle } from 'lucide-react';
 import styles from './LearnView.module.css';
 import LessonDetailView from '../LessonDetailView/LessonDetailView';
+import ChatWidget from '../../components/ChatWidget/ChatWidget';
 
 const LearnView = () => {
     const [selectedCategory, setSelectedCategory] = useState('all');
@@ -205,14 +206,26 @@ const LearnView = () => {
         setSelectedLessonId(null);
     };
 
+    // Get current lesson title for chat context
+    const getCurrentLessonTitle = () => {
+        if (selectedLessonId) {
+            const lesson = lessons.find(l => l.id === selectedLessonId);
+            return lesson?.title || null;
+        }
+        return null;
+    };
+
     if (selectedLessonId) {
         const savedProgress = lessonProgress[selectedLessonId];
         return (
-            <LessonDetailView 
-                lessonId={selectedLessonId} 
-                onBack={handleBackToLessons}
-                initialProgress={savedProgress}
-            />
+            <>
+                <LessonDetailView 
+                    lessonId={selectedLessonId} 
+                    onBack={handleBackToLessons}
+                    initialProgress={savedProgress}
+                />
+                <ChatWidget currentLesson={getCurrentLessonTitle()} />
+            </>
         );
     }
 
@@ -345,17 +358,8 @@ const LearnView = () => {
                 })}
             </div>
 
-            {/* AI Mentor Promo */}
-            <div className={styles.mentorPromo}>
-                <div className={styles.mentorIcon}>
-                    <Bot size={40} />
-                </div>
-                <div className={styles.mentorContent}>
-                    <h3>Need Help?</h3>
-                    <p>Ask our AI advisor any investing questions you have while learning.</p>
-                </div>
-                <button className={styles.mentorButton}>Ask AI Advisor</button>
-            </div>
+            {/* Chat Widget */}
+            <ChatWidget currentLesson={null} />
         </div>
     );
 };

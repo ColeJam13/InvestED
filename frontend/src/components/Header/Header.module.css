@@ -14,12 +14,16 @@
     display: flex;
     align-items: center;
     gap: 1.5rem;
+    flex: 1;
+    min-width: 0;
+    margin-right: 1.25rem;
 }
 
 .headerRight {
     display: flex;
     align-items: center;
     gap: 1rem;
+    flex-shrink: 0;
 }
 
 /* Logo Styles */
@@ -28,6 +32,7 @@
     border: none;
     padding: 0;
     cursor: pointer;
+    flex-shrink: 0;
 }
 
 .logo {
@@ -95,28 +100,34 @@
 .tickerWrapper {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 1rem;
+    flex: 1;
+    min-width: 0;
 }
 
 .tickerLabel {
-    font-size: 0.65rem;
+    font-size: 0.75rem;
     font-weight: 700;
     color: var(--text-muted);
     letter-spacing: 1px;
     white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .marqueeContainer {
-    width: 400px;
+    flex: 1;
+    min-width: 0;
+    max-width: calc(100% - 2rem);
     overflow: hidden;
-    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-    -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
 }
 
 .marquee {
     display: flex;
-    gap: 1.5rem;
-    animation: scroll 30s linear infinite;
+    gap: 2rem;
+    animation: scroll 35s linear infinite;
+    width: max-content;
 }
 
 @keyframes scroll {
@@ -137,17 +148,17 @@
 
 .tickerSymbol {
     font-weight: 700;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     color: var(--text-primary);
 }
 
 .tickerPrice {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     color: var(--text-secondary);
 }
 
 .tickerChange {
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     font-weight: 600;
 }
 
@@ -200,12 +211,12 @@
 
 /* Responsive */
 @media (max-width: 900px) {
-    .marqueeContainer {
-        width: 250px;
-    }
-    
     .welcomeText {
         display: none;
+    }
+    
+    .headerLeft {
+        margin-right: 1rem;
     }
 }
 
@@ -213,16 +224,16 @@
     .header {
         padding: 0.5rem 1rem;
     }
-    
+
     .tickerWrapper {
         display: none;
     }
-    
+
     .logoIcon {
         width: 44px;
         height: 40px;
     }
-    
+
     .logoInvest,
     .logoEd {
         font-size: 1.1rem;
