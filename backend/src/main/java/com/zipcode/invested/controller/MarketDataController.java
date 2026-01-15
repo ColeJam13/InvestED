@@ -1,18 +1,17 @@
 package com.zipcode.invested.controller;
 
-import com.zipcode.invested.service.FinnhubService;
-import com.zipcode.invested.service.CoinMarketCapService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.zipcode.invested.service.CoinMarketCapService;
+import com.zipcode.invested.service.FinnhubService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/market")
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
 public class MarketDataController {
 
     private final FinnhubService finnhubService;
@@ -27,25 +26,26 @@ public class MarketDataController {
     @GetMapping("/search")
     public ResponseEntity<String> searchAssets(
             @RequestParam String query,
-            @RequestParam(defaultValue = "stock") String type) {
+            @RequestParam(defaultValue = "stock") String type
+    ) {
         try {
             ObjectNode responseNode = objectMapper.createObjectNode();
             ArrayNode results = objectMapper.createArrayNode();
-            
+
             if (type.equalsIgnoreCase("crypto")) {
-                // Search only crypto
                 try {
                     String cryptoResults = coinMarketCapService.searchCrypto(query.toUpperCase());
                     JsonNode cryptoNode = objectMapper.readTree(cryptoResults);
-                    
+
                     if (cryptoNode.has("data") && cryptoNode.get("data").isArray()) {
                         ArrayNode cryptoArray = (ArrayNode) cryptoNode.get("data");
-                        System.out.println("Processing " + cryptoArray.size() + " crypto results from CMC");
-                        
-                        // Add top 5 cryptos with rank <= 1000
+
                         int count = 0;
                         for (JsonNode crypto : cryptoArray) {
-                            if (crypto.has("rank") && !crypto.get("rank").isNull() && crypto.get("rank").asInt() <= 1000) {
+                            if (crypto.has("rank")
+                                    && !crypto.get("rank").isNull()
+                                    && crypto.get("rank").asInt() <= 1000) {
+
                                 ObjectNode cryptoResult = objectMapper.createObjectNode();
                                 cryptoResult.put("symbol", "CRYPTO:" + crypto.get("symbol").asText());
                                 cryptoResult.put("instrument_name", crypto.get("name").asText());
@@ -53,28 +53,29 @@ public class MarketDataController {
                                 cryptoResult.put("displaySymbol", crypto.get("symbol").asText());
                                 cryptoResult.put("cmcId", crypto.get("id").asInt());
                                 results.add(cryptoResult);
+
                                 count++;
-                                if (count >= 5) break; // Limit to top 5
+                                if (count >= 5) break;
                             }
                         }
                     }
-                } catch (Exception e) {
-                    System.out.println("No crypto found for: " + query);
+                } catch (Exception ignored) {
+                    // Return empty list if no crypto found or API fails
                 }
             } else {
                 // Search only stocks
                 String stockResults = finnhubService.searchSymbol(query);
                 JsonNode stockNode = objectMapper.readTree(stockResults);
                 ArrayNode stockArray = (ArrayNode) stockNode.get("result");
-                
+
                 for (JsonNode stock : stockArray) {
                     results.add(stock);
                 }
             }
-            
+
             responseNode.put("count", results.size());
             responseNode.set("result", results);
-            
+
             return ResponseEntity.ok(objectMapper.writeValueAsString(responseNode));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -85,28 +86,28 @@ public class MarketDataController {
     @GetMapping("/quote")
     public ResponseEntity<String> getQuote(@RequestParam String symbol) {
         try {
-            // Check if it's a crypto symbol
             if (symbol.startsWith("CRYPTO:")) {
                 String cryptoSymbol = symbol.substring(7); // Remove "CRYPTO:" prefix
                 String cryptoQuote = coinMarketCapService.getCryptoQuote(cryptoSymbol);
-                
-                // Transform CoinMarketCap response to match Finnhub format
+
                 JsonNode cmcData = objectMapper.readTree(cryptoQuote);
                 JsonNode cryptoData = cmcData.path("data").path(cryptoSymbol).get(0);
                 JsonNode quote = cryptoData.path("quote").path("USD");
-                
+
                 ObjectNode finnhubFormat = objectMapper.createObjectNode();
                 finnhubFormat.put("c", quote.path("price").asDouble());
                 finnhubFormat.put("h", quote.path("price").asDouble());
                 finnhubFormat.put("l", quote.path("price").asDouble());
                 finnhubFormat.put("o", quote.path("price").asDouble());
-                finnhubFormat.put("pc", quote.path("price").asDouble() - (quote.path("price").asDouble() * quote.path("percent_change_24h").asDouble() / 100));
+                finnhubFormat.put("pc",
+                        quote.path("price").asDouble()
+                                - (quote.path("price").asDouble() * quote.path("percent_change_24h").asDouble() / 100)
+                );
                 finnhubFormat.put("dp", quote.path("percent_change_24h").asDouble());
-                
+
                 return ResponseEntity.ok(objectMapper.writeValueAsString(finnhubFormat));
             }
-            
-            // Regular stock quote from Finnhub
+
             String quote = finnhubService.getQuote(symbol);
             return ResponseEntity.ok(quote);
         } catch (Exception e) {
