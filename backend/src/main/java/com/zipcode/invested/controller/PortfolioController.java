@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zipcode.invested.dto.PortfolioSummary;
 import com.zipcode.invested.service.PortfolioSummaryService;
+import com.zipcode.invested.service.MarketDataService;
 
 
 import java.math.BigDecimal;
@@ -35,18 +36,26 @@ public class PortfolioController {
     private final FinnhubService finnhubService;
     private final ObjectMapper objectMapper;
     private final PortfolioSummaryService portfolioSummaryService;
+    private final MarketDataService marketDataService;
 
 
-    public PortfolioController(PortfolioService portfolioService, 
-                              UserService userService,
-                              PortfolioPositionService positionService,
-                              FinnhubService finnhubService, PortfolioSummaryService portfolioSummaryService) {
+
+    public PortfolioController(
+        PortfolioService portfolioService,
+        UserService userService,
+        PortfolioPositionService positionService,
+        FinnhubService finnhubService,
+        MarketDataService marketDataService,
+        PortfolioSummaryService portfolioSummaryService
+    ) {
+
         this.portfolioService = portfolioService;
         this.userService = userService;
         this.positionService = positionService;
         this.finnhubService = finnhubService;
         this.objectMapper = new ObjectMapper();
         this.portfolioSummaryService = portfolioSummaryService;
+        this.marketDataService = marketDataService;
     }
 
     @GetMapping
