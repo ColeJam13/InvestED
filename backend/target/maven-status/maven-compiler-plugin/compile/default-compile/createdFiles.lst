@@ -18,9 +18,13 @@ com/zipcode/invested/service/PortfolioSnapshotService.class
 com/zipcode/invested/user/User.class
 com/zipcode/invested/controller/RiskProfileController.class
 com/zipcode/invested/config/FinnhubConfig.class
+com/zipcode/invested/config/CoinMarketCapConfig.class
 com/zipcode/invested/config/CacheConfig.class
 com/zipcode/invested/controller/AssetController.class
+com/zipcode/invested/service/PortfolioSummaryService.class
 com/zipcode/invested/controller/PortfolioSnapshotController.class
+com/zipcode/invested/service/CoinMarketCapService.class
+com/zipcode/invested/service/MarketDataService.class
 com/zipcode/invested/service/RiskProfileService.class
 com/zipcode/invested/snapshot/PortfolioSnapshot.class
 com/zipcode/invested/service/FinnhubService.class
@@ -35,6 +39,7 @@ com/zipcode/invested/service/AIConversationService.class
 com/zipcode/invested/position/PortfolioPosition.class
 com/zipcode/invested/controller/MarketDataController.class
 com/zipcode/invested/controller/PortfolioController.class
+com/zipcode/invested/dto/PortfolioSummary.class
 com/zipcode/invested/service/PortfolioPositionService.class
 com/zipcode/invested/controller/PortfolioPositionController.class
 com/zipcode/invested/dto/BuyRequest.class

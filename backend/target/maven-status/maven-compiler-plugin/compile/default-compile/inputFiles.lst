@@ -4,6 +4,7 @@
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/asset/Asset.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/asset/AssetRepository.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/config/CacheConfig.java
+/Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/config/CoinMarketCapConfig.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/config/CorsConfig.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/config/DataInitializer.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/config/FinnhubConfig.java
@@ -17,6 +18,7 @@
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/controller/RiskProfileController.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/controller/UserController.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/dto/BuyRequest.java
+/Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/dto/PortfolioSummary.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/portfolio/Portfolio.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/portfolio/PortfolioRepository.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/position/PortfolioPosition.java
@@ -25,10 +27,13 @@
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/risk/RiskProfileRepository.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/service/AIConversationService.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/service/AssetService.java
+/Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/service/CoinMarketCapService.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/service/FinnhubService.java
+/Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/service/MarketDataService.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/service/PortfolioPositionService.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/service/PortfolioService.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/service/PortfolioSnapshotService.java
+/Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/service/PortfolioSummaryService.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/service/RiskProfileService.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/service/TransactionService.java
 /Users/cjamison/Projects/invested/backend/src/main/java/com/zipcode/invested/service/TwelveDataService.java

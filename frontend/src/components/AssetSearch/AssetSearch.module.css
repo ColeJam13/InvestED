@@ -75,3 +75,37 @@
   border-radius: 6px;
   margin-top: 0.5rem;
 }
+
+.searchToggle {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.toggleBtn {
+  flex: 1;
+  padding: 0.75rem 1.5rem;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toggleBtn:hover {
+  border-color: var(--accent-green);
+  color: var(--text-primary);
+}
+
+.toggleBtn.active {
+  background: var(--accent-green);
+  border-color: var(--accent-green);
+  color: #ffffff;
+}
+
+:global(body.dark-mode) .toggleBtn.active {
+  color: #0f0f1a;
+}
