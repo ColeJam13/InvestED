@@ -57,4 +57,27 @@ public class FinnhubService {
         System.out.println("Fetching search results from Finnhub API for: " + query); 
         return restTemplate.getForObject(url, String.class);
     }
+
+        @Cacheable(value = "historical", key = "#symbol + '_' + #fromTimestamp + '_' + #toTimestamp", unless = "#result == null")
+    public String getHistoricalData(String symbol, long fromTimestamp, long toTimestamp) {
+        String url = UriComponentsBuilder
+                .fromUriString(config.getBaseUrl() + "/stock/candle")
+                .queryParam("symbol", symbol)
+                .queryParam("resolution", "D")
+                .queryParam("from", fromTimestamp)
+                .queryParam("to", toTimestamp)
+                .queryParam("token", config.getApiKey())
+                .toUriString();
+        
+        System.out.println("Fetching historical data from Finnhub API for: " + symbol);
+        
+        try {
+            String response = restTemplate.getForObject(url, String.class);
+            System.out.println("Historical data response for " + symbol + ": " + response);
+            return response;
+        } catch (Exception e) {
+            System.err.println("Error fetching historical data for " + symbol + ": " + e.getMessage());
+            throw e;
+        }
+    }
 }

@@ -3,7 +3,7 @@ import styles from './PortfolioCard.module.css';
 import axios from 'axios';
 
 const PortfolioCard = () => {
-    const [activeTime, setActiveTime] = useState('1D');
+    const [activeTime, setActiveTime] = useState('1M');
     const [activeFilter, setActiveFilter] = useState('all');
     const [portfolioData, setPortfolioData] = useState(null);
     const [chartData, setChartData] = useState([]);
@@ -20,12 +20,22 @@ const PortfolioCard = () => {
         const fetchPortfolioData = async () => {
             setLoading(true);
             try {
-                const [summaryRes, chartRes] = await Promise.all([
+                const [summaryRes, histRes] = await Promise.all([
                     axios.get('http://localhost:8080/api/portfolios/user/1/summary'),
-                    axios.get('http://localhost:8080/api/portfolio-snapshots/user/1/chart-data')
+                    axios.get('http://localhost:8080/api/portfolios/user/1/performance/historical', {
+                        params: { range: activeTime === 'Live' ? '1D' : activeTime === 'All' ? '1Y' : activeTime }
+                    })
                 ]);
                 setPortfolioData(summaryRes.data);
-                setChartData(chartRes.data);
+                
+                // Transform historical data to chart format
+                const transformed = histRes.data.data.map(point => ({
+                    timestamp: point.timestamp * 1000, // Convert to milliseconds
+                    value: point.value
+                }));
+                setChartData(transformed);
+                
+                console.log('Fetched historical data:', histRes.data);
             } catch (error) {
                 console.error('Error fetching portfolio data:', error);
             } finally {
@@ -34,10 +44,7 @@ const PortfolioCard = () => {
         };
 
         fetchPortfolioData();
-        // Refresh every 30 seconds
-        const interval = setInterval(fetchPortfolioData, 30000);
-        return () => clearInterval(interval);
-    }, []);
+    }, [activeTime]); // Re-fetch when time range changes
 
     const formatCurrency = (amount) => {
         if (!amount) return '$0.00';
@@ -64,7 +71,7 @@ const PortfolioCard = () => {
         const values = chartData.map(d => d.value);
         const min = Math.min(...values);
         const max = Math.max(...values);
-        const range = max - min || 1; // Avoid division by zero
+        const range = max - min || 1;
         
         const points = chartData.map((point, index) => {
             const x = (index / (chartData.length - 1)) * width;
@@ -75,25 +82,36 @@ const PortfolioCard = () => {
         return `M${points.join(' L')}`;
     };
 
-    // Generate area path (same as line but closed at bottom)
+    // Generate area path
     const generateAreaPath = () => {
         const linePath = generateChartPath();
         if (!linePath) return '';
         return `${linePath} L350,150 L0,150 Z`;
     };
 
-    // Generate time labels from chart data
+    // Generate time labels based on selected range
     const generateTimeLabels = () => {
         if (!chartData || chartData.length === 0) return [];
         
-        const step = Math.floor(chartData.length / 7); // Show 7 labels
-        return chartData
-            .filter((_, index) => index % step === 0)
-            .slice(0, 6)
-            .map(point => {
-                const date = new Date(point.timestamp);
-                return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: false });
-            });
+        const step = Math.max(1, Math.floor(chartData.length / 6));
+        const labels = [];
+        
+        for (let i = 0; i < chartData.length; i += step) {
+            if (labels.length >= 6) break;
+            const date = new Date(chartData[i].timestamp);
+            
+            let label;
+            if (activeTime === '1D' || activeTime === 'Live') {
+                label = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+            } else if (activeTime === '1W') {
+                label = date.toLocaleDateString('en-US', { weekday: 'short' });
+            } else {
+                label = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            }
+            labels.push(label);
+        }
+        
+        return labels;
     };
 
     if (loading) {
@@ -136,7 +154,7 @@ const PortfolioCard = () => {
                 </span>
             </div>
 
-            {/* Chart with real data */}
+            {/* Chart with real historical data */}
             <div className={styles.chartContainer}>
                 <svg className={styles.chartSvg} viewBox="0 0 350 150" preserveAspectRatio="none">
                     <defs>
@@ -164,11 +182,11 @@ const PortfolioCard = () => {
                 
                 {/* Y-Axis Labels */}
                 <div className={styles.yAxisLabels}>
-                    <span>{formatCurrency(chartMax * 1.01)}</span>
-                    <span>{formatCurrency(chartMax * 1.005)}</span>
+                    <span>{formatCurrency(chartMax)}</span>
+                    <span>{formatCurrency(chartMax * 0.75 + chartMin * 0.25)}</span>
                     <span>{formatCurrency((chartMax + chartMin) / 2)}</span>
-                    <span>{formatCurrency(chartMin * 0.995)}</span>
-                    <span>{formatCurrency(chartMin * 0.99)}</span>
+                    <span>{formatCurrency(chartMax * 0.25 + chartMin * 0.75)}</span>
+                    <span>{formatCurrency(chartMin)}</span>
                 </div>
             </div>
 
