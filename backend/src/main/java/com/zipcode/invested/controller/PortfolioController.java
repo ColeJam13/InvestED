@@ -1,33 +1,28 @@
 package com.zipcode.invested.controller;
 
+import com.zipcode.invested.dto.BuyRequest;
+import com.zipcode.invested.dto.PortfolioSummary;
+import com.zipcode.invested.dto.SellRequest;
 import com.zipcode.invested.portfolio.Portfolio;
 import com.zipcode.invested.position.PortfolioPosition;
-import com.zipcode.invested.service.PortfolioService;
-import com.zipcode.invested.service.UserService;
+import com.zipcode.invested.service.MarketDataService;
 import com.zipcode.invested.service.PortfolioPositionService;
-import com.zipcode.invested.service.FinnhubService;
+import com.zipcode.invested.service.PortfolioService;
+import com.zipcode.invested.service.PortfolioSummaryService;
+import com.zipcode.invested.service.UserService;
 import com.zipcode.invested.user.User;
 import jakarta.validation.Valid;
-import com.zipcode.invested.dto.BuyRequest;
-import com.zipcode.invested.dto.SellRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.zipcode.invested.dto.PortfolioSummary;
-import com.zipcode.invested.service.PortfolioSummaryService;
-import com.zipcode.invested.service.MarketDataService;
-
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.math.RoundingMode;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/portfolios")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
 public class PortfolioController {
 
     private final PortfolioService portfolioService;
@@ -40,16 +35,14 @@ public class PortfolioController {
             PortfolioService portfolioService,
             UserService userService,
             PortfolioPositionService positionService,
-            FinnhubService finnhubService,
             MarketDataService marketDataService,
             PortfolioSummaryService portfolioSummaryService
     ) {
-
         this.portfolioService = portfolioService;
         this.userService = userService;
         this.positionService = positionService;
-        this.portfolioSummaryService = portfolioSummaryService;
         this.marketDataService = marketDataService;
+        this.portfolioSummaryService = portfolioSummaryService;
     }
 
     @GetMapping
@@ -68,7 +61,6 @@ public class PortfolioController {
     public ResponseEntity<List<Portfolio>> getByUser(@PathVariable Long userId) {
         User user = userService.findById(userId).orElse(null);
         if (user == null) return ResponseEntity.notFound().build();
-
         return ResponseEntity.ok(portfolioService.findByUser(user));
     }
 
@@ -88,58 +80,48 @@ public class PortfolioController {
     }
 
     @PostMapping("/{portfolioId}/buy")
-    public ResponseEntity<?> executeBuy(
+    public ResponseEntity<PortfolioPosition> executeBuy(
             @PathVariable Long portfolioId,
             @Valid @RequestBody BuyRequest buyRequest
     ) {
-    try {
-        String symbol = buyRequest.getSymbol();
-        BigDecimal currentPrice = marketDataService.getCurrentPrice(symbol);
+        BigDecimal currentPrice = marketDataService.getCurrentPrice(buyRequest.getSymbol());
         buyRequest.setCurrentPrice(currentPrice);
 
         PortfolioPosition position = portfolioService.executeBuy(portfolioId, buyRequest);
         return ResponseEntity.ok(position);
-    } catch (IllegalArgumentException e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
-    }
     }
 
     @PostMapping("/{portfolioId}/sell")
-    public ResponseEntity<?> executeSell(
+    public ResponseEntity<Map<String, Object>> executeSell(
             @PathVariable Long portfolioId,
             @Valid @RequestBody SellRequest sellRequest
     ) {
-        try {
-                Long positionId = sellRequest.getPositionId();
-                BigDecimal quantity = sellRequest.getQuantity();
+        Long positionId = sellRequest.getPositionId();
+        BigDecimal quantity = sellRequest.getQuantity();
 
         Portfolio portfolio = portfolioService.findById(portfolioId)
-            .orElseThrow(() -> new IllegalArgumentException("Portfolio not found: " + portfolioId));
+                .orElseThrow(() -> new IllegalArgumentException("Portfolio not found: " + portfolioId));
 
         PortfolioPosition pos = positionService.findByPortfolio(portfolio).stream()
-            .filter(p -> p.getId().equals(positionId))
-            .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("Position not found in portfolio: " + positionId));
+                .filter(p -> p.getId().equals(positionId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Position not found in portfolio: " + positionId));
 
         String symbol = pos.getAsset().getSymbol();
         BigDecimal currentPrice = marketDataService.getCurrentPrice(symbol);
 
         PortfolioPosition position = portfolioService.executeSell(portfolioId, positionId, quantity, currentPrice);
 
-            Map<String, Object> response = new HashMap<>();
-            if (position == null) {
-                response.put("message", "Position fully closed");
-                response.put("positionClosed", true);
-            } else {
-                response.put("message", "Sell successful");
-                response.put("position", position);
-                response.put("positionClosed", false);
-            }
-            
-            return ResponseEntity.ok(response);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+        Map<String, Object> response = new HashMap<>();
+        if (position == null) {
+            response.put("message", "Position fully closed");
+            response.put("positionClosed", true);
+        } else {
+            response.put("message", "Sell successful");
+            response.put("position", position);
+            response.put("positionClosed", false);
         }
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/user/{userId}/summary")
@@ -148,41 +130,42 @@ public class PortfolioController {
         if (user == null) return ResponseEntity.notFound().build();
 
         List<Portfolio> portfolios = portfolioService.findByUser(user);
-        
+
         BigDecimal totalCash = BigDecimal.ZERO;
         BigDecimal totalValue = BigDecimal.ZERO;
         BigDecimal totalCostBasis = BigDecimal.ZERO;
         int totalPositions = 0;
 
         for (Portfolio portfolio : portfolios) {
-            totalCash = totalCash.add(portfolio.getCashBalance());
+            totalCash = totalCash.add(nz(portfolio.getCashBalance()));
             List<PortfolioPosition> positions = positionService.findByPortfolio(portfolio);
             totalPositions += positions.size();
-            
-        for (PortfolioPosition position : positions) {
-            BigDecimal currentPrice = marketDataService.getCurrentPrice(position.getAsset().getSymbol());
 
-            if (currentPrice.compareTo(BigDecimal.ZERO) <= 0) {
-                currentPrice = position.getAverageBuyPrice();
+            for (PortfolioPosition position : positions) {
+                BigDecimal currentPrice = marketDataService.getCurrentPrice(position.getAsset().getSymbol());
+
+                if (currentPrice.compareTo(BigDecimal.ZERO) <= 0) {
+                    currentPrice = nz(position.getAverageBuyPrice());
+                }
+
+                BigDecimal qty = nz(position.getQuantity());
+                BigDecimal positionValue = qty.multiply(currentPrice);
+                totalValue = totalValue.add(positionValue);
+
+                BigDecimal costBasis = qty.multiply(nz(position.getAverageBuyPrice()));
+                totalCostBasis = totalCostBasis.add(costBasis);
             }
-
-            BigDecimal positionValue = position.getQuantity().multiply(currentPrice);
-            totalValue = totalValue.add(positionValue);
-
-            BigDecimal costBasis = position.getQuantity().multiply(position.getAverageBuyPrice());
-            totalCostBasis = totalCostBasis.add(costBasis);
         }
 
-        }
-        
-        totalValue = totalValue.add(totalCash); 
-        totalCostBasis = totalCostBasis.add(totalCash); 
-        
+        totalValue = totalValue.add(totalCash);
+        totalCostBasis = totalCostBasis.add(totalCash);
+
         BigDecimal totalGainLoss = totalValue.subtract(totalCostBasis);
         BigDecimal totalGainLossPercent = BigDecimal.ZERO;
         if (totalCostBasis.compareTo(BigDecimal.ZERO) > 0) {
-            totalGainLossPercent = totalGainLoss.divide(totalCostBasis, 4, RoundingMode.HALF_UP)
-                                                 .multiply(BigDecimal.valueOf(100));
+            totalGainLossPercent = totalGainLoss
+                    .divide(totalCostBasis, 4, RoundingMode.HALF_UP)
+                    .multiply(BigDecimal.valueOf(100));
         }
 
         Map<String, Object> summary = new HashMap<>();
@@ -193,7 +176,7 @@ public class PortfolioController {
         summary.put("totalGainLossPercent", totalGainLossPercent);
         summary.put("totalPositions", totalPositions);
         summary.put("portfolioCount", portfolios.size());
-        
+
         return ResponseEntity.ok(summary);
     }
 
@@ -207,7 +190,7 @@ public class PortfolioController {
 
         for (Portfolio portfolio : portfolios) {
             List<PortfolioPosition> positions = positionService.findByPortfolio(portfolio);
-            
+
             for (PortfolioPosition position : positions) {
                 Map<String, Object> positionData = new HashMap<>();
                 positionData.put("id", position.getId());
@@ -219,18 +202,21 @@ public class PortfolioController {
                 positionData.put("quantity", position.getQuantity());
                 positionData.put("averageBuyPrice", position.getAverageBuyPrice());
                 positionData.put("updatedAt", position.getUpdatedAt());
-                
+
                 BigDecimal currentPrice = marketDataService.getCurrentPrice(position.getAsset().getSymbol());
-
                 if (currentPrice.compareTo(BigDecimal.ZERO) <= 0) {
-                    currentPrice = position.getAverageBuyPrice();
+                    currentPrice = nz(position.getAverageBuyPrice());
                 }
-
                 positionData.put("currentPrice", currentPrice);
 
                 allPositions.add(positionData);
             }
         }
+
         return ResponseEntity.ok(allPositions);
+    }
+
+    private BigDecimal nz(BigDecimal v) {
+        return v == null ? BigDecimal.ZERO : v;
     }
 }
