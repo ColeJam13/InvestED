@@ -139,6 +139,7 @@ const AIAdvisorView = () => {
     };
 
     const formatTime = (date) => {
+        if (!date) return "";
         return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
     };
 
@@ -169,9 +170,9 @@ const AIAdvisorView = () => {
             id: messages.length + 1,
             type: 'ai',
             messageType: 'style-change',
+            timestamp: new Date(),
             style: style,
             content: `I'll now provide guidance from a ${style.name.toLowerCase()} perspective. ${style.description}. Feel free to ask me questions with this approach in mind!`,
-            timestamp: new Date()
         };
         setMessages(prev => [...prev, styleMessage]);
     };
@@ -212,6 +213,7 @@ const AIAdvisorView = () => {
                     id: messages.length + 2,
                     type: 'ai',
                     messageType: 'portfolio-reference',
+                    timestamp: new Date(),
                     content: `${styleContext}looking at your portfolio, I can see you have a diversified mix of assets. Your total value is ${portfolioData?.totalValue || 'loading...'} with ${portfolioData?.holdings?.length || 0} holdings.`,
                     portfolioRef: portfolioData?.holdings?.slice(0, 2) || []
                 };
