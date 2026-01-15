@@ -42,7 +42,7 @@ public class AIConversationController {
         User user = userService.findById(userId).orElse(null);
         if (user == null) return ResponseEntity.notFound().build();
 
-        return ResponseEntity.ok(aiConversationService.findByUser(user));
+        return ResponseEntity.ok(aiConversationService.findByUserId(userId));
     }
 
     @PostMapping("/user/{userId}")

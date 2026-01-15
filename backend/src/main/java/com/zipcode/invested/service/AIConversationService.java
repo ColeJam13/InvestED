@@ -25,8 +25,8 @@ public class AIConversationService {
         return aiConversationRepository.findById(id);
     }
 
-    public List<AIConversation> findByUser(User user) {
-        return aiConversationRepository.findByUser(user);
+    public List<AIConversation> findByUserId(Long userId) {
+        return aiConversationRepository.findByUserId(userId);
     }
 
     public AIConversation save(AIConversation conversation) {
