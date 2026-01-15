@@ -13,6 +13,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zipcode.invested.dto.PortfolioSummary;
+import com.zipcode.invested.service.PortfolioSummaryService;
+
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -31,16 +34,19 @@ public class PortfolioController {
     private final PortfolioPositionService positionService;
     private final FinnhubService finnhubService;
     private final ObjectMapper objectMapper;
+    private final PortfolioSummaryService portfolioSummaryService;
+
 
     public PortfolioController(PortfolioService portfolioService, 
                               UserService userService,
                               PortfolioPositionService positionService,
-                              FinnhubService finnhubService) {
+                              FinnhubService finnhubService, PortfolioSummaryService portfolioSummaryService) {
         this.portfolioService = portfolioService;
         this.userService = userService;
         this.positionService = positionService;
         this.finnhubService = finnhubService;
         this.objectMapper = new ObjectMapper();
+        this.portfolioSummaryService = portfolioSummaryService;
     }
 
     @GetMapping
@@ -61,6 +67,15 @@ public class PortfolioController {
         if (user == null) return ResponseEntity.notFound().build();
 
         return ResponseEntity.ok(portfolioService.findByUser(user));
+    }
+
+    @GetMapping("/{id}/summary")
+    public ResponseEntity<PortfolioSummary> getSummary(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(portfolioSummaryService.buildSummary(id));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping("/user/{userId}")
