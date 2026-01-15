@@ -133,112 +133,163 @@ const PortfolioView = () => {
     // PDF Export Function
     const exportToPDF = async () => {
         setExportingPDF(true);
-        
+
         try {
             const doc = new jsPDF();
             const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
             const now = new Date();
+
+            // Professional Color Palette
+            const brandGreen = [61, 155, 137];
+            const brandDark = [26, 26, 46];
+            const accentGold = [212, 175, 55];
+            const textDark = [33, 37, 41];
+            const textMuted = [108, 117, 125];
+            const successGreen = [40, 167, 69];
+            const dangerRed = [220, 53, 69];
+            const lightBg = [248, 249, 250];
+            const white = [255, 255, 255];
+
+            // Helper function to draw the logo
+            const drawLogo = (x, y, scale = 1) => {
+                // Graduation cap icon
+                doc.setFillColor(brandGreen[0], brandGreen[1], brandGreen[2]);
+                // Cap top
+                doc.triangle(x, y + 8 * scale, x + 12 * scale, y + 3 * scale, x + 24 * scale, y + 8 * scale, 'F');
+                // Cap base
+                doc.setFillColor(brandGreen[0] - 20, brandGreen[1] - 20, brandGreen[2] - 20);
+                doc.rect(x + 4 * scale, y + 8 * scale, 16 * scale, 4 * scale, 'F');
+                // Tassel (dollar sign style)
+                doc.setFillColor(accentGold[0], accentGold[1], accentGold[2]);
+                doc.circle(x + 20 * scale, y + 14 * scale, 2 * scale, 'F');
+            };
+
+            // ===== HEADER SECTION =====
+            // Header background with gradient effect
+            doc.setFillColor(brandDark[0], brandDark[1], brandDark[2]);
+            doc.rect(0, 0, pageWidth, 42, 'F');
             
-            // Colors
-            const primaryColor = [61, 155, 137];
-            const darkColor = [26, 26, 46];
-            const grayColor = [128, 128, 128];
-            const greenColor = [34, 197, 94];
-            const redColor = [239, 68, 68];
-            
-            // Header
-            doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-            doc.rect(0, 0, pageWidth, 35, 'F');
-            
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(24);
+            // Accent line
+            doc.setFillColor(brandGreen[0], brandGreen[1], brandGreen[2]);
+            doc.rect(0, 42, pageWidth, 3, 'F');
+
+            // Logo area
+            drawLogo(14, 8, 1);
+
+            // Brand name
+            doc.setTextColor(white[0], white[1], white[2]);
+            doc.setFontSize(22);
             doc.setFont('helvetica', 'bold');
-            doc.text('InvestED', 14, 18);
-            
-            doc.setFontSize(10);
+            doc.text('INVEST', 42, 22);
+            doc.setTextColor(brandGreen[0], brandGreen[1], brandGreen[2]);
+            doc.text('ED', 77, 22);
+
+            // Tagline
+            doc.setTextColor(textMuted[0], textMuted[1], textMuted[2]);
+            doc.setFontSize(8);
             doc.setFont('helvetica', 'normal');
-            doc.text('Portfolio Report', 14, 26);
-            
-            doc.setFontSize(9);
-            doc.text('Generated: ' + now.toLocaleDateString() + ' at ' + now.toLocaleTimeString(), pageWidth - 14, 18, { align: 'right' });
-            
-            // Portfolio Name
-            const portfolioName = selectedPortfolioId === 'all' 
-                ? 'All Portfolios' 
-                : portfolios.find(p => p.id === parseInt(selectedPortfolioId))?.name || 'Portfolio';
-            doc.text(portfolioName, pageWidth - 14, 26, { align: 'right' });
-            
-            // Summary Section
-            let yPos = 45;
-            
-            doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
+            doc.text('Smart Investing, Simplified', 42, 28);
+
+            // Report title and date (right side)
+            doc.setTextColor(white[0], white[1], white[2]);
             doc.setFontSize(14);
             doc.setFont('helvetica', 'bold');
-            doc.text('Portfolio Summary', 14, yPos);
+            doc.text('Portfolio Report', pageWidth - 14, 18, { align: 'right' });
             
-            yPos += 10;
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(textMuted[0], textMuted[1], textMuted[2]);
+            doc.text(now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }), pageWidth - 14, 26, { align: 'right' });
             
-            // Summary Cards
+            const portfolioName = selectedPortfolioId === 'all'
+                ? 'All Portfolios'
+                : portfolios.find(p => p.id === parseInt(selectedPortfolioId))?.name || 'Portfolio';
+            doc.setTextColor(brandGreen[0], brandGreen[1], brandGreen[2]);
+            doc.text(portfolioName, pageWidth - 14, 34, { align: 'right' });
+
+            // ===== SUMMARY SECTION =====
+            let yPos = 55;
+
+            // Section header with icon
+            doc.setFillColor(brandGreen[0], brandGreen[1], brandGreen[2]);
+            doc.roundedRect(14, yPos - 5, 4, 14, 1, 1, 'F');
+            doc.setTextColor(textDark[0], textDark[1], textDark[2]);
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Portfolio Summary', 22, yPos + 5);
+
+            yPos += 18;
+
+            // Summary Cards - Professional styled boxes
+            const cardWidth = (pageWidth - 38) / 4;
+            const cardHeight = 32;
             const summaryData = [
-                { label: 'Total Value', value: formatCurrency(portfolioTotals.totalValue), isGain: null },
-                { label: 'Cost Basis', value: formatCurrency(portfolioTotals.totalCost), isGain: null },
-                { label: 'Total Gain/Loss', value: formatCurrency(portfolioTotals.totalGainLoss), isGain: portfolioTotals.totalGainLoss >= 0 },
-                { label: 'Return', value: formatPercent(totalGainLossPercent), isGain: totalGainLossPercent >= 0 },
+                { label: 'Total Value', value: formatCurrency(portfolioTotals.totalValue), icon: '$', isGain: null },
+                { label: 'Cost Basis', value: formatCurrency(portfolioTotals.totalCost), icon: '₿', isGain: null },
+                { label: 'Total Gain/Loss', value: formatCurrency(portfolioTotals.totalGainLoss), icon: '↕', isGain: portfolioTotals.totalGainLoss >= 0 },
+                { label: 'Return', value: formatPercent(totalGainLossPercent), icon: '%', isGain: totalGainLossPercent >= 0 },
             ];
-            
-            const cardWidth = (pageWidth - 28 - 15) / 4;
-            
+
             summaryData.forEach((item, index) => {
-                const xPos = 14 + (index * (cardWidth + 5));
-                
+                const xPos = 14 + (index * (cardWidth + 4));
+
                 // Card background
-                doc.setFillColor(245, 247, 250);
-                doc.roundedRect(xPos, yPos, cardWidth, 25, 3, 3, 'F');
-                
+                doc.setFillColor(lightBg[0], lightBg[1], lightBg[2]);
+                doc.roundedRect(xPos, yPos, cardWidth, cardHeight, 3, 3, 'F');
+
+                // Card left accent
+                const accentColor = item.isGain === null ? brandGreen : (item.isGain ? successGreen : dangerRed);
+                doc.setFillColor(accentColor[0], accentColor[1], accentColor[2]);
+                doc.roundedRect(xPos, yPos, 3, cardHeight, 1, 1, 'F');
+
                 // Label
-                doc.setTextColor(grayColor[0], grayColor[1], grayColor[2]);
+                doc.setTextColor(textMuted[0], textMuted[1], textMuted[2]);
                 doc.setFontSize(8);
                 doc.setFont('helvetica', 'normal');
-                doc.text(item.label, xPos + 5, yPos + 8);
-                
+                doc.text(item.label, xPos + 8, yPos + 10);
+
                 // Value
                 if (item.isGain !== null) {
-                    if (item.isGain) {
-                        doc.setTextColor(greenColor[0], greenColor[1], greenColor[2]);
-                    } else {
-                        doc.setTextColor(redColor[0], redColor[1], redColor[2]);
-                    }
+                    doc.setTextColor(item.isGain ? successGreen[0] : dangerRed[0], item.isGain ? successGreen[1] : dangerRed[1], item.isGain ? successGreen[2] : dangerRed[2]);
                 } else {
-                    doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
+                    doc.setTextColor(textDark[0], textDark[1], textDark[2]);
                 }
-                doc.setFontSize(11);
+                doc.setFontSize(12);
                 doc.setFont('helvetica', 'bold');
-                doc.text(item.value, xPos + 5, yPos + 18);
+                doc.text(item.value, xPos + 8, yPos + 22);
             });
-            
-            yPos += 35;
-            
-            // Cash Balance Section
+
+            yPos += cardHeight + 15;
+
+            // Cash Balance
             if (portfolios.length > 0) {
                 const totalCash = selectedPortfolioId === 'all'
                     ? portfolios.reduce((sum, p) => sum + (p.cashBalance || 0), 0)
                     : portfolios.find(p => p.id === parseInt(selectedPortfolioId))?.cashBalance || 0;
-                
-                doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
+
+                doc.setFillColor(245, 245, 220);
+                doc.roundedRect(14, yPos - 5, pageWidth - 28, 16, 2, 2, 'F');
+                doc.setTextColor(textDark[0], textDark[1], textDark[2]);
                 doc.setFontSize(10);
                 doc.setFont('helvetica', 'normal');
-                doc.text('Available Cash: ' + formatCurrency(totalCash), 14, yPos);
-                yPos += 10;
+                doc.text('Available Cash Balance:', 20, yPos + 5);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(brandGreen[0], brandGreen[1], brandGreen[2]);
+                doc.text(formatCurrency(totalCash), pageWidth - 20, yPos + 5, { align: 'right' });
+                yPos += 20;
             }
-            
-            // Holdings Table
-            doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
+
+            // ===== HOLDINGS TABLE =====
+            doc.setFillColor(brandGreen[0], brandGreen[1], brandGreen[2]);
+            doc.roundedRect(14, yPos - 5, 4, 14, 1, 1, 'F');
+            doc.setTextColor(textDark[0], textDark[1], textDark[2]);
             doc.setFontSize(14);
             doc.setFont('helvetica', 'bold');
-            doc.text('Holdings', 14, yPos);
-            
-            yPos += 5;
-            
+            doc.text('Current Holdings', 22, yPos + 5);
+
+            yPos += 12;
+
             if (filteredPositions.length > 0) {
                 const tableData = filteredPositions.map(position => {
                     const metrics = calculateMetrics(position);
@@ -253,32 +304,35 @@ const PortfolioView = () => {
                         formatPercent(metrics.gainLossPercent)
                     ];
                 });
-                
+
                 autoTable(doc, {
                     startY: yPos,
                     head: [['Symbol', 'Name', 'Shares', 'Avg Cost', 'Price', 'Value', 'Gain/Loss', 'Return']],
                     body: tableData,
-                    theme: 'striped',
+                    theme: 'grid',
                     headStyles: {
-                        fillColor: primaryColor,
-                        textColor: [255, 255, 255],
+                        fillColor: brandDark,
+                        textColor: white,
                         fontStyle: 'bold',
                         fontSize: 8,
+                        halign: 'center',
+                        cellPadding: 3,
                     },
                     bodyStyles: {
                         fontSize: 8,
-                        textColor: darkColor,
+                        textColor: textDark,
+                        cellPadding: 2.5,
                     },
                     alternateRowStyles: {
-                        fillColor: [248, 250, 252],
+                        fillColor: [250, 250, 250],
                     },
                     columnStyles: {
-                        0: { fontStyle: 'bold', cellWidth: 18 },
-                        1: { cellWidth: 35 },
+                        0: { fontStyle: 'bold', cellWidth: 18, halign: 'center' },
+                        1: { cellWidth: 32 },
                         2: { halign: 'right', cellWidth: 18 },
                         3: { halign: 'right', cellWidth: 22 },
                         4: { halign: 'right', cellWidth: 22 },
-                        5: { halign: 'right', cellWidth: 25 },
+                        5: { halign: 'right', cellWidth: 24, fontStyle: 'bold' },
                         6: { halign: 'right', cellWidth: 22 },
                         7: { halign: 'right', cellWidth: 20 },
                     },
@@ -287,38 +341,40 @@ const PortfolioView = () => {
                         if (data.section === 'body' && (data.column.index === 6 || data.column.index === 7)) {
                             const value = data.cell.raw;
                             if (value && value.startsWith('-')) {
-                                data.cell.styles.textColor = redColor;
+                                data.cell.styles.textColor = dangerRed;
                             } else if (value && value.startsWith('+')) {
-                                data.cell.styles.textColor = greenColor;
+                                data.cell.styles.textColor = successGreen;
                             }
                         }
                     }
                 });
-                
-                yPos = doc.lastAutoTable.finalY + 10;
+
+                yPos = doc.lastAutoTable.finalY + 15;
             } else {
                 yPos += 10;
                 doc.setFontSize(10);
                 doc.setFont('helvetica', 'italic');
-                doc.setTextColor(grayColor[0], grayColor[1], grayColor[2]);
-                doc.text('No positions to display', 14, yPos);
+                doc.setTextColor(textMuted[0], textMuted[1], textMuted[2]);
+                doc.text('No holdings to display', 14, yPos);
                 yPos += 15;
             }
-            
-            // Asset Allocation Section
+
+            // ===== ASSET ALLOCATION =====
             if (filteredPositions.length > 0) {
-                if (yPos > 250) {
+                if (yPos > 220) {
                     doc.addPage();
                     yPos = 20;
                 }
-                
-                doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
+
+                doc.setFillColor(brandGreen[0], brandGreen[1], brandGreen[2]);
+                doc.roundedRect(14, yPos - 5, 4, 14, 1, 1, 'F');
+                doc.setTextColor(textDark[0], textDark[1], textDark[2]);
                 doc.setFontSize(14);
                 doc.setFont('helvetica', 'bold');
-                doc.text('Asset Allocation', 14, yPos);
-                
-                yPos += 8;
-                
+                doc.text('Asset Allocation', 22, yPos + 5);
+
+                yPos += 12;
+
                 const allocation = filteredPositions.reduce((acc, position) => {
                     const type = position.assetType || 'Other';
                     const metrics = calculateMetrics(position);
@@ -329,64 +385,159 @@ const PortfolioView = () => {
                     acc[type].count += 1;
                     return acc;
                 }, {});
-                
+
                 const allocationData = Object.entries(allocation).map(([type, data]) => [
                     type,
                     data.count.toString(),
                     formatCurrency(data.value),
                     ((data.value / portfolioTotals.totalValue) * 100).toFixed(1) + '%'
                 ]);
-                
+
                 autoTable(doc, {
                     startY: yPos,
                     head: [['Asset Type', 'Holdings', 'Value', '% of Portfolio']],
                     body: allocationData,
-                    theme: 'striped',
+                    theme: 'grid',
                     headStyles: {
-                        fillColor: primaryColor,
-                        textColor: [255, 255, 255],
+                        fillColor: brandDark,
+                        textColor: white,
                         fontStyle: 'bold',
                         fontSize: 9,
+                        halign: 'center',
                     },
                     bodyStyles: {
                         fontSize: 9,
-                        textColor: darkColor,
+                        textColor: textDark,
                     },
                     columnStyles: {
-                        0: { fontStyle: 'bold' },
-                        1: { halign: 'center' },
-                        2: { halign: 'right' },
-                        3: { halign: 'right' },
+                        0: { fontStyle: 'bold', cellWidth: 35 },
+                        1: { halign: 'center', cellWidth: 25 },
+                        2: { halign: 'right', cellWidth: 35 },
+                        3: { halign: 'right', cellWidth: 30, fontStyle: 'bold' },
                     },
                     margin: { left: 14, right: 14 },
-                    tableWidth: 120,
+                    tableWidth: 125,
                 });
+
+                yPos = doc.lastAutoTable.finalY + 15;
             }
-            
-            // Footer
+
+            // ===== TRANSACTION HISTORY =====
+            try {
+                let transactionsUrl = selectedPortfolioId === 'all'
+                    ? 'http://localhost:8080/api/transactions/user/1'
+                    : 'http://localhost:8080/api/transactions/portfolio/' + selectedPortfolioId;
+
+                const transactionsRes = await axios.get(transactionsUrl);
+                const transactions = transactionsRes.data;
+
+                if (transactions && transactions.length > 0) {
+                    if (yPos > 200) {
+                        doc.addPage();
+                        yPos = 20;
+                    }
+
+                    doc.setFillColor(brandGreen[0], brandGreen[1], brandGreen[2]);
+                    doc.roundedRect(14, yPos - 5, 4, 14, 1, 1, 'F');
+                    doc.setTextColor(textDark[0], textDark[1], textDark[2]);
+                    doc.setFontSize(14);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Transaction History', 22, yPos + 5);
+
+                    yPos += 12;
+
+                    const transactionData = transactions.slice(0, 25).map(t => {
+                        const date = new Date(t.transactionDate).toLocaleDateString();
+                        const type = t.transactionType;
+                        const symbol = t.asset?.symbol || '-';
+                        const qty = parseFloat(t.quantity).toFixed(4);
+                        const price = formatCurrency(parseFloat(t.priceAtTransaction));
+                        const total = formatCurrency(parseFloat(t.totalAmount));
+                        return [date, type, symbol, qty, price, total];
+                    });
+
+                    autoTable(doc, {
+                        startY: yPos,
+                        head: [['Date', 'Type', 'Symbol', 'Quantity', 'Price', 'Total']],
+                        body: transactionData,
+                        theme: 'grid',
+                        headStyles: {
+                            fillColor: brandDark,
+                            textColor: white,
+                            fontStyle: 'bold',
+                            fontSize: 8,
+                            halign: 'center',
+                        },
+                        bodyStyles: {
+                            fontSize: 8,
+                            textColor: textDark,
+                        },
+                        alternateRowStyles: {
+                            fillColor: [250, 250, 250],
+                        },
+                        columnStyles: {
+                            0: { cellWidth: 28 },
+                            1: { cellWidth: 18, halign: 'center', fontStyle: 'bold' },
+                            2: { fontStyle: 'bold', cellWidth: 22, halign: 'center' },
+                            3: { halign: 'right', cellWidth: 28 },
+                            4: { halign: 'right', cellWidth: 28 },
+                            5: { halign: 'right', cellWidth: 32, fontStyle: 'bold' },
+                        },
+                        margin: { left: 14, right: 14 },
+                        didParseCell: function(data) {
+                            if (data.section === 'body' && data.column.index === 1) {
+                                const value = data.cell.raw;
+                                if (value === 'BUY') {
+                                    data.cell.styles.textColor = successGreen;
+                                } else if (value === 'SELL') {
+                                    data.cell.styles.textColor = dangerRed;
+                                }
+                            }
+                        }
+                    });
+
+                    if (transactions.length > 25) {
+                        yPos = doc.lastAutoTable.finalY + 5;
+                        doc.setFontSize(8);
+                        doc.setFont('helvetica', 'italic');
+                        doc.setTextColor(textMuted[0], textMuted[1], textMuted[2]);
+                        doc.text('Showing 25 of ' + transactions.length + ' transactions', 14, yPos);
+                    }
+                }
+            } catch (txError) {
+                console.log('Could not fetch transactions:', txError);
+            }
+
+            // ===== FOOTER ON ALL PAGES =====
             const pageCount = doc.internal.getNumberOfPages();
             for (let i = 1; i <= pageCount; i++) {
                 doc.setPage(i);
+
+                // Footer background
+                doc.setFillColor(brandDark[0], brandDark[1], brandDark[2]);
+                doc.rect(0, pageHeight - 18, pageWidth, 18, 'F');
+
+                // Footer accent line
+                doc.setFillColor(brandGreen[0], brandGreen[1], brandGreen[2]);
+                doc.rect(0, pageHeight - 18, pageWidth, 1, 'F');
+
+                // Footer text
                 doc.setFontSize(8);
-                doc.setTextColor(grayColor[0], grayColor[1], grayColor[2]);
-                doc.text(
-                    'Page ' + i + ' of ' + pageCount,
-                    pageWidth / 2,
-                    doc.internal.pageSize.getHeight() - 10,
-                    { align: 'center' }
-                );
-                doc.text(
-                    'This report is for informational purposes only and does not constitute financial advice.',
-                    pageWidth / 2,
-                    doc.internal.pageSize.getHeight() - 5,
-                    { align: 'center' }
-                );
+                doc.setTextColor(textMuted[0], textMuted[1], textMuted[2]);
+                doc.text('InvestED - Smart Investing, Simplified', 14, pageHeight - 8);
+                
+                doc.setTextColor(white[0], white[1], white[2]);
+                doc.text('Page ' + i + ' of ' + pageCount, pageWidth / 2, pageHeight - 8, { align: 'center' });
+                
+                doc.setTextColor(textMuted[0], textMuted[1], textMuted[2]);
+                doc.setFontSize(7);
+                doc.text('This report is for informational purposes only.', pageWidth - 14, pageHeight - 8, { align: 'right' });
             }
-            
+
             // Save the PDF
-            const fileName = 'InvestED_Portfolio_' + now.toISOString().split('T')[0] + '.pdf';
+            const fileName = 'InvestED_Portfolio_Report_' + now.toISOString().split('T')[0] + '.pdf';
             doc.save(fileName);
-            
+
         } catch (error) {
             console.error('Error generating PDF:', error);
             alert('Failed to generate PDF. Please try again.');
