@@ -1,7 +1,6 @@
 import styles from './Profile.module.css';
 import React, { useState, useEffect } from 'react';
 import { Shield, Scale, Rocket, ChevronRight, User, Lock, Bell, LogOut, Check } from 'lucide-react';
-import ThemeToggle from '../../components/ThemeToggle';
 import { portfolioService } from '../../services/portfolioService';
 
 function Profile() {
@@ -212,34 +211,6 @@ function Profile() {
             <p className={styles.noHoldings}>No holdings yet. Start investing!</p>
           )}
         </div>
-
-        {/* Goals Overview Card */}
-        <div className={styles.card}>
-          <div className={styles.cardHeader}>
-            <h3 className={styles.cardTitle}>Your Goals</h3>
-            <a href="#" className={styles.viewAll}>View All →</a>
-          </div>
-          <div className={styles.goalsList}>
-            {goals.map((goal, index) => (
-              <div key={index} className={styles.goalItem}>
-                <div className={styles.goalHeader}>
-                  <span className={styles.goalTitle}>{goal.title}</span>
-                  <span className={styles.goalProgress}>{goal.progress}%</span>
-                </div>
-                <div className={styles.progressBar}>
-                  <div 
-                    className={styles.progressFill} 
-                    style={{ width: `${goal.progress}%` }}
-                  />
-                </div>
-                <div className={styles.goalMeta}>
-                  <span>{goal.saved} saved</span>
-                  <span>Target: {goal.target}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
 
       {/* Right Column */}
@@ -302,20 +273,40 @@ function Profile() {
             </button>
           </div>
         </div>
+      </div>
 
-        {/* Preferences Card */}
+      {/* Goals Section - Full Width at Bottom */}
+      <div className={styles.goalsSection}>
         <div className={styles.card}>
-          <h3 className={styles.cardTitle}>Preferences</h3>
-          <div className={styles.preferenceItem}>
-            <div className={styles.preferenceInfo}>
-              <span className={styles.preferenceLabel}>Dark Mode</span>
-              <span className={styles.preferenceDescription}>Toggle between light and dark themes</span>
-            </div>
-            <ThemeToggle />
+          <div className={styles.cardHeader}>
+            <h3 className={styles.cardTitle}>Your Goals</h3>
+            <a href="#" className={styles.viewAll}>View All →</a>
+          </div>
+          <div className={styles.goalsList}>
+            {goals.map((goal, index) => (
+              <div key={index} className={styles.goalItem}>
+                <div className={styles.goalHeader}>
+                  <span className={styles.goalTitle}>{goal.title}</span>
+                  <span className={styles.goalProgress}>{goal.progress}%</span>
+                </div>
+                <div className={styles.progressBar}>
+                  <div 
+                    className={styles.progressFill} 
+                    style={{ width: `${goal.progress}%` }}
+                  />
+                </div>
+                <div className={styles.goalMeta}>
+                  <span>{goal.saved} saved</span>
+                  <span>Target: {goal.target}</span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
+      </div>
 
-        {/* Logout Button */}
+      {/* Logout Button - Centered at Bottom */}
+      <div className={styles.logoutSection}>
         <button className={styles.logoutButton}>
           <LogOut size={18} />
           <span>Logout</span>

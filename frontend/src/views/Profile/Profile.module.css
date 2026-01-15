@@ -1,39 +1,63 @@
 .profileView {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 1.5rem;
-  padding-bottom: 100px;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-  min-height: calc(100vh - 140px);
+  gap: 1.5rem;
+  padding: 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  grid-template-areas:
+    "left right"
+    "goals goals"
+    "logout logout";
 }
 
-.leftColumn,
-.rightColumn {
+.leftColumn {
+  grid-area: left;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
 
-/* Card Styles */
+.rightColumn {
+  grid-area: right;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.goalsSection {
+  grid-area: goals;
+  margin-top: 0.5rem;
+}
+
+.logoutSection {
+  grid-area: logout;
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+  margin-bottom: 6rem;
+}
+
 .card {
   background: var(--bg-card);
-  padding: 2rem;
   border-radius: 16px;
+  padding: 1.5rem;
   box-shadow: var(--shadow);
 }
 
 .cardTitle {
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--text-primary);
   margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .cardDescription {
   font-size: 0.9rem;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   margin-bottom: 1.5rem;
   line-height: 1.5;
 }
@@ -47,45 +71,48 @@
 
 .viewAll {
   font-size: 0.85rem;
-  font-weight: 600;
   color: var(--accent-green);
-  transition: opacity 0.2s;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s;
 }
 
 .viewAll:hover {
-  opacity: 0.8;
+  color: var(--accent-yellow);
 }
 
 /* User Info */
 .userInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
+  gap: 0.75rem;
 }
 
 .avatarLarge {
-  width: 100px;
-  height: 100px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-green), var(--accent-yellow));
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 2rem;
   font-weight: 700;
-  font-size: 2.5rem;
-  background: linear-gradient(135deg, var(--accent-green) 0%, #80C4B7 100%);
   color: white;
-  margin: 0 auto 1.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .userInfo h2 {
-  font-size: 1.75rem;
-  font-weight: 700;
+  font-size: 1.5rem;
   color: var(--text-primary);
-  margin-bottom: 0.5rem;
+  margin: 0;
 }
 
 .email {
-  font-size: 0.95rem;
-  color: var(--text-secondary);
-  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
 }
 
 .memberSince {
@@ -97,42 +124,42 @@
 .portfolioStats {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 .statItem {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding-bottom: 1.5rem;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
   border-bottom: 1px solid var(--border-color);
 }
 
 .statItem:last-child {
   border-bottom: none;
-  padding-bottom: 0;
 }
 
 .statLabel {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
   font-weight: 500;
-  color: var(--text-secondary);
 }
 
 .statValue {
-  font-size: 1.5rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--text-primary);
 }
 
 .gainLoss {
   display: flex;
-  align-items: baseline;
-  gap: 0.75rem;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
 }
 
 .percentage {
-  font-size: 1.125rem;
+  font-size: 0.85rem;
   font-weight: 600;
 }
 
@@ -142,256 +169,6 @@
 
 .negative {
   color: var(--accent-red);
-}
-
-/* Goals List */
-.goalsList {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.goalItem {
-  padding: 1.25rem;
-  background: var(--bg-primary);
-  border-radius: 12px;
-}
-
-.goalHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.75rem;
-}
-
-.goalTitle {
-  font-weight: 600;
-  font-size: 0.95rem;
-  color: var(--text-primary);
-}
-
-.goalProgress {
-  font-weight: 700;
-  font-size: 0.95rem;
-  color: var(--accent-green);
-}
-
-.progressBar {
-  height: 8px;
-  background: var(--border-color);
-  border-radius: 4px;
-  overflow: hidden;
-  margin-bottom: 0.75rem;
-}
-
-.progressFill {
-  height: 100%;
-  background: var(--accent-green);
-  border-radius: 4px;
-  transition: width 0.5s ease;
-}
-
-.goalMeta {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-}
-
-/* Risk Profiles */
-.riskProfiles {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.riskOption {
-  padding: 1.25rem;
-  border: 2px solid var(--border-color);
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.riskOption:hover {
-  border-color: var(--accent-green);
-  background: rgba(128, 196, 183, 0.05);
-}
-
-.riskOption.selected {
-  border-color: var(--accent-green);
-  background: linear-gradient(135deg, rgba(238, 204, 211, 0.2) 0%, rgba(238, 201, 92, 0.2) 100%);
-}
-
-.riskHeader {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
-}
-
-.riskIcon {
-  font-size: 1.5rem;
-}
-
-.riskLabel {
-  font-weight: 700;
-  font-size: 1.1rem;
-  color: var(--text-primary);
-  flex: 1;
-}
-
-.checkmark {
-  font-size: 1.25rem;
-  color: var(--accent-green);
-  font-weight: 700;
-}
-
-.riskDescription {
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  margin-bottom: 0.5rem;
-  line-height: 1.5;
-}
-
-.riskAllocation {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
-/* Settings */
-.settingsList {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.settingButton {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 1.25rem;
-  background: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: var(--text-primary);
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.settingButton:hover {
-  border-color: var(--accent-green);
-  background: rgba(128, 196, 183, 0.05);
-  transform: translateX(4px);
-}
-
-/* Preferences */
-.preferenceItem {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 0;
-}
-
-.preferenceInfo {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.preferenceLabel {
-  font-weight: 600;
-  font-size: 0.95rem;
-  color: var(--text-primary);
-}
-
-.preferenceDescription {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-}
-
-/* Logout Button */
-.logoutButton {
-  width: 100%;
-  padding: 1rem;
-  background: var(--accent-red);
-  color: white;
-  border: none;
-  border-radius: 10px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.logoutButton:hover {
-  opacity: 0.9;
-  transform: translateY(-2px);
-}
-
-/* Responsive */
-@media (max-width: 900px) {
-  .profileView {
-    grid-template-columns: 1fr;
-  }
-}
-/* Fix settings icon spacing */
-.settingContent {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.settingIcon {
-    flex-shrink: 0;
-}
-
-/* Fix settings icon spacing */
-.settingContent {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.settingIcon {
-    flex-shrink: 0;
-}
-/* Loading and Error States */
-.loadingState,
-.errorState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 400px;
-  text-align: center;
-  grid-column: 1 / -1;
-}
-
-.spinner {
-  width: 50px;
-  height: 50px;
-  border: 4px solid var(--border-color);
-  border-top-color: var(--accent-green);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-.errorState button {
-  margin-top: 1rem;
-  padding: 0.75rem 1.5rem;
-  background: var(--accent-green);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
 }
 
 /* Top Holdings */
@@ -405,14 +182,21 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
+  padding: 0.75rem;
   background: var(--bg-primary);
-  border-radius: 10px;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.holdingRow:hover {
+  background: var(--border-color);
+  transform: translateX(4px);
 }
 
 .holdingInfo {
   display: flex;
   flex-direction: column;
+  gap: 0.25rem;
 }
 
 .holdingSymbol {
@@ -423,34 +207,279 @@
 
 .holdingName {
   font-size: 0.85rem;
-  color: var(--text-secondary);
+  color: var(--text-muted);
 }
 
 .holdingValue {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  gap: 0.25rem;
 }
 
 .holdingAmount {
   font-weight: 700;
-  font-size: 1rem;
   color: var(--text-primary);
 }
 
 .holdingGain {
   font-size: 0.85rem;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .noHoldings {
   text-align: center;
-  padding: 2rem;
   color: var(--text-muted);
-  font-style: italic;
+  padding: 2rem;
+  font-size: 0.9rem;
+}
+
+/* Goals */
+.goalsList {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.goalItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.goalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.goalTitle {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.goalProgress {
+  font-weight: 700;
+  color: var(--accent-green);
+  font-size: 0.9rem;
+}
+
+.progressBar {
+  width: 100%;
+  height: 8px;
+  background: var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-green), var(--accent-yellow));
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.goalMeta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* Risk Profiles */
+.riskProfiles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.riskOption {
+  padding: 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--bg-primary);
+}
+
+.riskOption:hover {
+  border-color: var(--accent-green);
+  transform: translateY(-2px);
+}
+
+.riskOption.selected {
+  border-color: var(--accent-green);
+  background: var(--accent-green-light);
 }
 
 .riskOption.disabled {
-  opacity: 0.5;
+  opacity: 0.6;
   cursor: not-allowed;
+}
+
+.riskHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.riskIcon {
+  color: var(--accent-green);
+}
+
+.riskLabel {
+  font-weight: 700;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.checkmark {
+  color: var(--accent-green);
+}
+
+.riskDescription {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.riskAllocation {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* Account Settings */
+.settingsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.settingButton {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.settingButton:hover {
+  background: var(--border-color);
+  border-color: var(--accent-green);
+  transform: translateX(4px);
+}
+
+.settingContent {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.settingIcon {
+  color: var(--text-muted);
+}
+
+/* Logout Button */
+.logoutButton {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 2.5rem;
+  background: var(--accent-red);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.logoutButton:hover {
+  background: #c62828;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3);
+}
+
+/* Loading & Error States */
+.loadingState,
+.errorState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 1rem;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border-color);
+  border-top-color: var(--accent-green);
+  border-radius: 50%;
+  animation: spinLoader 0.8s linear infinite;
+}
+
+@keyframes spinLoader {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.errorState button {
+  padding: 0.75rem 1.5rem;
+  background: var(--accent-green);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.errorState button:hover {
+  background: var(--accent-yellow);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .profileView {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "left"
+      "right"
+      "goals"
+      "logout";
+  }
+
+  .goalsList {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .profileView {
+    padding: 1rem;
+  }
+
+  .card {
+    padding: 1rem;
+  }
+
+  .avatarLarge {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+  }
 }
