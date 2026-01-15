@@ -41,12 +41,12 @@ public class PortfolioController {
 
 
     public PortfolioController(
-        PortfolioService portfolioService,
-        UserService userService,
-        PortfolioPositionService positionService,
-        FinnhubService finnhubService,
-        MarketDataService marketDataService,
-        PortfolioSummaryService portfolioSummaryService
+            PortfolioService portfolioService,
+            UserService userService,
+            PortfolioPositionService positionService,
+            FinnhubService finnhubService,
+            MarketDataService marketDataService,
+            PortfolioSummaryService portfolioSummaryService
     ) {
 
         this.portfolioService = portfolioService;
@@ -108,12 +108,22 @@ public class PortfolioController {
             @PathVariable Long portfolioId,
             @RequestBody Map<String, Object> sellRequest) {
         try {
-            Long positionId = Long.valueOf(sellRequest.get("positionId").toString());
-            BigDecimal quantity = new BigDecimal(sellRequest.get("quantity").toString());
-            BigDecimal currentPrice = new BigDecimal(sellRequest.get("currentPrice").toString());
-            
-            PortfolioPosition position = portfolioService.executeSell(portfolioId, positionId, quantity, currentPrice);
-            
+           Long positionId = Long.valueOf(sellRequest.get("positionId").toString());
+           BigDecimal quantity = new BigDecimal(sellRequest.get("quantity").toString());
+
+        Portfolio portfolio = portfolioService.findById(portfolioId)
+            .orElseThrow(() -> new IllegalArgumentException("Portfolio not found: " + portfolioId));
+
+        PortfolioPosition pos = positionService.findByPortfolio(portfolio).stream()
+            .filter(p -> p.getId().equals(positionId))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("Position not found in portfolio: " + positionId));
+
+        String symbol = pos.getAsset().getSymbol();
+        BigDecimal currentPrice = marketDataService.getCurrentPrice(symbol);
+
+        PortfolioPosition position = portfolioService.executeSell(portfolioId, positionId, quantity, currentPrice);
+
             Map<String, Object> response = new HashMap<>();
             if (position == null) {
                 response.put("message", "Position fully closed");
