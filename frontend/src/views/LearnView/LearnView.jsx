@@ -162,12 +162,16 @@ const LearnView = () => {
         return Math.round((completedSteps / totalSteps) * 100);
     };
 
-    const filteredLessons = lessons.filter(lesson => {
-        const matchesCategory = selectedCategory === 'all' || lesson.category === selectedCategory;
-        const matchesSearch = lesson.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                             lesson.description.toLowerCase().includes(searchTerm.toLowerCase());
-        return matchesCategory && matchesSearch;
-    });
+    const difficultyOrder = { "Beginner": 1, "Intermediate": 2, "Advanced": 3 };
+
+    const filteredLessons = lessons
+        .filter(lesson => {
+            const matchesCategory = selectedCategory === 'all' || lesson.category === selectedCategory;
+            const matchesSearch = lesson.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                 lesson.description.toLowerCase().includes(searchTerm.toLowerCase());
+            return matchesCategory && matchesSearch;
+        })
+        .sort((a, b) => difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty]);
 
     const completedCount = lessons.filter(l => lessonProgress[l.id]?.completed).length;
     const progressPercent = Math.round((completedCount / lessons.filter(l => l.hasContent).length) * 100) || 0;
