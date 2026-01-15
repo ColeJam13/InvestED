@@ -8,13 +8,11 @@ const LearnView = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedLessonId, setSelectedLessonId] = useState(null);
     
-    // Track progress for each lesson - load from localStorage
     const [lessonProgress, setLessonProgress] = useState(() => {
         const saved = localStorage.getItem('lessonProgress');
         return saved ? JSON.parse(saved) : {};
     });
 
-    // Save progress to localStorage whenever it changes
     useEffect(() => {
         localStorage.setItem('lessonProgress', JSON.stringify(lessonProgress));
     }, [lessonProgress]);
@@ -150,7 +148,6 @@ const LearnView = () => {
         },
     ];
 
-    // Calculate progress for a lesson
     const getLessonProgress = (lessonId) => {
         const progress = lessonProgress[lessonId];
         if (!progress) return 0;
@@ -165,12 +162,16 @@ const LearnView = () => {
         return Math.round((completedSteps / totalSteps) * 100);
     };
 
-    const filteredLessons = lessons.filter(lesson => {
-        const matchesCategory = selectedCategory === 'all' || lesson.category === selectedCategory;
-        const matchesSearch = lesson.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                             lesson.description.toLowerCase().includes(searchTerm.toLowerCase());
-        return matchesCategory && matchesSearch;
-    });
+    const difficultyOrder = { "Beginner": 1, "Intermediate": 2, "Advanced": 3 };
+
+    const filteredLessons = lessons
+        .filter(lesson => {
+            const matchesCategory = selectedCategory === 'all' || lesson.category === selectedCategory;
+            const matchesSearch = lesson.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                 lesson.description.toLowerCase().includes(searchTerm.toLowerCase());
+            return matchesCategory && matchesSearch;
+        })
+        .sort((a, b) => difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty]);
 
     const completedCount = lessons.filter(l => lessonProgress[l.id]?.completed).length;
     const progressPercent = Math.round((completedCount / lessons.filter(l => l.hasContent).length) * 100) || 0;
@@ -307,8 +308,11 @@ const LearnView = () => {
                                         <CheckCircle size={16} />
                                     </div>
                                 )}
-                                {!lesson.hasContent && (
+                                {!lesson.hasContent && !isCompleted && (
                                     <div className={styles.comingSoonBadge}>Coming Soon</div>
+                                )}
+                                {progress > 0 && progress < 100 && (
+                                    <div className={styles.progressBadgeCorner}>{progress}%</div>
                                 )}
                             </div>
                             <h3 className={styles.lessonTitle}>{lesson.title}</h3>
@@ -329,9 +333,6 @@ const LearnView = () => {
                                         style={{ width: `${progress}%` }}
                                     />
                                 </div>
-                            )}
-                            {progress > 0 && progress < 100 && (
-                                <span className={styles.progressText}>{progress}% complete</span>
                             )}
                             <button 
                                 className={styles.lessonButton}
