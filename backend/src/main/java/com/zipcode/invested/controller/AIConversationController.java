@@ -2,8 +2,6 @@ package com.zipcode.invested.controller;
 
 import com.zipcode.invested.ai.AIConversation;
 import com.zipcode.invested.service.AIConversationService;
-import com.zipcode.invested.service.UserService;
-import com.zipcode.invested.user.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,14 +13,9 @@ import java.util.List;
 public class AIConversationController {
 
     private final AIConversationService aiConversationService;
-    private final UserService userService;
 
-    public AIConversationController(
-            AIConversationService aiConversationService,
-            UserService userService
-    ) {
+    public AIConversationController(AIConversationService aiConversationService) {
         this.aiConversationService = aiConversationService;
-        this.userService = userService;
     }
 
     @GetMapping
@@ -39,22 +32,31 @@ public class AIConversationController {
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<AIConversation>> getByUser(@PathVariable Long userId) {
-        User user = userService.findById(userId).orElse(null);
-        if (user == null) return ResponseEntity.notFound().build();
-
         return ResponseEntity.ok(aiConversationService.findByUserId(userId));
     }
 
     @PostMapping("/user/{userId}")
     public ResponseEntity<AIConversation> createForUser(
             @PathVariable Long userId,
-            @RequestBody AIConversation body
+            @RequestBody CreateAIConversationRequest body
     ) {
-        User user = userService.findById(userId).orElse(null);
-        if (user == null) return ResponseEntity.notFound().build();
-
-        body.setUser(user);
-        AIConversation saved = aiConversationService.save(body);
+        AIConversation saved = aiConversationService.createForUser(
+                userId,
+                body.getTitle(),
+                body.getTranscript()
+        );
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
+
+    public static class CreateAIConversationRequest {
+        private String title;
+        private String transcript;
+
+        public String getTitle() { return title; }
+        public String getTranscript() { return transcript; }
+
+        public void setTitle(String title) { this.title = title; }
+        public void setTranscript(String transcript) { this.transcript = transcript; }
+    }
+
 }
