@@ -41,9 +41,9 @@ public class AIConversationController {
     @PostMapping("/user/{userId}")
     public ResponseEntity<AIConversation> createForUser(
             @PathVariable Long userId,
-            @RequestBody CreateAIConversationRequest body
+            @Valid @RequestBody CreateAIConversationRequest body
     ) {
-        AIConversation saved = aiConversationService.createForUser(
+    AIConversation saved = aiConversationService.createForUser(
                 userId,
                 body.getTitle(),
                 body.getTranscript()
