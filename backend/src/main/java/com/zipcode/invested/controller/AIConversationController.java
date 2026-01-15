@@ -5,6 +5,9 @@ import com.zipcode.invested.service.AIConversationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+
 
 import java.util.List;
 
@@ -49,14 +52,27 @@ public class AIConversationController {
     }
 
     public static class CreateAIConversationRequest {
+
+        @NotBlank(message = "title is required")
         private String title;
+
+        @NotBlank(message = "transcript is required")
         private String transcript;
 
-        public String getTitle() { return title; }
-        public String getTranscript() { return transcript; }
+        public String getTitle() {
+            return title;
+        }
 
-        public void setTitle(String title) { this.title = title; }
-        public void setTranscript(String transcript) { this.transcript = transcript; }
+        public String getTranscript() {
+            return transcript;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public void setTranscript(String transcript) {
+            this.transcript = transcript;
+        }
     }
-
 }
