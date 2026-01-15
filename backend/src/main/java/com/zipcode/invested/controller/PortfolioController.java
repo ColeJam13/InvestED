@@ -7,6 +7,9 @@ import com.zipcode.invested.service.UserService;
 import com.zipcode.invested.service.PortfolioPositionService;
 import com.zipcode.invested.service.FinnhubService;
 import com.zipcode.invested.user.User;
+
+import jakarta.validation.Valid;
+
 import com.zipcode.invested.dto.BuyRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -86,7 +89,10 @@ public class PortfolioController {
     }
 
     @PostMapping("/{portfolioId}/buy")
-    public ResponseEntity<?> executeBuy(@PathVariable Long portfolioId, @RequestBody BuyRequest buyRequest) {
+    public ResponseEntity<?> executeBuy(
+            @PathVariable Long portfolioId,
+            @Valid @RequestBody BuyRequest buyRequest
+    ) {
     try {
         String symbol = buyRequest.getSymbol();
         BigDecimal currentPrice = marketDataService.getCurrentPrice(symbol);
