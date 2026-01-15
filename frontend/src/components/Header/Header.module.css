@@ -1,234 +1,25 @@
 .header {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    padding: 0.75rem 1.5rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: var(--bg-secondary);
+    padding: 0.75rem 1.5rem;
+    background: var(--bg-card);
     border-bottom: 1px solid var(--border-color);
-    transition: background-color 0.3s, border-color 0.3s;
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
 .headerLeft {
     display: flex;
     align-items: center;
-    gap: 2rem;
-    flex: 1;
-    min-width: 0;
-}
-
-.logo {
-    font-size: 1.5rem;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-    color: var(--accent-green);
-    flex-shrink: 0;
-}
-
-.tickerWrapper {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-}
-
-.tickerLabel {
-    font-weight: 600;
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    flex-shrink: 0;
-}
-
-.marqueeContainer {
-    flex: 1;
-    overflow: hidden;
-    mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
-    -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
-}
-
-.marquee {
-    display: flex;
-    gap: 2rem;
-    animation: marquee 30s linear infinite;
-    width: max-content;
-}
-
-.marquee:hover {
-    animation-play-state: paused;
-}
-
-@keyframes marquee {
-    0% {
-        transform: translateX(0);
-    }
-    100% {
-        transform: translateX(-50%);
-    }
-}
-
-.tickerItem {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.8rem;
-    white-space: nowrap;
-}
-
-.tickerSymbol {
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-.tickerPrice {
-    color: var(--text-secondary);
-}
-
-.tickerChange {
-    font-weight: 500;
-}
-
-.tickerItem.positive .tickerChange {
-    color: var(--accent-green);
-}
-
-.tickerItem.negative .tickerChange {
-    color: var(--accent-red);
+    gap: 1.5rem;
 }
 
 .headerRight {
     display: flex;
     align-items: center;
     gap: 1rem;
-    flex-shrink: 0;
-}
-
-.welcomeText {
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: var(--text-primary);
-}
-
-.avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    font-size: 0.8rem;
-    background: var(--accent-green);
-    color: #FFFFFF;
-}
-
-:global(body.dark-mode) .avatar {
-    color: #0f0f1a;
-}
-
-/* Responsive */
-@media (max-width: 1024px) {
-    .tickerWrapper {
-        display: none;
-    }
-}
-
-@media (max-width: 640px) {
-    .welcomeText {
-        display: none;
-    }
-}
-
-/* Avatar button */
-.avatarButton {
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    border-radius: 50%;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.avatarButton:hover {
-    transform: scale(1.05);
-}
-
-.avatarButton:hover .avatar {
-    box-shadow: 0 0 0 3px var(--accent-green);
-}
-
-/* New Logo Styles */
-.logoButton {
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-}
-
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.logoIcon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    background: linear-gradient(135deg, #80C4B7 0%, #3D9B89 100%);
-    border-radius: 10px;
-    color: #FFFFFF;
-    box-shadow: 0 4px 12px rgba(128, 196, 183, 0.3);
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.logoButton:hover .logoIcon {
-    transform: scale(1.05);
-    box-shadow: 0 6px 16px rgba(128, 196, 183, 0.4);
-}
-
-.logoText {
-    font-size: 1.4rem;
-    font-weight: 800;
-    color: var(--text-primary);
-    letter-spacing: -0.5px;
-}
-
-.logoHighlight {
-    background: linear-gradient(135deg, #80C4B7 0%, #3D9B89 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-:global(body.dark-mode) .logoHighlight {
-    background: linear-gradient(135deg, #80C4B7 0%, #A8E6CF 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-/* Avatar button */
-.avatarButton {
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    border-radius: 50%;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.avatarButton:hover {
-    transform: scale(1.05);
-}
-
-.avatarButton:hover .avatar {
-    box-shadow: 0 0 0 3px var(--accent-green);
 }
 
 /* Logo Styles */
@@ -249,18 +40,17 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    background: linear-gradient(135deg, #1E3A5F 0%, #2D5A87 100%);
-    border-radius: 10px;
-    color: #80C4B7;
-    box-shadow: 0 4px 12px rgba(30, 58, 95, 0.3);
+    width: 58px;
+    height: 52px;
+    background: linear-gradient(135deg, #80C4B7 0%, #3D9B89 100%);
+    border-radius: 12px;
+    color: #FFFFFF;
+    box-shadow: 0 4px 12px rgba(128, 196, 183, 0.3);
     transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .logoButton:hover .logoIcon {
     transform: scale(1.05);
-    box-shadow: 0 6px 16px rgba(30, 58, 95, 0.4);
 }
 
 .logoText {
@@ -278,11 +68,105 @@
 .logoEd {
     font-size: 1.3rem;
     font-weight: 900;
-    color: #80C4B7;
+    color: #3D9B89;
     letter-spacing: 2px;
 }
 
-/* Avatar button */
+/* Dark mode logo */
+:global(body.dark-mode) .logoIcon {
+    background: linear-gradient(135deg, #1E3A5F 0%, #2D5A87 100%);
+    color: #80C4B7;
+    box-shadow: 0 4px 12px rgba(30, 58, 95, 0.3);
+}
+
+:global(body.dark-mode) .logoInvest {
+    color: #888;
+}
+
+:global(body.dark-mode) .logoEd {
+    color: #80C4B7;
+}
+
+:global(body.dark-mode) .logoButton:hover .logoIcon {
+    box-shadow: 0 6px 16px rgba(30, 58, 95, 0.5);
+}
+
+/* Ticker Styles */
+.tickerWrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.tickerLabel {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+.marqueeContainer {
+    width: 400px;
+    overflow: hidden;
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+.marquee {
+    display: flex;
+    gap: 1.5rem;
+    animation: scroll 30s linear infinite;
+}
+
+@keyframes scroll {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+.tickerItem {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
+
+.tickerSymbol {
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: var(--text-primary);
+}
+
+.tickerPrice {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.tickerChange {
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.tickerItem.positive .tickerChange {
+    color: var(--accent-green);
+}
+
+.tickerItem.negative .tickerChange {
+    color: #EF4444;
+}
+
+/* Welcome Text */
+.welcomeText {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+/* Avatar Button */
 .avatarButton {
     background: none;
     border: none;
@@ -300,60 +184,47 @@
     box-shadow: 0 0 0 3px var(--accent-green);
 }
 
-/* Logo Dark Mode Overrides */
-:global(body.dark-mode) .logoIcon {
-    background: linear-gradient(135deg, #1E3A5F 0%, #2D5A87 100%);
-    color: #80C4B7;
-    box-shadow: 0 4px 12px rgba(30, 58, 95, 0.3);
-}
-
-:global(body.dark-mode) .logoInvest {
-    color: #888;
-}
-
-:global(body.dark-mode) .logoEd {
-    color: #80C4B7;
-}
-
-/* Logo Light Mode */
-.logoIcon {
-    background: linear-gradient(135deg, #80C4B7 0%, #3D9B89 100%);
+.avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #E07A5F 0%, #F2A07B 100%);
     color: #FFFFFF;
-    box-shadow: 0 4px 12px rgba(128, 196, 183, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    transition: box-shadow 0.2s;
 }
 
-.logoInvest {
-    color: #666;
+/* Responsive */
+@media (max-width: 900px) {
+    .marqueeContainer {
+        width: 250px;
+    }
+    
+    .welcomeText {
+        display: none;
+    }
 }
 
-.logoEd {
-    color: #3D9B89;
-}
-
-.logoButton:hover .logoIcon {
-    transform: scale(1.05);
-}
-
-:global(body.dark-mode) .logoButton:hover .logoIcon {
-    box-shadow: 0 6px 16px rgba(30, 58, 95, 0.5);
-}
-
-<<<<<<< Updated upstream
-/* Bigger and wider logo icon box */
-.logoIcon {
-    width: 58px;
-    height: 52px;
-    border-radius: 12px;
-=======
-/* Larger logo icon box */
-.logoIcon {
-    width: 46px;
-    height: 46px;
-}
-
-/* Larger logo icon box */
-.logoIcon {
-    width: 52px;
-    height: 52px;
->>>>>>> Stashed changes
+@media (max-width: 600px) {
+    .header {
+        padding: 0.5rem 1rem;
+    }
+    
+    .tickerWrapper {
+        display: none;
+    }
+    
+    .logoIcon {
+        width: 44px;
+        height: 40px;
+    }
+    
+    .logoInvest,
+    .logoEd {
+        font-size: 1.1rem;
+    }
 }
