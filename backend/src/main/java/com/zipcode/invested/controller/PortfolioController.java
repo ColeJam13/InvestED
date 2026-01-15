@@ -71,11 +71,7 @@ public class PortfolioController {
 
     @GetMapping("/{id}/summary")
     public ResponseEntity<PortfolioSummary> getSummary(@PathVariable Long id) {
-        try {
-            return ResponseEntity.ok(portfolioSummaryService.buildSummary(id));
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(portfolioSummaryService.buildSummary(id));
     }
 
     @PostMapping("/user/{userId}")
