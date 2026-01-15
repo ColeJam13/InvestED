@@ -1,10 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BookOpen, TrendingUp, Search, DollarSign, Coins, BarChart3, AlertTriangle, Target, Calendar, Scale, Clock, Bot, ChevronRight, CheckCircle } from 'lucide-react';
 import styles from './LearnView.module.css';
+import LessonDetailView from '../LessonDetailView/LessonDetailView';
 
 const LearnView = () => {
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedLessonId, setSelectedLessonId] = useState(null);
+    
+    // Track progress for each lesson - load from localStorage
+    const [lessonProgress, setLessonProgress] = useState(() => {
+        const saved = localStorage.getItem('lessonProgress');
+        return saved ? JSON.parse(saved) : {};
+    });
+
+    // Save progress to localStorage whenever it changes
+    useEffect(() => {
+        localStorage.setItem('lessonProgress', JSON.stringify(lessonProgress));
+    }, [lessonProgress]);
 
     const categories = [
         { id: 'all', name: 'All Lessons' },
@@ -23,8 +36,9 @@ const LearnView = () => {
             duration: '10 min',
             difficulty: 'Beginner',
             icon: BookOpen,
-            completed: true,
-            progress: 100,
+            hasContent: true,
+            totalSections: 5,
+            totalQuizQuestions: 5,
         },
         {
             id: 2,
@@ -34,8 +48,9 @@ const LearnView = () => {
             duration: '15 min',
             difficulty: 'Beginner',
             icon: TrendingUp,
-            completed: true,
-            progress: 100,
+            hasContent: true,
+            totalSections: 6,
+            totalQuizQuestions: 6,
         },
         {
             id: 3,
@@ -45,8 +60,9 @@ const LearnView = () => {
             duration: '20 min',
             difficulty: 'Intermediate',
             icon: Search,
-            completed: false,
-            progress: 45,
+            hasContent: false,
+            totalSections: 0,
+            totalQuizQuestions: 0,
         },
         {
             id: 4,
@@ -56,8 +72,9 @@ const LearnView = () => {
             duration: '12 min',
             difficulty: 'Intermediate',
             icon: DollarSign,
-            completed: false,
-            progress: 0,
+            hasContent: false,
+            totalSections: 0,
+            totalQuizQuestions: 0,
         },
         {
             id: 5,
@@ -67,8 +84,9 @@ const LearnView = () => {
             duration: '18 min',
             difficulty: 'Beginner',
             icon: Coins,
-            completed: false,
-            progress: 0,
+            hasContent: true,
+            totalSections: 6,
+            totalQuizQuestions: 6,
         },
         {
             id: 6,
@@ -78,8 +96,9 @@ const LearnView = () => {
             duration: '14 min',
             difficulty: 'Intermediate',
             icon: BarChart3,
-            completed: false,
-            progress: 0,
+            hasContent: false,
+            totalSections: 0,
+            totalQuizQuestions: 0,
         },
         {
             id: 7,
@@ -89,8 +108,9 @@ const LearnView = () => {
             duration: '16 min',
             difficulty: 'Advanced',
             icon: AlertTriangle,
-            completed: false,
-            progress: 0,
+            hasContent: false,
+            totalSections: 0,
+            totalQuizQuestions: 0,
         },
         {
             id: 8,
@@ -100,8 +120,9 @@ const LearnView = () => {
             duration: '8 min',
             difficulty: 'Beginner',
             icon: Target,
-            completed: true,
-            progress: 100,
+            hasContent: false,
+            totalSections: 0,
+            totalQuizQuestions: 0,
         },
         {
             id: 9,
@@ -111,8 +132,9 @@ const LearnView = () => {
             duration: '20 min',
             difficulty: 'Intermediate',
             icon: Calendar,
-            completed: false,
-            progress: 0,
+            hasContent: false,
+            totalSections: 0,
+            totalQuizQuestions: 0,
         },
         {
             id: 10,
@@ -122,10 +144,26 @@ const LearnView = () => {
             duration: '15 min',
             difficulty: 'Advanced',
             icon: Scale,
-            completed: false,
-            progress: 0,
+            hasContent: false,
+            totalSections: 0,
+            totalQuizQuestions: 0,
         },
     ];
+
+    // Calculate progress for a lesson
+    const getLessonProgress = (lessonId) => {
+        const progress = lessonProgress[lessonId];
+        if (!progress) return 0;
+        if (progress.completed) return 100;
+        
+        const lesson = lessons.find(l => l.id === lessonId);
+        if (!lesson || !lesson.hasContent) return 0;
+        
+        const totalSteps = lesson.totalSections + lesson.totalQuizQuestions;
+        const completedSteps = progress.currentSection + (progress.quizAnswered || 0);
+        
+        return Math.round((completedSteps / totalSteps) * 100);
+    };
 
     const filteredLessons = lessons.filter(lesson => {
         const matchesCategory = selectedCategory === 'all' || lesson.category === selectedCategory;
@@ -134,10 +172,12 @@ const LearnView = () => {
         return matchesCategory && matchesSearch;
     });
 
-    const completedCount = lessons.filter(l => l.completed).length;
-    const progressPercent = Math.round((completedCount / lessons.length) * 100);
+    const completedCount = lessons.filter(l => lessonProgress[l.id]?.completed).length;
+    const progressPercent = Math.round((completedCount / lessons.filter(l => l.hasContent).length) * 100) || 0;
 
-    const featuredLesson = lessons.find(l => !l.completed && l.progress > 0) || lessons.find(l => !l.completed) || lessons[0];
+    const featuredLesson = lessons.find(l => l.hasContent && !lessonProgress[l.id]?.completed && getLessonProgress(l.id) > 0) 
+        || lessons.find(l => l.hasContent && !lessonProgress[l.id]?.completed) 
+        || lessons[0];
 
     const getDifficultyClass = (difficulty) => {
         switch (difficulty.toLowerCase()) {
@@ -147,6 +187,33 @@ const LearnView = () => {
             default: return styles.beginner;
         }
     };
+
+    const handleLessonClick = (lesson) => {
+        if (lesson.hasContent) {
+            setSelectedLessonId(lesson.id);
+        }
+    };
+
+    const handleBackToLessons = (lessonId, progressData) => {
+        if (progressData) {
+            setLessonProgress(prev => ({
+                ...prev,
+                [lessonId]: progressData
+            }));
+        }
+        setSelectedLessonId(null);
+    };
+
+    if (selectedLessonId) {
+        const savedProgress = lessonProgress[selectedLessonId];
+        return (
+            <LessonDetailView 
+                lessonId={selectedLessonId} 
+                onBack={handleBackToLessons}
+                initialProgress={savedProgress}
+            />
+        );
+    }
 
     return (
         <div className={styles.learnContainer}>
@@ -170,12 +237,17 @@ const LearnView = () => {
 
             {/* Featured Lesson */}
             <div className={styles.featuredSection}>
-                <div className={styles.featuredCard}>
+                <div 
+                    className={`${styles.featuredCard} ${featuredLesson.hasContent ? styles.clickable : ''}`}
+                    onClick={() => handleLessonClick(featuredLesson)}
+                >
                     <div className={styles.featuredIcon}>
                         <featuredLesson.icon size={48} />
                     </div>
                     <div className={styles.featuredContent}>
-                        <span className={styles.featuredLabel}>CONTINUE LEARNING</span>
+                        <span className={styles.featuredLabel}>
+                            {getLessonProgress(featuredLesson.id) > 0 ? 'CONTINUE LEARNING' : 'START LEARNING'}
+                        </span>
                         <h2 className={styles.featuredTitle}>{featuredLesson.title}</h2>
                         <p className={styles.featuredDescription}>{featuredLesson.description}</p>
                         <div className={styles.featuredMeta}>
@@ -186,10 +258,15 @@ const LearnView = () => {
                             <span className={`${styles.difficulty} ${getDifficultyClass(featuredLesson.difficulty)}`}>
                                 {featuredLesson.difficulty}
                             </span>
+                            {getLessonProgress(featuredLesson.id) > 0 && (
+                                <span className={styles.progressBadge}>
+                                    {getLessonProgress(featuredLesson.id)}% complete
+                                </span>
+                            )}
                         </div>
                     </div>
                     <button className={styles.startButton}>
-                        {featuredLesson.progress > 0 ? 'Continue' : 'Start'} Lesson
+                        {getLessonProgress(featuredLesson.id) > 0 ? 'Continue' : 'Start'} Lesson
                         <ChevronRight size={18} style={{ marginLeft: '4px', verticalAlign: 'middle' }} />
                     </button>
                 </div>
@@ -212,16 +289,26 @@ const LearnView = () => {
             <div className={styles.lessonsGrid}>
                 {filteredLessons.map(lesson => {
                     const IconComponent = lesson.icon;
+                    const progress = getLessonProgress(lesson.id);
+                    const isCompleted = lessonProgress[lesson.id]?.completed;
+                    
                     return (
-                        <div key={lesson.id} className={styles.lessonCard}>
+                        <div 
+                            key={lesson.id} 
+                            className={`${styles.lessonCard} ${lesson.hasContent ? styles.clickable : styles.comingSoon}`}
+                            onClick={() => handleLessonClick(lesson)}
+                        >
                             <div className={styles.lessonHeader}>
                                 <div className={styles.lessonIcon}>
                                     <IconComponent size={32} />
                                 </div>
-                                {lesson.completed && (
+                                {isCompleted && (
                                     <div className={styles.completedBadge}>
                                         <CheckCircle size={16} />
                                     </div>
+                                )}
+                                {!lesson.hasContent && (
+                                    <div className={styles.comingSoonBadge}>Coming Soon</div>
                                 )}
                             </div>
                             <h3 className={styles.lessonTitle}>{lesson.title}</h3>
@@ -235,16 +322,22 @@ const LearnView = () => {
                                     {lesson.difficulty}
                                 </span>
                             </div>
-                            {lesson.progress > 0 && lesson.progress < 100 && (
+                            {progress > 0 && progress < 100 && (
                                 <div className={styles.progressBar}>
-                                    <div 
-                                        className={styles.progressFill} 
-                                        style={{ width: `${lesson.progress}%` }}
+                                    <div
+                                        className={styles.progressFill}
+                                        style={{ width: `${progress}%` }}
                                     />
                                 </div>
                             )}
-                            <button className={styles.lessonButton}>
-                                {lesson.completed ? 'Review' : lesson.progress > 0 ? 'Continue' : 'Start'}
+                            {progress > 0 && progress < 100 && (
+                                <span className={styles.progressText}>{progress}% complete</span>
+                            )}
+                            <button 
+                                className={styles.lessonButton}
+                                disabled={!lesson.hasContent}
+                            >
+                                {isCompleted ? 'Review' : progress > 0 ? 'Continue' : lesson.hasContent ? 'Start' : 'Coming Soon'}
                             </button>
                         </div>
                     );
