@@ -60,10 +60,8 @@ public class MarketDataController {
                         }
                     }
                 } catch (Exception ignored) {
-                    // Return empty list if no crypto found or API fails
                 }
             } else {
-                // Search only stocks
                 String stockResults = finnhubService.searchSymbol(query);
                 JsonNode stockNode = objectMapper.readTree(stockResults);
                 ArrayNode stockArray = (ArrayNode) stockNode.get("result");
@@ -87,7 +85,7 @@ public class MarketDataController {
     public ResponseEntity<String> getQuote(@RequestParam String symbol) {
         try {
             if (symbol.startsWith("CRYPTO:")) {
-                String cryptoSymbol = symbol.substring(7); // Remove "CRYPTO:" prefix
+                String cryptoSymbol = symbol.substring(7); 
                 String cryptoQuote = coinMarketCapService.getCryptoQuote(cryptoSymbol);
 
                 JsonNode cmcData = objectMapper.readTree(cryptoQuote);
