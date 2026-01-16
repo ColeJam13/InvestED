@@ -6,6 +6,7 @@ import com.zipcode.invested.service.PortfolioService;
 import com.zipcode.invested.service.UserService;
 import com.zipcode.invested.service.PortfolioPositionService;
 import com.zipcode.invested.service.FinnhubService;
+import com.zipcode.invested.service.CoinMarketCapService;
 import com.zipcode.invested.user.User;
 import com.zipcode.invested.dto.BuyRequest;
 import org.springframework.http.HttpStatus;
@@ -35,22 +36,25 @@ public class PortfolioController {
     private final FinnhubService finnhubService;
     private final ObjectMapper objectMapper;
     private final PortfolioSummaryService portfolioSummaryService;
-    private final TwelveDataService twelveDataService; 
+    private final TwelveDataService twelveDataService;
+    private final CoinMarketCapService coinMarketCapService;
 
 
     public PortfolioController(PortfolioService portfolioService, 
-                            UserService userService,
-                            PortfolioPositionService positionService,
-                            FinnhubService finnhubService, 
-                            PortfolioSummaryService portfolioSummaryService,
-                            TwelveDataService twelveDataService) { 
+                              UserService userService,
+                              PortfolioPositionService positionService,
+                              FinnhubService finnhubService, 
+                              PortfolioSummaryService portfolioSummaryService,
+                              TwelveDataService twelveDataService,
+                              CoinMarketCapService coinMarketCapService) {
         this.portfolioService = portfolioService;
         this.userService = userService;
         this.positionService = positionService;
         this.finnhubService = finnhubService;
         this.objectMapper = new ObjectMapper();
         this.portfolioSummaryService = portfolioSummaryService;
-        this.twelveDataService = twelveDataService; 
+        this.twelveDataService = twelveDataService;
+        this.coinMarketCapService = coinMarketCapService;
     }
 
     @GetMapping
@@ -147,13 +151,28 @@ public class PortfolioController {
             List<PortfolioPosition> positions = positionService.findByPortfolio(portfolio);
             totalPositions += positions.size();
             
-            // Calculate portfolio value with real-time prices from Finnhub
+            // Calculate portfolio value with real-time prices
             for (PortfolioPosition position : positions) {
                 try {
-                    // Fetch current price from Finnhub
-                    String quoteJson = finnhubService.getQuote(position.getAsset().getSymbol());
-                    JsonNode quoteNode = objectMapper.readTree(quoteJson);
-                    BigDecimal currentPrice = BigDecimal.valueOf(quoteNode.get("c").asDouble());
+                    String symbol = position.getAsset().getSymbol();
+                    BigDecimal currentPrice;
+                    
+                    if (symbol.startsWith("CRYPTO:")) {
+                        // Use CoinMarketCap for crypto
+                        String cryptoSymbol = symbol.replace("CRYPTO:", "");
+                        String cryptoQuoteJson = coinMarketCapService.getCryptoQuote(cryptoSymbol);
+                        JsonNode cryptoQuoteNode = objectMapper.readTree(cryptoQuoteJson);
+                        
+                        // CoinMarketCap response structure: data -> [symbol] -> quote -> USD -> price
+                        currentPrice = BigDecimal.valueOf(
+                            cryptoQuoteNode.get("data").get(cryptoSymbol).get("quote").get("USD").get("price").asDouble()
+                        );
+                    } else {
+                        // Fetch current price from Finnhub for stocks
+                        String quoteJson = finnhubService.getQuote(symbol);
+                        JsonNode quoteNode = objectMapper.readTree(quoteJson);
+                        currentPrice = BigDecimal.valueOf(quoteNode.get("c").asDouble());
+                    }
                     
                     // Calculate position value
                     BigDecimal positionValue = position.getQuantity().multiply(currentPrice);
@@ -218,11 +237,24 @@ public class PortfolioController {
                 positionData.put("averageBuyPrice", position.getAverageBuyPrice());
                 positionData.put("updatedAt", position.getUpdatedAt());
                 
-                // Fetch real-time current price from Finnhub
+                // Fetch real-time current price
                 try {
-                    String quoteJson = finnhubService.getQuote(position.getAsset().getSymbol());
-                    JsonNode quoteNode = objectMapper.readTree(quoteJson);
-                    double currentPrice = quoteNode.get("c").asDouble();
+                    String symbol = position.getAsset().getSymbol();
+                    double currentPrice;
+                    
+                    if (symbol.startsWith("CRYPTO:")) {
+                        // Use CoinMarketCap for crypto
+                        String cryptoSymbol = symbol.replace("CRYPTO:", "");
+                        String cryptoQuoteJson = coinMarketCapService.getCryptoQuote(cryptoSymbol);
+                        JsonNode cryptoQuoteNode = objectMapper.readTree(cryptoQuoteJson);
+                        currentPrice = cryptoQuoteNode.get("data").get(cryptoSymbol).get("quote").get("USD").get("price").asDouble();
+                    } else {
+                        // Use Finnhub for stocks
+                        String quoteJson = finnhubService.getQuote(symbol);
+                        JsonNode quoteNode = objectMapper.readTree(quoteJson);
+                        currentPrice = quoteNode.get("c").asDouble();
+                    }
+                    
                     positionData.put("currentPrice", currentPrice);
                 } catch (Exception e) {
                     System.err.println("Error fetching price for " + position.getAsset().getSymbol() + ": " + e.getMessage());
@@ -352,13 +384,38 @@ public class PortfolioController {
         List<PortfolioPosition> sortedPositions = new ArrayList<>(positions);
         sortedPositions.sort((p1, p2) -> {
             try {
-                String quote1 = finnhubService.getQuote(p1.getAsset().getSymbol());
-                String quote2 = finnhubService.getQuote(p2.getAsset().getSymbol());
-                JsonNode node1 = objectMapper.readTree(quote1);
-                JsonNode node2 = objectMapper.readTree(quote2);
+                String symbol1 = p1.getAsset().getSymbol();
+                String symbol2 = p2.getAsset().getSymbol();
+                BigDecimal value1;
+                BigDecimal value2;
                 
-                BigDecimal value1 = p1.getQuantity().multiply(BigDecimal.valueOf(node1.get("c").asDouble()));
-                BigDecimal value2 = p2.getQuantity().multiply(BigDecimal.valueOf(node2.get("c").asDouble()));
+                // Get price for position 1
+                if (symbol1.startsWith("CRYPTO:")) {
+                    String cryptoSymbol1 = symbol1.replace("CRYPTO:", "");
+                    String cryptoQuote1 = coinMarketCapService.getCryptoQuote(cryptoSymbol1);
+                    JsonNode cryptoNode1 = objectMapper.readTree(cryptoQuote1);
+                    value1 = p1.getQuantity().multiply(
+                        BigDecimal.valueOf(cryptoNode1.get("data").get(cryptoSymbol1).get("quote").get("USD").get("price").asDouble())
+                    );
+                } else {
+                    String quote1 = finnhubService.getQuote(symbol1);
+                    JsonNode node1 = objectMapper.readTree(quote1);
+                    value1 = p1.getQuantity().multiply(BigDecimal.valueOf(node1.get("c").asDouble()));
+                }
+                
+                // Get price for position 2
+                if (symbol2.startsWith("CRYPTO:")) {
+                    String cryptoSymbol2 = symbol2.replace("CRYPTO:", "");
+                    String cryptoQuote2 = coinMarketCapService.getCryptoQuote(cryptoSymbol2);
+                    JsonNode cryptoNode2 = objectMapper.readTree(cryptoQuote2);
+                    value2 = p2.getQuantity().multiply(
+                        BigDecimal.valueOf(cryptoNode2.get("data").get(cryptoSymbol2).get("quote").get("USD").get("price").asDouble())
+                    );
+                } else {
+                    String quote2 = finnhubService.getQuote(symbol2);
+                    JsonNode node2 = objectMapper.readTree(quote2);
+                    value2 = p2.getQuantity().multiply(BigDecimal.valueOf(node2.get("c").asDouble()));
+                }
                 
                 return value2.compareTo(value1); // Descending order
             } catch (Exception e) {

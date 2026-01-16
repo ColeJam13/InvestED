@@ -250,8 +250,8 @@ const PortfolioView = () => {
                 const holdingsData = filteredPositions.map(position => {
                     const metrics = calculateMetrics(position);
                     return [
-                        position.symbol,
-                        position.name || '',
+                            position.symbol.replace('CRYPTO:', ''),
+                            (position.name || '').replace('CRYPTO:', ''),
                         formatShares(position.quantity),
                         formatCurrency(position.currentPrice),
                         formatCurrency(metrics.marketValue),
@@ -702,8 +702,8 @@ const PortfolioView = () => {
                                 <tr key={position.id}>
                                     <td>
                                         <div className={styles.assetCell}>
-                                            <span className={styles.assetSymbol}>{position.symbol}</span>
-                                            <span className={styles.assetName}>{position.name}</span>
+                                            <span className={styles.assetSymbol}>{position.symbol.replace('CRYPTO:', '')}</span>
+                                            <span className={styles.assetName}>{position.name.replace('CRYPTO:', '')}</span>
                                         </div>
                                     </td>
                                     <td>{formatShares(position.quantity)}</td>
@@ -749,7 +749,7 @@ const PortfolioView = () => {
                         {!showConfirmation ? (
                             <>
                                 <div className={styles.modalHeader}>
-                                    <h2>Sell {selectedPosition.symbol}</h2>
+                                    <h2>Sell {selectedPosition.symbol.replace('CRYPTO:', '')}</h2>
                                     <button className={styles.closeBtn} onClick={() => setShowSellModal(false)}>×</button>
                                 </div>
 
@@ -826,7 +826,7 @@ const PortfolioView = () => {
                                     <div className={styles.confirmDetails}>
                                         <div className={styles.confirmRow}>
                                             <span>Asset</span>
-                                            <span>{selectedPosition.symbol}</span>
+                                            <span>{selectedPosition.symbol.replace('CRYPTO:', '')}</span>
                                         </div>
                                         <div className={styles.confirmRow}>
                                             <span>Shares</span>
