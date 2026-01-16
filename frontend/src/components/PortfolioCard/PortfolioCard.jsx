@@ -23,7 +23,8 @@ const PortfolioCard = () => {
                 const [summaryRes, histRes] = await Promise.all([
                     axios.get('http://localhost:8080/api/portfolios/user/1/summary'),
                     axios.get('http://localhost:8080/api/portfolios/user/1/performance/historical', {
-                        params: { range: activeTime === 'Live' ? '1D' : activeTime === 'All' ? '1Y' : activeTime }
+                        params: { range: activeTime === 'Live' ? '1D' : activeTime === 'All' ? '1Y' : activeTime, 
+                        assetFilter: activeFilter } 
                     })
                 ]);
                 setPortfolioData(summaryRes.data);
@@ -44,7 +45,7 @@ const PortfolioCard = () => {
         };
 
         fetchPortfolioData();
-    }, [activeTime]); // Re-fetch when time range changes
+    }, [activeTime, activeFilter]); // Re-fetch when time range changes
 
     const formatCurrency = (amount) => {
         if (!amount) return '$0.00';
