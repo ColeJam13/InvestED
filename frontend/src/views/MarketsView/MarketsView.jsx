@@ -90,7 +90,7 @@ function MarketsView() {
               </button>
               <button 
                 className={styles.quickActionBtn}
-                onClick={() => setSelectedSymbol('BTC/USD')}
+                onClick={() => setSelectedSymbol('CRYPTO:BTC')}
               >
                 View Bitcoin
               </button>
