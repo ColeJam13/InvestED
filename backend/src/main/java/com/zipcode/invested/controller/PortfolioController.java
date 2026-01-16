@@ -35,7 +35,7 @@ public class PortfolioController {
     private final FinnhubService finnhubService;
     private final ObjectMapper objectMapper;
     private final PortfolioSummaryService portfolioSummaryService;
-    private final TwelveDataService twelveDataService; // ADD THIS LINE
+    private final TwelveDataService twelveDataService; 
 
 
     public PortfolioController(PortfolioService portfolioService, 
@@ -43,14 +43,14 @@ public class PortfolioController {
                             PortfolioPositionService positionService,
                             FinnhubService finnhubService, 
                             PortfolioSummaryService portfolioSummaryService,
-                            TwelveDataService twelveDataService) { // ADD THIS PARAMETER
+                            TwelveDataService twelveDataService) { 
         this.portfolioService = portfolioService;
         this.userService = userService;
         this.positionService = positionService;
         this.finnhubService = finnhubService;
         this.objectMapper = new ObjectMapper();
         this.portfolioSummaryService = portfolioSummaryService;
-        this.twelveDataService = twelveDataService; // ADD THIS LINE
+        this.twelveDataService = twelveDataService; 
     }
 
     @GetMapping
@@ -240,7 +240,8 @@ public class PortfolioController {
     @GetMapping("/user/{userId}/performance/historical")
     public ResponseEntity<?> getHistoricalPerformance(
             @PathVariable Long userId,
-            @RequestParam(defaultValue = "1M") String range) {
+            @RequestParam(defaultValue = "1M") String range,
+            @RequestParam(defaultValue = "all") String assetFilter) {
         try {
             User user = userService.findById(userId).orElse(null);
             if (user == null) return ResponseEntity.notFound().build();
@@ -285,6 +286,21 @@ public class PortfolioController {
                 allPositions.addAll(positionService.findByPortfolio(portfolio));
                 totalCash = totalCash.add(portfolio.getCashBalance());
             }
+
+            if (!"all".equals(assetFilter)) {
+                allPositions = allPositions.stream()
+                        .filter(pos -> {
+                            String assetType = pos.getAsset().getAssetType();
+                            if ("stocks".equals(assetFilter)) {
+                                return "STOCK".equalsIgnoreCase(assetType);
+                            } else if ("crypto".equals(assetFilter)) {
+                                return "CRYPTO".equalsIgnoreCase(assetType);
+                            }
+                            return true;
+                        })
+                        .collect(java.util.stream.Collectors.toList());
+            }
+
             
             if (allPositions.isEmpty()) {
                 // Return flat line at current cash balance if no positions
@@ -391,16 +407,23 @@ public class PortfolioController {
         
         // Fetch historical data for top positions with delay between calls
         Map<String, JsonNode> historicalDataMap = new HashMap<>();
-        
+            
         for (PortfolioPosition position : topPositions) {
             String symbol = position.getAsset().getSymbol();
             System.out.println("===> Processing position for historical data: " + symbol);
             
-            // Skip crypto for now
-            if (symbol.startsWith("CRYPTO:")) continue;
-            
             try {
-                String histData = twelveDataService.getHistoricalData(symbol, interval, outputsize);
+                String histData;
+                
+                if (symbol.startsWith("CRYPTO:")) {
+                    // Handle crypto - convert CRYPTO:ETH to ETH/USD for TwelveData
+                    String cryptoSymbol = symbol.replace("CRYPTO:", "") + "/USD";
+                    histData = twelveDataService.getHistoricalData(cryptoSymbol, interval, outputsize);
+                } else {
+                    // Handle stocks
+                    histData = twelveDataService.getHistoricalData(symbol, interval, outputsize);
+                }
+                
                 JsonNode histNode = objectMapper.readTree(histData);
                 
                 // Check if we got valid data
@@ -411,10 +434,10 @@ public class PortfolioController {
                     System.err.println("TwelveData error for " + symbol + ": " + histNode.get("message").asText());
                 }
                 
-                    // Only sleep if this is the last position (cache should handle subsequent calls instantly)
-                        if (topPositions.indexOf(position) < topPositions.size() - 1) {
-                            Thread.sleep(2000); // Reduced to 2 seconds
-                        }
+                // Only sleep if this is not the last position
+                if (topPositions.indexOf(position) < topPositions.size() - 1) {
+                    Thread.sleep(2000);
+                }
                 
             } catch (Exception e) {
                 System.err.println("Error fetching historical data for " + symbol + ": " + e.getMessage());
@@ -432,8 +455,6 @@ public class PortfolioController {
             // Add up position values at this point in time
             for (PortfolioPosition position : topPositions) {
                 String symbol = position.getAsset().getSymbol();
-                
-                if (symbol.startsWith("CRYPTO:")) continue;
                 
                 JsonNode histData = historicalDataMap.get(symbol);
                 if (histData != null && histData.has("values")) {
