@@ -143,16 +143,15 @@ const PortfolioView = () => {
 
             // InvestED Dark Mode Colors
             const colors = {
-                darkBg: [26, 26, 46],           // Main dark background
-                cardBg: [35, 39, 56],           // Card background
-                brandGreen: [61, 155, 137],     // #3D9B89
-                brandGreenLight: [128, 196, 183], // #80C4B7
-                accentGreen: [72, 187, 120],    // Success green
-                accentRed: [245, 101, 101],     // Danger red
+                darkBg: [26, 26, 46],
+                cardBg: [35, 39, 56],
+                brandGreen: [61, 155, 137],
+                brandGreenLight: [128, 196, 183],
+                accentGreen: [72, 187, 120],
+                accentRed: [245, 101, 101],
                 textWhite: [255, 255, 255],
-                textGray: [156, 163, 175],      // Muted text
-                textLight: [229, 231, 235],     // Light text
-                headerBg: [30, 32, 48],         // Darker header
+                textGray: [156, 163, 175],
+                textLight: [229, 231, 235],
             };
 
             let yPos = 0;
@@ -161,17 +160,16 @@ const PortfolioView = () => {
             doc.setFillColor(colors.darkBg[0], colors.darkBg[1], colors.darkBg[2]);
             doc.rect(0, 0, pageWidth, 35, 'F');
 
-            // Green accent line
             doc.setFillColor(colors.brandGreen[0], colors.brandGreen[1], colors.brandGreen[2]);
             doc.rect(0, 35, pageWidth, 2, 'F');
 
-            // Logo text
+            // Logo text - INVESTED as one word
             doc.setFontSize(22);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(colors.textGray[0], colors.textGray[1], colors.textGray[2]);
             doc.text('INVEST', margin, 22);
             doc.setTextColor(colors.brandGreen[0], colors.brandGreen[1], colors.brandGreen[2]);
-            doc.text('ED', margin + 41, 22);
+            doc.text('ED', margin + 28, 22);
 
             // Right side info
             doc.setFontSize(14);
@@ -198,20 +196,17 @@ const PortfolioView = () => {
             doc.setFillColor(colors.cardBg[0], colors.cardBg[1], colors.cardBg[2]);
             doc.roundedRect(margin, yPos, contentWidth, 50, 3, 3, 'F');
 
-            // Section title
             doc.setFontSize(11);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(colors.brandGreen[0], colors.brandGreen[1], colors.brandGreen[2]);
             doc.text('ACCOUNT SUMMARY', margin + 8, yPos + 12);
 
-            // Get cash balance
             const totalCash = portfolios.length > 0 
                 ? (selectedPortfolioId === 'all'
                     ? portfolios.reduce((sum, p) => sum + (p.cashBalance || 0), 0)
                     : portfolios.find(p => p.id === parseInt(selectedPortfolioId))?.cashBalance || 0)
                 : 0;
 
-            // Summary grid - 3 columns
             const colWidth = (contentWidth - 16) / 3;
             const summaryY = yPos + 22;
 
@@ -241,7 +236,7 @@ const PortfolioView = () => {
                 doc.text(item.value, x, y + 8);
             });
 
-            yPos += 60;
+            yPos += 58;
 
             // ===== HOLDINGS =====
             doc.setFontSize(11);
@@ -314,11 +309,17 @@ const PortfolioView = () => {
                     }
                 });
 
-                yPos = doc.lastAutoTable.finalY + 15;
+                yPos = doc.lastAutoTable.finalY + 10;
             }
 
             // ===== ASSET ALLOCATION =====
-            if (filteredPositions.length > 0 && yPos < 200) {
+            if (filteredPositions.length > 0) {
+                // Check if we need a new page
+                if (yPos > pageHeight - 80) {
+                    doc.addPage();
+                    yPos = 20;
+                }
+
                 doc.setFontSize(11);
                 doc.setFont('helvetica', 'bold');
                 doc.setTextColor(colors.darkBg[0], colors.darkBg[1], colors.darkBg[2]);
@@ -372,7 +373,7 @@ const PortfolioView = () => {
                     margin: { left: margin, right: margin },
                 });
 
-                yPos = doc.lastAutoTable.finalY + 15;
+                yPos = doc.lastAutoTable.finalY + 10;
             }
 
             // ===== TRANSACTION HISTORY =====
@@ -385,7 +386,8 @@ const PortfolioView = () => {
                 const transactions = txRes.data;
 
                 if (transactions && transactions.length > 0) {
-                    if (yPos > 190) {
+                    // Check if we need a new page - only if not enough space for header + a few rows
+                    if (yPos > pageHeight - 60) {
                         doc.addPage();
                         yPos = 20;
                     }
@@ -463,34 +465,27 @@ const PortfolioView = () => {
             for (let i = 1; i <= totalPages; i++) {
                 doc.setPage(i);
 
-                // Footer background
                 doc.setFillColor(colors.darkBg[0], colors.darkBg[1], colors.darkBg[2]);
-                doc.rect(0, pageHeight - 25, pageWidth, 25, 'F');
+                doc.rect(0, pageHeight - 22, pageWidth, 22, 'F');
 
-                // Green accent line
                 doc.setFillColor(colors.brandGreen[0], colors.brandGreen[1], colors.brandGreen[2]);
-                doc.rect(0, pageHeight - 25, pageWidth, 1, 'F');
+                doc.rect(0, pageHeight - 22, pageWidth, 1, 'F');
 
-                // Footer content
                 doc.setFontSize(8);
                 doc.setFont('helvetica', 'bold');
                 doc.setTextColor(colors.textGray[0], colors.textGray[1], colors.textGray[2]);
-                doc.text('INVEST', margin, pageHeight - 17);
+                doc.text('INVEST', margin, pageHeight - 14);
                 doc.setTextColor(colors.brandGreen[0], colors.brandGreen[1], colors.brandGreen[2]);
-                doc.text('ED', margin + 16, pageHeight - 17);
+                doc.text('ED', margin + 12, pageHeight - 14);
 
                 doc.setFont('helvetica', 'normal');
                 doc.setTextColor(colors.textGray[0], colors.textGray[1], colors.textGray[2]);
-                doc.text('Page ' + i + ' of ' + totalPages, pageWidth / 2, pageHeight - 17, { align: 'center' });
-                doc.text(now.toLocaleDateString(), pageWidth - margin, pageHeight - 17, { align: 'right' });
+                doc.text('Page ' + i + ' of ' + totalPages, pageWidth / 2, pageHeight - 14, { align: 'center' });
+                doc.text(now.toLocaleDateString(), pageWidth - margin, pageHeight - 14, { align: 'right' });
 
-                // Legal disclaimer
-                doc.setFontSize(6);
-                doc.setTextColor(colors.textGray[0], colors.textGray[1], colors.textGray[2]);
-                const disclaimer = 'EDUCATIONAL PURPOSE ONLY: InvestED is a financial literacy and education platform. This statement is simulated and does not represent real investments, securities, or financial advice. ';
-                const disclaimer2 = 'No real money is involved. Do not make financial decisions based on this document. Consult a licensed financial advisor for real investment advice.';
-                doc.text(disclaimer, margin, pageHeight - 10);
-                doc.text(disclaimer2, margin, pageHeight - 6);
+                doc.setFontSize(5.5);
+                doc.text('EDUCATIONAL PURPOSE ONLY: InvestED is a financial literacy and education platform. This statement is simulated and does not represent real investments, securities, or financial advice.', margin, pageHeight - 8);
+                doc.text('No real money is involved. Do not make financial decisions based on this document. Consult a licensed financial advisor for real investment advice.', margin, pageHeight - 4);
             }
 
             doc.save('InvestED_Statement_' + now.toISOString().split('T')[0] + '.pdf');
