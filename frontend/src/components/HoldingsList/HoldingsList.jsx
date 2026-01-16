@@ -49,19 +49,22 @@ const HoldingsList = () => {
     };
 
     const getAssetColor = (symbol) => {
-        const colors = {
-            'AAPL': '#FF6B6B',
-            'BTC': '#F7931A',
-            'TSLA': '#E31937',
-            'ETH': '#627EEA',
-            'GOOGL': '#4285F4',
-            'AMZN': '#FF9900',
-            'MSFT': '#00A4EF',
-            'META': '#0668E1',
-            'NVDA': '#76B900',
+            // Strip CRYPTO: prefix for color matching
+            const cleanSymbol = symbol.replace('CRYPTO:', '');
+            
+            const colors = {
+                'AAPL': '#FF6B6B',
+                'BTC': '#F7931A',
+                'TSLA': '#E31937',
+                'ETH': '#627EEA',
+                'GOOGL': '#4285F4',
+                'AMZN': '#FF9900',
+                'MSFT': '#00A4EF',
+                'META': '#0668E1',
+                'NVDA': '#76B900',
+            };
+            return colors[cleanSymbol] || '#80C4B7';
         };
-        return colors[symbol] || '#80C4B7';
-    };
 
     if (loading) {
         return (
@@ -128,10 +131,10 @@ const HoldingsList = () => {
                                         className={styles.holdingIcon}
                                         style={{ backgroundColor: getAssetColor(holding.symbol) }}
                                     >
-                                        {holding.symbol}
+                                        {holding.symbol.replace('CRYPTO:', '')}
                                     </div>
                                     <div className={styles.holdingInfo}>
-                                        <span className={styles.holdingName}>{holding.name}</span>
+                                        <span className={styles.holdingName}>{holding.name.replace('CRYPTO:', '')}</span>
                                         <span className={styles.holdingShares}>
                                             {formatShares(holding.quantity)} shares • {holding.portfolioName}
                                         </span>

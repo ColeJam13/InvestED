@@ -194,8 +194,8 @@ function Profile() {
                 return (
                   <div key={index} className={styles.holdingRow}>
                     <div className={styles.holdingInfo}>
-                      <span className={styles.holdingSymbol}>{holding.symbol}</span>
-                      <span className={styles.holdingName}>{holding.name}</span>
+                      <span className={styles.holdingSymbol}>{holding.symbol.replace('CRYPTO:', '')}</span>
+                      <span className={styles.holdingName}>{holding.name.replace('CRYPTO:', '')}</span>
                     </div>
                     <div className={styles.holdingValue}>
                       <span className={styles.holdingAmount}>{portfolioService.formatCurrency(value)}</span>

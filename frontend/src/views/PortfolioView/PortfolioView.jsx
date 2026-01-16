@@ -130,263 +130,366 @@ const PortfolioView = () => {
         return shares < 1 ? shares.toFixed(4) : shares.toFixed(2);
     };
 
-    // PDF Export Function
     const exportToPDF = async () => {
         setExportingPDF(true);
-        
+
         try {
             const doc = new jsPDF();
             const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
             const now = new Date();
-            
-            // Colors
-            const primaryColor = [61, 155, 137];
-            const darkColor = [26, 26, 46];
-            const grayColor = [128, 128, 128];
-            const greenColor = [34, 197, 94];
-            const redColor = [239, 68, 68];
-            
-            // Header
-            doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+            const margin = 15;
+            const contentWidth = pageWidth - (margin * 2);
+
+            // InvestED Dark Mode Colors
+            const colors = {
+                darkBg: [26, 26, 46],
+                cardBg: [35, 39, 56],
+                brandGreen: [61, 155, 137],
+                brandGreenLight: [128, 196, 183],
+                accentGreen: [72, 187, 120],
+                accentRed: [245, 101, 101],
+                textWhite: [255, 255, 255],
+                textGray: [156, 163, 175],
+                textLight: [229, 231, 235],
+            };
+
+            let yPos = 0;
+
+            // ===== HEADER =====
+            doc.setFillColor(colors.darkBg[0], colors.darkBg[1], colors.darkBg[2]);
             doc.rect(0, 0, pageWidth, 35, 'F');
-            
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(24);
+
+            doc.setFillColor(colors.brandGreen[0], colors.brandGreen[1], colors.brandGreen[2]);
+            doc.rect(0, 35, pageWidth, 2, 'F');
+
+            // Logo text - INVESTED as one word
+            doc.setFontSize(22);
             doc.setFont('helvetica', 'bold');
-            doc.text('InvestED', 14, 18);
-            
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
-            doc.text('Portfolio Report', 14, 26);
-            
-            doc.setFontSize(9);
-            doc.text('Generated: ' + now.toLocaleDateString() + ' at ' + now.toLocaleTimeString(), pageWidth - 14, 18, { align: 'right' });
-            
-            // Portfolio Name
-            const portfolioName = selectedPortfolioId === 'all' 
-                ? 'All Portfolios' 
-                : portfolios.find(p => p.id === parseInt(selectedPortfolioId))?.name || 'Portfolio';
-            doc.text(portfolioName, pageWidth - 14, 26, { align: 'right' });
-            
-            // Summary Section
-            let yPos = 45;
-            
-            doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
+            doc.setTextColor(colors.textGray[0], colors.textGray[1], colors.textGray[2]);
+            doc.text('INVEST', margin, 22);
+            doc.setTextColor(colors.brandGreen[0], colors.brandGreen[1], colors.brandGreen[2]);
+            doc.text('ED', margin + 28, 22);
+
+            // Right side info
             doc.setFontSize(14);
             doc.setFont('helvetica', 'bold');
-            doc.text('Portfolio Summary', 14, yPos);
-            
-            yPos += 10;
-            
-            // Summary Cards
-            const summaryData = [
-                { label: 'Total Value', value: formatCurrency(portfolioTotals.totalValue), isGain: null },
-                { label: 'Cost Basis', value: formatCurrency(portfolioTotals.totalCost), isGain: null },
-                { label: 'Total Gain/Loss', value: formatCurrency(portfolioTotals.totalGainLoss), isGain: portfolioTotals.totalGainLoss >= 0 },
-                { label: 'Return', value: formatPercent(totalGainLossPercent), isGain: totalGainLossPercent >= 0 },
+            doc.setTextColor(colors.textWhite[0], colors.textWhite[1], colors.textWhite[2]);
+            doc.text('Portfolio Statement', pageWidth - margin, 16, { align: 'right' });
+
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(colors.textGray[0], colors.textGray[1], colors.textGray[2]);
+            doc.text(now.toLocaleDateString('en-US', { 
+                month: 'long', day: 'numeric', year: 'numeric'
+            }), pageWidth - margin, 24, { align: 'right' });
+
+            const portfolioName = selectedPortfolioId === 'all'
+                ? 'All Portfolios'
+                : portfolios.find(p => p.id === parseInt(selectedPortfolioId))?.name || 'Portfolio';
+            doc.setTextColor(colors.brandGreenLight[0], colors.brandGreenLight[1], colors.brandGreenLight[2]);
+            doc.text(portfolioName, pageWidth - margin, 31, { align: 'right' });
+
+            yPos = 47;
+
+            // ===== ACCOUNT SUMMARY =====
+            doc.setFillColor(colors.cardBg[0], colors.cardBg[1], colors.cardBg[2]);
+            doc.roundedRect(margin, yPos, contentWidth, 50, 3, 3, 'F');
+
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(colors.brandGreen[0], colors.brandGreen[1], colors.brandGreen[2]);
+            doc.text('ACCOUNT SUMMARY', margin + 8, yPos + 12);
+
+            const totalCash = portfolios.length > 0 
+                ? (selectedPortfolioId === 'all'
+                    ? portfolios.reduce((sum, p) => sum + (p.cashBalance || 0), 0)
+                    : portfolios.find(p => p.id === parseInt(selectedPortfolioId))?.cashBalance || 0)
+                : 0;
+
+            const colWidth = (contentWidth - 16) / 3;
+            const summaryY = yPos + 22;
+
+            const summaryItems = [
+                { label: 'Total Value', value: formatCurrency(portfolioTotals.totalValue + totalCash), color: colors.textWhite },
+                { label: 'Cash Balance', value: formatCurrency(totalCash), color: colors.textWhite },
+                { label: 'Securities Value', value: formatCurrency(portfolioTotals.totalValue), color: colors.textWhite },
+                { label: 'Cost Basis', value: formatCurrency(portfolioTotals.totalCost), color: colors.textWhite },
+                { label: 'Total Gain/Loss', value: formatCurrency(portfolioTotals.totalGainLoss), color: portfolioTotals.totalGainLoss >= 0 ? colors.accentGreen : colors.accentRed },
+                { label: 'Return', value: formatPercent(totalGainLossPercent), color: totalGainLossPercent >= 0 ? colors.accentGreen : colors.accentRed },
             ];
-            
-            const cardWidth = (pageWidth - 28 - 15) / 4;
-            
-            summaryData.forEach((item, index) => {
-                const xPos = 14 + (index * (cardWidth + 5));
-                
-                // Card background
-                doc.setFillColor(245, 247, 250);
-                doc.roundedRect(xPos, yPos, cardWidth, 25, 3, 3, 'F');
-                
-                // Label
-                doc.setTextColor(grayColor[0], grayColor[1], grayColor[2]);
+
+            summaryItems.forEach((item, i) => {
+                const col = i % 3;
+                const row = Math.floor(i / 3);
+                const x = margin + 8 + (col * colWidth);
+                const y = summaryY + (row * 16);
+
                 doc.setFontSize(8);
                 doc.setFont('helvetica', 'normal');
-                doc.text(item.label, xPos + 5, yPos + 8);
-                
-                // Value
-                if (item.isGain !== null) {
-                    if (item.isGain) {
-                        doc.setTextColor(greenColor[0], greenColor[1], greenColor[2]);
-                    } else {
-                        doc.setTextColor(redColor[0], redColor[1], redColor[2]);
-                    }
-                } else {
-                    doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
-                }
+                doc.setTextColor(colors.textGray[0], colors.textGray[1], colors.textGray[2]);
+                doc.text(item.label, x, y);
+
                 doc.setFontSize(11);
                 doc.setFont('helvetica', 'bold');
-                doc.text(item.value, xPos + 5, yPos + 18);
+                doc.setTextColor(item.color[0], item.color[1], item.color[2]);
+                doc.text(item.value, x, y + 8);
             });
-            
-            yPos += 35;
-            
-            // Cash Balance Section
-            if (portfolios.length > 0) {
-                const totalCash = selectedPortfolioId === 'all'
-                    ? portfolios.reduce((sum, p) => sum + (p.cashBalance || 0), 0)
-                    : portfolios.find(p => p.id === parseInt(selectedPortfolioId))?.cashBalance || 0;
-                
-                doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
-                doc.setFontSize(10);
-                doc.setFont('helvetica', 'normal');
-                doc.text('Available Cash: ' + formatCurrency(totalCash), 14, yPos);
-                yPos += 10;
-            }
-            
-            // Holdings Table
-            doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
-            doc.setFontSize(14);
+
+            yPos += 58;
+
+            // ===== HOLDINGS =====
+            doc.setFontSize(11);
             doc.setFont('helvetica', 'bold');
-            doc.text('Holdings', 14, yPos);
-            
+            doc.setTextColor(colors.darkBg[0], colors.darkBg[1], colors.darkBg[2]);
+            doc.text('HOLDINGS', margin, yPos);
+
             yPos += 5;
-            
+
             if (filteredPositions.length > 0) {
-                const tableData = filteredPositions.map(position => {
+                const holdingsData = filteredPositions.map(position => {
                     const metrics = calculateMetrics(position);
                     return [
-                        position.symbol,
-                        position.name || '-',
+                            position.symbol.replace('CRYPTO:', ''),
+                            (position.name || '').replace('CRYPTO:', ''),
                         formatShares(position.quantity),
-                        formatCurrency(position.averageBuyPrice),
                         formatCurrency(position.currentPrice),
                         formatCurrency(metrics.marketValue),
                         formatCurrency(metrics.gainLoss),
                         formatPercent(metrics.gainLossPercent)
                     ];
                 });
-                
+
                 autoTable(doc, {
                     startY: yPos,
-                    head: [['Symbol', 'Name', 'Shares', 'Avg Cost', 'Price', 'Value', 'Gain/Loss', 'Return']],
-                    body: tableData,
-                    theme: 'striped',
+                    head: [['Symbol', 'Description', 'Shares', 'Price', 'Value', 'Gain/Loss', 'Return']],
+                    body: holdingsData,
+                    theme: 'plain',
+                    styles: {
+                        fontSize: 8,
+                        cellPadding: 3,
+                    },
                     headStyles: {
-                        fillColor: primaryColor,
-                        textColor: [255, 255, 255],
+                        fillColor: colors.darkBg,
+                        textColor: colors.textWhite,
                         fontStyle: 'bold',
                         fontSize: 8,
                     },
                     bodyStyles: {
-                        fontSize: 8,
-                        textColor: darkColor,
+                        textColor: [51, 51, 51],
                     },
                     alternateRowStyles: {
-                        fillColor: [248, 250, 252],
+                        fillColor: [245, 247, 250],
                     },
                     columnStyles: {
-                        0: { fontStyle: 'bold', cellWidth: 18 },
-                        1: { cellWidth: 35 },
-                        2: { halign: 'right', cellWidth: 18 },
-                        3: { halign: 'right', cellWidth: 22 },
-                        4: { halign: 'right', cellWidth: 22 },
-                        5: { halign: 'right', cellWidth: 25 },
-                        6: { halign: 'right', cellWidth: 22 },
-                        7: { halign: 'right', cellWidth: 20 },
+                        0: { fontStyle: 'bold', cellWidth: contentWidth * 0.12 },
+                        1: { cellWidth: contentWidth * 0.22 },
+                        2: { halign: 'right', cellWidth: contentWidth * 0.12 },
+                        3: { halign: 'right', cellWidth: contentWidth * 0.14 },
+                        4: { halign: 'right', cellWidth: contentWidth * 0.14 },
+                        5: { halign: 'right', cellWidth: contentWidth * 0.13 },
+                        6: { halign: 'right', cellWidth: contentWidth * 0.13 },
                     },
-                    margin: { left: 14, right: 14 },
+                    tableWidth: contentWidth,
+                    margin: { left: margin, right: margin },
                     didParseCell: function(data) {
-                        if (data.section === 'body' && (data.column.index === 6 || data.column.index === 7)) {
-                            const value = data.cell.raw;
-                            if (value && value.startsWith('-')) {
-                                data.cell.styles.textColor = redColor;
-                            } else if (value && value.startsWith('+')) {
-                                data.cell.styles.textColor = greenColor;
+                        if (data.section === 'body') {
+                            if (data.column.index === 0) {
+                                data.cell.styles.textColor = colors.brandGreen;
+                            }
+                            if (data.column.index === 5 || data.column.index === 6) {
+                                const value = data.cell.raw;
+                                if (value && value.includes('-')) {
+                                    data.cell.styles.textColor = colors.accentRed;
+                                } else {
+                                    data.cell.styles.textColor = colors.accentGreen;
+                                }
                             }
                         }
                     }
                 });
-                
+
                 yPos = doc.lastAutoTable.finalY + 10;
-            } else {
-                yPos += 10;
-                doc.setFontSize(10);
-                doc.setFont('helvetica', 'italic');
-                doc.setTextColor(grayColor[0], grayColor[1], grayColor[2]);
-                doc.text('No positions to display', 14, yPos);
-                yPos += 15;
             }
-            
-            // Asset Allocation Section
+
+            // ===== ASSET ALLOCATION =====
             if (filteredPositions.length > 0) {
-                if (yPos > 250) {
+                // Check if we need a new page
+                if (yPos > pageHeight - 80) {
                     doc.addPage();
                     yPos = 20;
                 }
-                
-                doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
-                doc.setFontSize(14);
+
+                doc.setFontSize(11);
                 doc.setFont('helvetica', 'bold');
-                doc.text('Asset Allocation', 14, yPos);
-                
-                yPos += 8;
-                
+                doc.setTextColor(colors.darkBg[0], colors.darkBg[1], colors.darkBg[2]);
+                doc.text('ASSET ALLOCATION', margin, yPos);
+
+                yPos += 5;
+
                 const allocation = filteredPositions.reduce((acc, position) => {
                     const type = position.assetType || 'Other';
                     const metrics = calculateMetrics(position);
-                    if (!acc[type]) {
-                        acc[type] = { value: 0, count: 0 };
-                    }
+                    if (!acc[type]) acc[type] = { value: 0, count: 0 };
                     acc[type].value += metrics.marketValue;
                     acc[type].count += 1;
                     return acc;
                 }, {});
-                
+
                 const allocationData = Object.entries(allocation).map(([type, data]) => [
                     type,
                     data.count.toString(),
                     formatCurrency(data.value),
                     ((data.value / portfolioTotals.totalValue) * 100).toFixed(1) + '%'
                 ]);
-                
+
                 autoTable(doc, {
                     startY: yPos,
-                    head: [['Asset Type', 'Holdings', 'Value', '% of Portfolio']],
+                    head: [['Asset Type', 'Holdings', 'Value', 'Allocation']],
                     body: allocationData,
-                    theme: 'striped',
-                    headStyles: {
-                        fillColor: primaryColor,
-                        textColor: [255, 255, 255],
-                        fontStyle: 'bold',
+                    theme: 'plain',
+                    styles: {
                         fontSize: 9,
+                        cellPadding: 3,
+                    },
+                    headStyles: {
+                        fillColor: colors.darkBg,
+                        textColor: colors.textWhite,
+                        fontStyle: 'bold',
                     },
                     bodyStyles: {
-                        fontSize: 9,
-                        textColor: darkColor,
+                        textColor: [51, 51, 51],
+                    },
+                    alternateRowStyles: {
+                        fillColor: [245, 247, 250],
                     },
                     columnStyles: {
-                        0: { fontStyle: 'bold' },
-                        1: { halign: 'center' },
-                        2: { halign: 'right' },
-                        3: { halign: 'right' },
+                        0: { fontStyle: 'bold', cellWidth: contentWidth * 0.25 },
+                        1: { halign: 'center', cellWidth: contentWidth * 0.25 },
+                        2: { halign: 'right', cellWidth: contentWidth * 0.25 },
+                        3: { halign: 'right', cellWidth: contentWidth * 0.25, fontStyle: 'bold', textColor: colors.brandGreen },
                     },
-                    margin: { left: 14, right: 14 },
-                    tableWidth: 120,
+                    tableWidth: contentWidth,
+                    margin: { left: margin, right: margin },
                 });
+
+                yPos = doc.lastAutoTable.finalY + 10;
             }
-            
-            // Footer
-            const pageCount = doc.internal.getNumberOfPages();
-            for (let i = 1; i <= pageCount; i++) {
+
+            // ===== TRANSACTION HISTORY =====
+            try {
+                const txUrl = selectedPortfolioId === 'all'
+                    ? 'http://localhost:8080/api/transactions/user/1'
+                    : 'http://localhost:8080/api/transactions/portfolio/' + selectedPortfolioId;
+
+                const txRes = await axios.get(txUrl);
+                const transactions = txRes.data;
+
+                if (transactions && transactions.length > 0) {
+                    // Check if we need a new page - only if not enough space for header + a few rows
+                    if (yPos > pageHeight - 60) {
+                        doc.addPage();
+                        yPos = 20;
+                    }
+
+                    doc.setFontSize(11);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(colors.darkBg[0], colors.darkBg[1], colors.darkBg[2]);
+                    doc.text('TRANSACTION HISTORY', margin, yPos);
+
+                    yPos += 5;
+
+                    const txData = transactions.slice(0, 20).map(t => [
+                        new Date(t.transactionDate).toLocaleDateString(),
+                        t.transactionType,
+                        t.asset?.symbol || '-',
+                        parseFloat(t.quantity).toFixed(4),
+                        formatCurrency(parseFloat(t.priceAtTransaction)),
+                        formatCurrency(parseFloat(t.totalAmount))
+                    ]);
+
+                    autoTable(doc, {
+                        startY: yPos,
+                        head: [['Date', 'Type', 'Symbol', 'Quantity', 'Price', 'Amount']],
+                        body: txData,
+                        theme: 'plain',
+                        styles: {
+                            fontSize: 8,
+                            cellPadding: 3,
+                        },
+                        headStyles: {
+                            fillColor: colors.darkBg,
+                            textColor: colors.textWhite,
+                            fontStyle: 'bold',
+                        },
+                        bodyStyles: {
+                            textColor: [51, 51, 51],
+                        },
+                        alternateRowStyles: {
+                            fillColor: [245, 247, 250],
+                        },
+                        columnStyles: {
+                            0: { cellWidth: contentWidth * 0.16 },
+                            1: { cellWidth: contentWidth * 0.14, fontStyle: 'bold' },
+                            2: { cellWidth: contentWidth * 0.16, fontStyle: 'bold', textColor: colors.brandGreen },
+                            3: { halign: 'right', cellWidth: contentWidth * 0.18 },
+                            4: { halign: 'right', cellWidth: contentWidth * 0.18 },
+                            5: { halign: 'right', cellWidth: contentWidth * 0.18 },
+                        },
+                        tableWidth: contentWidth,
+                        margin: { left: margin, right: margin },
+                        didParseCell: function(data) {
+                            if (data.section === 'body' && data.column.index === 1) {
+                                if (data.cell.raw === 'BUY') {
+                                    data.cell.styles.textColor = colors.accentGreen;
+                                } else if (data.cell.raw === 'SELL') {
+                                    data.cell.styles.textColor = colors.accentRed;
+                                }
+                            }
+                        }
+                    });
+
+                    if (transactions.length > 20) {
+                        yPos = doc.lastAutoTable.finalY + 4;
+                        doc.setFontSize(7);
+                        doc.setTextColor(colors.textGray[0], colors.textGray[1], colors.textGray[2]);
+                        doc.text('Showing 20 of ' + transactions.length + ' transactions', margin, yPos);
+                    }
+                }
+            } catch (err) {
+                console.log('Could not load transactions:', err);
+            }
+
+            // ===== FOOTER =====
+            const totalPages = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= totalPages; i++) {
                 doc.setPage(i);
+
+                doc.setFillColor(colors.darkBg[0], colors.darkBg[1], colors.darkBg[2]);
+                doc.rect(0, pageHeight - 22, pageWidth, 22, 'F');
+
+                doc.setFillColor(colors.brandGreen[0], colors.brandGreen[1], colors.brandGreen[2]);
+                doc.rect(0, pageHeight - 22, pageWidth, 1, 'F');
+
                 doc.setFontSize(8);
-                doc.setTextColor(grayColor[0], grayColor[1], grayColor[2]);
-                doc.text(
-                    'Page ' + i + ' of ' + pageCount,
-                    pageWidth / 2,
-                    doc.internal.pageSize.getHeight() - 10,
-                    { align: 'center' }
-                );
-                doc.text(
-                    'This report is for informational purposes only and does not constitute financial advice.',
-                    pageWidth / 2,
-                    doc.internal.pageSize.getHeight() - 5,
-                    { align: 'center' }
-                );
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(colors.textGray[0], colors.textGray[1], colors.textGray[2]);
+                doc.text('INVEST', margin, pageHeight - 14);
+                doc.setTextColor(colors.brandGreen[0], colors.brandGreen[1], colors.brandGreen[2]);
+                doc.text('ED', margin + 12, pageHeight - 14);
+
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(colors.textGray[0], colors.textGray[1], colors.textGray[2]);
+                doc.text('Page ' + i + ' of ' + totalPages, pageWidth / 2, pageHeight - 14, { align: 'center' });
+                doc.text(now.toLocaleDateString(), pageWidth - margin, pageHeight - 14, { align: 'right' });
+
+                doc.setFontSize(5.5);
+                doc.text('EDUCATIONAL PURPOSE ONLY: InvestED is a financial literacy and education platform. This statement is simulated and does not represent real investments, securities, or financial advice.', margin, pageHeight - 8);
+                doc.text('No real money is involved. Do not make financial decisions based on this document. Consult a licensed financial advisor for real investment advice.', margin, pageHeight - 4);
             }
-            
-            // Save the PDF
-            const fileName = 'InvestED_Portfolio_' + now.toISOString().split('T')[0] + '.pdf';
-            doc.save(fileName);
-            
+
+            doc.save('InvestED_Statement_' + now.toISOString().split('T')[0] + '.pdf');
+
         } catch (error) {
             console.error('Error generating PDF:', error);
             alert('Failed to generate PDF. Please try again.');
@@ -394,7 +497,6 @@ const PortfolioView = () => {
             setExportingPDF(false);
         }
     };
-
     const handleSort = (column) => {
         if (sortBy === column) {
             setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
@@ -600,8 +702,8 @@ const PortfolioView = () => {
                                 <tr key={position.id}>
                                     <td>
                                         <div className={styles.assetCell}>
-                                            <span className={styles.assetSymbol}>{position.symbol}</span>
-                                            <span className={styles.assetName}>{position.name}</span>
+                                            <span className={styles.assetSymbol}>{position.symbol.replace('CRYPTO:', '')}</span>
+                                            <span className={styles.assetName}>{position.name.replace('CRYPTO:', '')}</span>
                                         </div>
                                     </td>
                                     <td>{formatShares(position.quantity)}</td>
@@ -647,7 +749,7 @@ const PortfolioView = () => {
                         {!showConfirmation ? (
                             <>
                                 <div className={styles.modalHeader}>
-                                    <h2>Sell {selectedPosition.symbol}</h2>
+                                    <h2>Sell {selectedPosition.symbol.replace('CRYPTO:', '')}</h2>
                                     <button className={styles.closeBtn} onClick={() => setShowSellModal(false)}>×</button>
                                 </div>
 
@@ -724,7 +826,7 @@ const PortfolioView = () => {
                                     <div className={styles.confirmDetails}>
                                         <div className={styles.confirmRow}>
                                             <span>Asset</span>
-                                            <span>{selectedPosition.symbol}</span>
+                                            <span>{selectedPosition.symbol.replace('CRYPTO:', '')}</span>
                                         </div>
                                         <div className={styles.confirmRow}>
                                             <span>Shares</span>
