@@ -25,3 +25,18 @@ replay_pid*
 
 #ignores my local DB
 **/application-local.properties
+
+# Maven build output
+backend/target/
+
+# Java build output
+**/target/
+*.class
+
+# Env / secrets
+**/target/
+.env
+*.env
+application.properties
+application.yml
+application-local.properties

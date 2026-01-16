@@ -1,0 +1,485 @@
+.profileView {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  grid-template-areas:
+    "left right"
+    "goals goals"
+    "logout logout";
+}
+
+.leftColumn {
+  grid-area: left;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.rightColumn {
+  grid-area: right;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.goalsSection {
+  grid-area: goals;
+  margin-top: 0.5rem;
+}
+
+.logoutSection {
+  grid-area: logout;
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+  margin-bottom: 6rem;
+}
+
+.card {
+  background: var(--bg-card);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+}
+
+.cardTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cardDescription {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.viewAll {
+  font-size: 0.85rem;
+  color: var(--accent-green);
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.viewAll:hover {
+  color: var(--accent-yellow);
+}
+
+/* User Info */
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+}
+
+.avatarLarge {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-green), var(--accent-yellow));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 0.5rem;
+}
+
+.userInfo h2 {
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.email {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.memberSince {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* Portfolio Stats */
+.portfolioStats {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.statItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.statItem:last-child {
+  border-bottom: none;
+}
+
+.statLabel {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.statValue {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.gainLoss {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.percentage {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.positive {
+  color: var(--accent-green);
+}
+
+.negative {
+  color: var(--accent-red);
+}
+
+/* Top Holdings */
+.topHoldings {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.holdingRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: var(--bg-primary);
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.holdingRow:hover {
+  background: var(--border-color);
+  transform: translateX(4px);
+}
+
+.holdingInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.holdingSymbol {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+.holdingName {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.holdingValue {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.holdingAmount {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.holdingGain {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.noHoldings {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 2rem;
+  font-size: 0.9rem;
+}
+
+/* Goals */
+.goalsList {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.goalItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.goalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.goalTitle {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.goalProgress {
+  font-weight: 700;
+  color: var(--accent-green);
+  font-size: 0.9rem;
+}
+
+.progressBar {
+  width: 100%;
+  height: 8px;
+  background: var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-green), var(--accent-yellow));
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.goalMeta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* Risk Profiles */
+.riskProfiles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.riskOption {
+  padding: 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--bg-primary);
+}
+
+.riskOption:hover {
+  border-color: var(--accent-green);
+  transform: translateY(-2px);
+}
+
+.riskOption.selected {
+  border-color: var(--accent-green);
+  background: var(--accent-green-light);
+}
+
+.riskOption.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.riskHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.riskIcon {
+  color: var(--accent-green);
+}
+
+.riskLabel {
+  font-weight: 700;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.checkmark {
+  color: var(--accent-green);
+}
+
+.riskDescription {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.riskAllocation {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* Account Settings */
+.settingsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.settingButton {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.settingButton:hover {
+  background: var(--border-color);
+  border-color: var(--accent-green);
+  transform: translateX(4px);
+}
+
+.settingContent {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.settingIcon {
+  color: var(--text-muted);
+}
+
+/* Logout Button */
+.logoutButton {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 2.5rem;
+  background: var(--accent-red);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.logoutButton:hover {
+  background: #c62828;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3);
+}
+
+/* Loading & Error States */
+.loadingState,
+.errorState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 1rem;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border-color);
+  border-top-color: var(--accent-green);
+  border-radius: 50%;
+  animation: spinLoader 0.8s linear infinite;
+}
+
+@keyframes spinLoader {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.errorState button {
+  padding: 0.75rem 1.5rem;
+  background: var(--accent-green);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.errorState button:hover {
+  background: var(--accent-yellow);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .profileView {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "left"
+      "right"
+      "goals"
+      "logout";
+  }
+
+  .goalsList {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .profileView {
+    padding: 1rem;
+  }
+
+  .card {
+    padding: 1rem;
+  }
+
+  .avatarLarge {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+  }
+}
