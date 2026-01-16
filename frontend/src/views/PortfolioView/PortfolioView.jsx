@@ -531,7 +531,7 @@ const PortfolioView = () => {
                     }
                 );
 
-                alert('Successfully sold ' + formatShares(sharesToSell) + ' shares of ' + selectedPosition.symbol + '!');
+                alert('Successfully sold ' + formatShares(sharesToSell) + ' shares of ' + selectedPosition.symbol.replace('CRYPTO:', '') + '!');
 
                 const [portfoliosRes, positionsRes] = await Promise.all([
                     axios.get('http://localhost:8080/api/portfolios/user/1'),

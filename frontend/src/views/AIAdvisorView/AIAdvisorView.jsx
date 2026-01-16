@@ -54,8 +54,8 @@ const AIAdvisorView = () => {
           cashAvailable: portfolioService.formatCurrency(summary.totalCash),
           riskProfile: riskLevel,
           holdings: positions.map(p => ({
-            symbol: p.symbol,
-            name: p.name,
+            symbol: p.symbol.replace('CRYPTO:', ''),
+            name: p.name.replace('CRYPTO:', ''),
             value: portfolioService.formatCurrency(p.quantity * p.currentPrice),
             change: portfolioService.formatPercent(
               ((p.currentPrice - p.averageBuyPrice) / p.averageBuyPrice) * 100

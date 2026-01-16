@@ -89,7 +89,7 @@ function BuyModal({ asset, currentPrice, onClose, onSuccess }) {
         {!showConfirmation ? (
           <>
             <div className={styles.modalHeader}>
-              <h2>Buy {asset.symbol}</h2>
+              <h2>Buy {asset.symbol.replace('CRYPTO:', '')}</h2>
               <button className={styles.closeBtn} onClick={onClose}>×</button>
             </div>
 
@@ -193,7 +193,7 @@ function BuyModal({ asset, currentPrice, onClose, onSuccess }) {
               <div className={styles.confirmDetails}>
                 <div className={styles.confirmRow}>
                   <span>Asset</span>
-                  <span>{asset.symbol}</span>
+                  <span>{asset.symbol.replace('CRYPTO:', '')}</span>
                 </div>
                 <div className={styles.confirmRow}>
                   <span>Portfolio</span>
