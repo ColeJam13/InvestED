@@ -28,3 +28,14 @@ replay_pid*
 
 # Maven build output
 backend/target/
+
+# Java build output
+**/target/
+*.class
+
+# Env / secrets
+.env
+*.env
+application.properties
+application.yml
+application-local.properties

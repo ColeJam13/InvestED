@@ -68,15 +68,35 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
     }
 
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ApiError> handleIllegalState(
+            IllegalStateException ex,
+            HttpServletRequest req
+    ) {
+        ApiError err = new ApiError(
+                HttpStatus.BAD_GATEWAY.value(),
+                "AI Provider Error",
+                ex.getMessage(),
+                req.getRequestURI(),
+                Map.of("exception", ex.getClass().getSimpleName())
+        );
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(err);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleGeneric(
             Exception ex,
             HttpServletRequest req
     ) {
+        // For demo/debug: surface message so you don’t get stuck
+        String message = (ex.getMessage() == null || ex.getMessage().isBlank())
+                ? "An unexpected error occurred"
+                : ex.getMessage();
+
         ApiError err = new ApiError(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "Internal Server Error",
-                "An unexpected error occurred",
+                message,
                 req.getRequestURI(),
                 Map.of("exception", ex.getClass().getSimpleName())
         );
