@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
+import jsPDF from 'jspdf';
 import {
   Menu, Bot, Palette, BarChart3, Download, X, Send, Copy, Check,
   Diamond, Rocket, TrendingUp, DollarSign, Star, Zap, Target,
@@ -126,19 +127,19 @@ const AIAdvisorView = () => {
         "What should I know as a beginner?",
         "How do I start investing?",
         "Explain my portfolio performance",
-        "What's the difference between stocks and bonds?",
+        "What is the difference between stocks and bonds?",
       ];
     }
     const stylePrompts = {
       value: ["How do I find undervalued stocks?", "What metrics indicate good value?", "Explain intrinsic value"],
-      growth: ["How do I identify growth stocks?", "What's a reasonable P/E for growth?", "Growth vs value?"],
-      momentum: ["What's trending in the market?", "How do I spot momentum?", "When to exit momentum trades?"],
-      income: ["What's a good dividend yield?", "How do I build passive income?", "Dividend stocks vs bonds?"],
+      growth: ["How do I identify growth stocks?", "What is a reasonable P/E for growth?", "Growth vs value?"],
+      momentum: ["What is trending in the market?", "How do I spot momentum?", "When to exit momentum trades?"],
+      income: ["What is a good dividend yield?", "How do I build passive income?", "Dividend stocks vs bonds?"],
       quality: ["What makes a quality company?", "How do I evaluate fundamentals?", "Quality vs growth?"],
       active: ["How often should I trade?", "What are active trading risks?", "How to time the market?"],
       passive: ["Best index funds to consider?", "How to set and forget?", "Active vs passive performance?"],
       conservative: ["What are safest investments?", "How to protect capital?", "Government bonds vs savings?"],
-      moderate: ["What's a balanced allocation?", "How to diversify properly?", "60/40 portfolio relevance?"],
+      moderate: ["What is a balanced allocation?", "How to diversify properly?", "60/40 portfolio relevance?"],
       aggressive: ["High-growth opportunities?", "How much volatility is too much?", "Alternative investments?"],
       esg: ["How to invest sustainably?", "What ESG factors matter?", "Do ESG funds underperform?"],
       largecap: ["Best blue chip stocks?", "Large vs small-cap returns?", "Large company stability?"],
@@ -167,7 +168,7 @@ const AIAdvisorView = () => {
         id: 1,
         type: 'ai',
         messageType: 'greeting',
-        content: "Hello! I'm your AI financial education advisor. I can help you learn about investing, understand your portfolio, and explore different strategies.\n\nTry a quick prompt below, or pick an investing style from the toolbar.",
+        content: "Hello! I am your AI financial education advisor. I can help you learn about investing, understand your portfolio, and explore different strategies.\n\nTry a quick prompt below, or pick an investing style from the toolbar.",
         timestamp: new Date()
       }]);
     }
@@ -188,7 +189,7 @@ const AIAdvisorView = () => {
       messageType: 'style-change',
       timestamp: new Date(),
       style: style,
-      content: `I'll now respond from a **${style.name}** perspective.\n\n_${style.description}_\n\nAsk me questions with this approach in mind.`,
+      content: `I will now respond from a **${style.name}** perspective.\n\n_${style.description}_\n\nAsk me questions with this approach in mind.`,
     };
     setMessages(prev => [...prev, styleMessage]);
   };
@@ -205,7 +206,7 @@ const AIAdvisorView = () => {
     setMessages(prev => [...prev, message]);
   };
 
-  // ✅ backend call
+  // backend call
   const handleSendMessage = async (content) => {
     const trimmed = (content || '').trim();
     if (!trimmed) return;
@@ -296,10 +297,112 @@ const AIAdvisorView = () => {
       id: 1,
       type: 'ai',
       messageType: 'greeting',
-      content: "Hello! I'm your AI financial education advisor.\n\nAsk me anything, or choose an investing style from the toolbar.",
+      content: "Hello! I am your AI financial education advisor.\n\nAsk me anything, or choose an investing style from the toolbar.",
       timestamp: new Date()
     }]);
     setSelectedStyle(null);
+  };
+
+  // PDF Export Function
+  const exportChatToPDF = () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 20;
+    const maxWidth = pageWidth - margin * 2;
+    let yPos = 20;
+
+    // Header
+    doc.setFillColor(61, 155, 137);
+    doc.rect(0, 0, pageWidth, 35, 'F');
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(20);
+    doc.setFont('helvetica', 'bold');
+    doc.text('InvestED', margin, 18);
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text('AI Advisor Chat Export', margin, 28);
+
+    const now = new Date();
+    doc.setFontSize(9);
+    doc.text(
+      `Generated: ${now.toLocaleDateString()} at ${now.toLocaleTimeString()}`,
+      pageWidth - margin,
+      18,
+      { align: 'right' }
+    );
+
+    if (selectedStyle) {
+      doc.text(`Style: ${selectedStyle.name}`, pageWidth - margin, 28, { align: 'right' });
+    }
+
+    yPos = 50;
+
+    // Chat messages
+    messages.forEach((message) => {
+      // Skip greeting message type for cleaner export
+      if (message.messageType === 'greeting') return;
+
+      const isUser = message.type === 'user';
+      const label = isUser ? 'You' : 'AI Advisor';
+      const time = formatTime(message.timestamp);
+
+      // Check if we need a new page
+      if (yPos > pageHeight - 40) {
+        doc.addPage();
+        yPos = 20;
+      }
+
+      // Message label and time
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      if (isUser) {
+        doc.setTextColor(102, 126, 234);
+      } else {
+        doc.setTextColor(61, 155, 137);
+      }
+      doc.text(`${label} - ${time}`, margin, yPos);
+      yPos += 6;
+
+      // Message content - strip markdown for cleaner PDF
+      const cleanContent = message.content
+        .replace(/\*\*/g, '')
+        .replace(/\*/g, '')
+        .replace(/_/g, '')
+        .replace(/`/g, '');
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(50, 50, 50);
+
+      const lines = doc.splitTextToSize(cleanContent, maxWidth);
+      lines.forEach((line) => {
+        if (yPos > pageHeight - 20) {
+          doc.addPage();
+          yPos = 20;
+        }
+        doc.text(line, margin, yPos);
+        yPos += 5;
+      });
+
+      yPos += 8; // Space between messages
+    });
+
+    // Footer on last page
+    doc.setFontSize(8);
+    doc.setTextColor(128, 128, 128);
+    doc.text(
+      'InvestED - Educational simulation only - Not real financial advice',
+      pageWidth / 2,
+      pageHeight - 10,
+      { align: 'center' }
+    );
+
+    // Save the PDF
+    const filename = `InvestED-Chat-${now.toISOString().split('T')[0]}.pdf`;
+    doc.save(filename);
   };
 
   const Markdown = ({ text }) => (
@@ -482,7 +585,11 @@ const AIAdvisorView = () => {
             <BarChart3 size={20} />
           </button>
 
-          <button className={styles.toolbarBtn} title="Export chat">
+          <button 
+            className={styles.toolbarBtn} 
+            title="Export chat"
+            onClick={exportChatToPDF}
+          >
             <Download size={20} />
           </button>
         </div>
@@ -690,7 +797,7 @@ const AIAdvisorView = () => {
           </button>
         </div>
         <p className={styles.inputDisclaimer}>
-          Educational simulation only • Not real financial advice
+          Educational simulation only - Not real financial advice
         </p>
       </div>
     </div>
