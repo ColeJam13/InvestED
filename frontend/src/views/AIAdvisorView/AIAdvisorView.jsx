@@ -168,7 +168,7 @@ const AIAdvisorView = () => {
         id: 1,
         type: 'ai',
         messageType: 'greeting',
-        content: "Hello! I am your AI financial education advisor. I can help you learn about investing, understand your portfolio, and explore different strategies.\n\nTry a quick prompt below, or pick an investing style from the toolbar.",
+        content: "Hey there! I'm Eddy, your educational investing assistant. I can help you learn about investing, understand your portfolio, and explore different strategies.\n\nTry a quick prompt below, or pick an investing style from the toolbar.",
         timestamp: new Date()
       }]);
     }
@@ -297,7 +297,7 @@ const AIAdvisorView = () => {
       id: 1,
       type: 'ai',
       messageType: 'greeting',
-      content: "Hello! I am your AI financial education advisor.\n\nAsk me anything, or choose an investing style from the toolbar.",
+      content: "Hey there! I'm Eddy, your educational investing assistant.\n\nAsk me anything, or choose an investing style from the toolbar.",
       timestamp: new Date()
     }]);
     setSelectedStyle(null);
@@ -435,7 +435,7 @@ const AIAdvisorView = () => {
         <div className={styles.greetingBubble}>
           <div className={styles.greetingHeader}>
             <Bot size={32} className={styles.greetingIcon} />
-            <div className={styles.greetingTitle}>Welcome to InvestED AI Advisor</div>
+            <div className={styles.greetingTitle}>Meet Eddy, Your Learning Buddy</div>
           </div>
           <div className={styles.greetingText}>
             <Markdown text={message.content} />
@@ -553,7 +553,7 @@ const AIAdvisorView = () => {
           <button className={styles.toolbarBtn} onClick={() => setShowHistorySidebar(!showHistorySidebar)}>
             <Menu size={20} />
           </button>
-          <div className={styles.toolbarTitle}>AI Financial Advisor</div>
+          <div className={styles.toolbarTitle}>Eddy</div>
         </div>
         <div className={styles.toolbarRight}>
           {selectedStyle && (
