@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Shield, Scale, Rocket, ChevronRight, User, Lock, Bell, LogOut, Check } from 'lucide-react';
 import { portfolioService } from '../../services/portfolioService';
 
-function Profile() {
+function Profile({ onNavigate }) {
   const userId = 1; // Hardcoded for demo
   
   const [riskProfile, setRiskProfile] = useState('moderate');
@@ -280,7 +280,12 @@ function Profile() {
         <div className={styles.card}>
           <div className={styles.cardHeader}>
             <h3 className={styles.cardTitle}>Your Goals</h3>
-            <a href="#" className={styles.viewAll}>View All →</a>
+            <button 
+              className={styles.viewAll} 
+              onClick={() => onNavigate('goals')}
+            >
+              View All →
+            </button>
           </div>
           <div className={styles.goalsList}>
             {goals.map((goal, index) => (

@@ -29,7 +29,7 @@ function App() {
             case 'portfolio':
                 return <PortfolioView />;
             case 'profile':
-                return <Profile />;
+                return <Profile onNavigate={setActiveView} />;
             default:
                 return <Dashboard onNavigate={setActiveView} />;
         }
