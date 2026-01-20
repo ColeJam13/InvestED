@@ -88,7 +88,6 @@ public class GlobalExceptionHandler {
             Exception ex,
             HttpServletRequest req
     ) {
-        // For demo/debug: surface message so you don’t get stuck
         String message = (ex.getMessage() == null || ex.getMessage().isBlank())
                 ? "An unexpected error occurred"
                 : ex.getMessage();

@@ -133,7 +133,6 @@ public class PortfolioController {
         }
     }
 
-    // Get user's total portfolio summary (combined across all portfolios)
     @GetMapping("/user/{userId}/summary")
     public ResponseEntity<Map<String, Object>> getUserPortfolioSummary(@PathVariable Long userId) {
         User user = userService.findById(userId).orElse(null);
@@ -151,39 +150,32 @@ public class PortfolioController {
             List<PortfolioPosition> positions = positionService.findByPortfolio(portfolio);
             totalPositions += positions.size();
             
-            // Calculate portfolio value with real-time prices
             for (PortfolioPosition position : positions) {
                 try {
                     String symbol = position.getAsset().getSymbol();
                     BigDecimal currentPrice;
                     
                     if (symbol.startsWith("CRYPTO:")) {
-                        // Use CoinMarketCap for crypto
                         String cryptoSymbol = symbol.replace("CRYPTO:", "");
                         String cryptoQuoteJson = coinMarketCapService.getCryptoQuote(cryptoSymbol);
                         JsonNode cryptoQuoteNode = objectMapper.readTree(cryptoQuoteJson);
                         
-                        // CoinMarketCap response structure: data -> [symbol] -> quote -> USD -> price
                         currentPrice = BigDecimal.valueOf(
                             cryptoQuoteNode.get("data").get(cryptoSymbol).get("quote").get("USD").get("price").asDouble()
                         );
                     } else {
-                        // Fetch current price from Finnhub for stocks
                         String quoteJson = finnhubService.getQuote(symbol);
                         JsonNode quoteNode = objectMapper.readTree(quoteJson);
                         currentPrice = BigDecimal.valueOf(quoteNode.get("c").asDouble());
                     }
                     
-                    // Calculate position value
                     BigDecimal positionValue = position.getQuantity().multiply(currentPrice);
                     totalValue = totalValue.add(positionValue);
                     
-                    // Calculate cost basis
                     BigDecimal costBasis = position.getQuantity().multiply(position.getAverageBuyPrice());
                     totalCostBasis = totalCostBasis.add(costBasis);
                 } catch (Exception e) {
                     System.err.println("Error fetching price for " + position.getAsset().getSymbol() + ": " + e.getMessage());
-                    // Fallback to average buy price if API fails
                     BigDecimal fallbackValue = position.getQuantity().multiply(position.getAverageBuyPrice());
                     totalValue = totalValue.add(fallbackValue);
                     totalCostBasis = totalCostBasis.add(fallbackValue);
@@ -191,8 +183,8 @@ public class PortfolioController {
             }
         }
         
-        totalValue = totalValue.add(totalCash); // Total value includes cash
-        totalCostBasis = totalCostBasis.add(totalCash); // Cost basis includes initial cash
+        totalValue = totalValue.add(totalCash); 
+        totalCostBasis = totalCostBasis.add(totalCash); 
         
         BigDecimal totalGainLoss = totalValue.subtract(totalCostBasis);
         BigDecimal totalGainLossPercent = BigDecimal.ZERO;
@@ -213,7 +205,6 @@ public class PortfolioController {
         return ResponseEntity.ok(summary);
     }
 
-    // Get all positions across all user's portfolios with real-time prices
     @GetMapping("/user/{userId}/all-positions")
     public ResponseEntity<List<Map<String, Object>>> getAllUserPositions(@PathVariable Long userId) {
         User user = userService.findById(userId).orElse(null);
@@ -237,19 +228,16 @@ public class PortfolioController {
                 positionData.put("averageBuyPrice", position.getAverageBuyPrice());
                 positionData.put("updatedAt", position.getUpdatedAt());
                 
-                // Fetch real-time current price
                 try {
                     String symbol = position.getAsset().getSymbol();
                     double currentPrice;
                     
                     if (symbol.startsWith("CRYPTO:")) {
-                        // Use CoinMarketCap for crypto
                         String cryptoSymbol = symbol.replace("CRYPTO:", "");
                         String cryptoQuoteJson = coinMarketCapService.getCryptoQuote(cryptoSymbol);
                         JsonNode cryptoQuoteNode = objectMapper.readTree(cryptoQuoteJson);
                         currentPrice = cryptoQuoteNode.get("data").get(cryptoSymbol).get("quote").get("USD").get("price").asDouble();
                     } else {
-                        // Use Finnhub for stocks
                         String quoteJson = finnhubService.getQuote(symbol);
                         JsonNode quoteNode = objectMapper.readTree(quoteJson);
                         currentPrice = quoteNode.get("c").asDouble();
@@ -258,7 +246,6 @@ public class PortfolioController {
                     positionData.put("currentPrice", currentPrice);
                 } catch (Exception e) {
                     System.err.println("Error fetching price for " + position.getAsset().getSymbol() + ": " + e.getMessage());
-                    // Fallback to average buy price
                     positionData.put("currentPrice", position.getAverageBuyPrice().doubleValue());
                 }
                 
@@ -278,15 +265,14 @@ public class PortfolioController {
             User user = userService.findById(userId).orElse(null);
             if (user == null) return ResponseEntity.notFound().build();
 
-            // Calculate date range based on parameter
-            long endTimestamp = System.currentTimeMillis() / 1000; // Current time in Unix seconds
+            long endTimestamp = System.currentTimeMillis() / 1000; 
             long startTimestamp;
             int dataPoints;
             
             switch (range.toUpperCase()) {
                 case "1D":
-                    startTimestamp = endTimestamp - (24 * 60 * 60); // 1 day ago
-                    dataPoints = 24; // Hourly for 1 day (simulated)
+                    startTimestamp = endTimestamp - (24 * 60 * 60);
+                    dataPoints = 24; 
                     break;
                 case "1W":
                     startTimestamp = endTimestamp - (7 * 24 * 60 * 60); // 1 week ago

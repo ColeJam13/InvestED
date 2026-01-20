@@ -20,14 +20,12 @@ public class CacheConfig {
     public CacheManager cacheManager() {
         SimpleCacheManager cacheManager = new SimpleCacheManager();
         
-        // Short-lived caches (1 minute) for real-time data
         CaffeineCache quotesCache = buildCache("quotes", 1, TimeUnit.MINUTES);
         CaffeineCache searchCache = buildCache("search", 1, TimeUnit.MINUTES);
         CaffeineCache trendingCache = buildCache("trending", 1, TimeUnit.MINUTES);
         CaffeineCache cryptoQuoteCache = buildCache("cryptoQuote", 1, TimeUnit.MINUTES);
         CaffeineCache cryptoSearchCache = buildCache("cryptoSearch", 1, TimeUnit.MINUTES);
         
-        // Long-lived caches (24 hours) for historical data
         CaffeineCache historicalCache = buildCache("twelveHistorical", 24, TimeUnit.HOURS);
         CaffeineCache cryptoHistoricalCache = buildCache("cryptoHistorical", 24, TimeUnit.HOURS);
         

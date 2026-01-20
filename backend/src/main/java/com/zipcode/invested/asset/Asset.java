@@ -14,13 +14,13 @@ public class Asset {
     private Long id;
 
     @Column(nullable = false, length = 20)
-    private String symbol; // e.g. AAPL, VTI, BTC
+    private String symbol;
 
     @Column(nullable = false, length = 120)
-    private String name;   // e.g. Apple Inc.
+    private String name;   
 
     @Column(name = "asset_type", nullable = false, length = 30)
-    private String assetType; // e.g. STOCK, ETF, CRYPTO
+    private String assetType;
 
     protected Asset() {}
 

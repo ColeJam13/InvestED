@@ -34,6 +34,17 @@ const BottomNav = ({ activeView, onNavigate }) => {
             )
         },
         { 
+            id: 'goals', 
+            label: 'Goals', 
+            icon: (
+                <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <circle cx="12" cy="12" r="6"></circle>
+                    <circle cx="12" cy="12" r="2"></circle>
+                </svg>
+            )
+        },
+        { 
             id: 'learn', 
             label: 'Learn', 
             icon: (
@@ -45,7 +56,7 @@ const BottomNav = ({ activeView, onNavigate }) => {
         },
         { 
             id: 'advisor', 
-            label: 'Advisor', 
+            label: 'Eddy', 
             icon: (
                 <svg viewBox="0 0 24 24">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
