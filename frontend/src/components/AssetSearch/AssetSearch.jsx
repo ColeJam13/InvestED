@@ -89,8 +89,8 @@ function AssetSearch({ onAssetSelect }) {
               className={styles.searchResultItem}
               onClick={() => onAssetSelect(asset.symbol)}
             >
-              <div className={styles.resultSymbol}>{asset.displaySymbol || asset.symbol}</div>
-              <div className={styles.resultName}>{asset.instrument_name}</div>
+              <div className={styles.resultSymbol}>{(asset.displaySymbol || asset.symbol).replace('CRYPTO:', '')}</div>
+              <div className={styles.resultName}>{(asset.instrument_name || '').replace('CRYPTO:', '')}</div>
               <div className={styles.resultType}>{asset.instrument_type}</div>
             </div>
           ))}

@@ -17,7 +17,7 @@ const StockComparison = ({ baseSymbol, onClose }) => {
       const quote = await marketService.getAssetQuote(symbol);
       return {
         symbol: symbol.replace('CRYPTO:', ''),
-        name: quote.name || symbol,
+        name: (quote.name || symbol).replace('CRYPTO:', ''),
         price: `$${quote.close}`,
         change24h: parseFloat(quote.percent_change),
         marketCap: 'N/A',
