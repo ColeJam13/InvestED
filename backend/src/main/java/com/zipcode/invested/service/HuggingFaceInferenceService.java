@@ -7,11 +7,32 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class HuggingFaceInferenceService {
+
+    private static final Duration CACHE_TTL = Duration.ofMinutes(30);
+
+    private static class CacheEntry {
+        final String value;
+        final Instant createdAt;
+
+        CacheEntry(String value) {
+            this.value = value;
+            this.createdAt = Instant.now();
+        }
+
+        boolean isExpired() {
+            return Instant.now().isAfter(createdAt.plus(CACHE_TTL));
+        }
+    }
+
+    private final ConcurrentHashMap<String, CacheEntry> cache = new ConcurrentHashMap<>();
 
     private final RestClient client;
     private final String model;
@@ -42,27 +63,42 @@ public class HuggingFaceInferenceService {
         // ✅ Strong system prompt to reduce "thinking" leakage + keep replies complete
         String system =
                 "You are a financial EDUCATION assistant (not a financial advisor). " +
-                "Give general info and explain concepts clearly. " +
-                "Do NOT provide professional advice. " +
-                "IMPORTANT: Do NOT output internal reasoning or hidden thoughts. " +
-                "Never output <think>...</think> or any chain-of-thought. " +
-                "Only output the final answer. " +
-                "If you need to reason, do it silently. " +
-                "Keep responses concise unless the user asks for detail.";
+                        "Give general info and explain concepts clearly. " +
+                        "Do NOT provide professional advice. " +
+                        "IMPORTANT: Do NOT output internal reasoning or hidden thoughts. " +
+                        "Never output <think>...</think> or any chain-of-thought. " +
+                        "Only output the final answer. " +
+                        "If you need to reason, do it silently. " +
+                        "Keep responses concise unless the user asks for detail.";
+
+        String safePrompt = prompt == null ? "" : prompt.trim();
+        if (safePrompt.isBlank()) {
+            throw new IllegalArgumentException("Prompt cannot be blank");
+        }
+
+        // ✅ Simple in-memory cache (great for demo): same prompt returns instantly
+        // Include model + system so you don't accidentally reuse across config changes
+        String cacheKey = model + "::" + system + "::" + safePrompt;
+
+        CacheEntry cached = cache.get(cacheKey);
+        if (cached != null) {
+            if (!cached.isExpired()) {
+                return cached.value;
+            }
+            // expired
+            cache.remove(cacheKey);
+        }
 
         Map<String, Object> body = Map.of(
                 "model", model,
                 "messages", List.of(
                         Map.of("role", "system", "content", system),
-                        Map.of("role", "user", "content", prompt)
+                        Map.of("role", "user", "content", safePrompt)
                 ),
                 "temperature", 0.4,
 
                 // Increase to reduce cut-offs. Adjust if you want longer/shorter.
-                "max_tokens", 800
-
-                // NOTE: Some providers also support "stop" sequences; not guaranteed here.
-                // You could try: "stop", List.of("</think>", "<think>")
+                "max_tokens", 1000
         );
 
         try {
@@ -98,6 +134,9 @@ public class HuggingFaceInferenceService {
             if (content.isBlank()) {
                 throw new IllegalStateException("Unexpected HF response (empty content): " + resp);
             }
+
+            // store in cache for subsequent identical prompts
+            cache.put(cacheKey, new CacheEntry(content));
 
             return content;
 
