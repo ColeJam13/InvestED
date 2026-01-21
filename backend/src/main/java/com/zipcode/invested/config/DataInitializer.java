@@ -25,7 +25,7 @@ public class DataInitializer implements CommandLineRunner {
 
         if (userService.findById(1L).isEmpty()) {
 
-            User testUser = new User("test@example.com", "Jordan Mitchell");
+            User testUser = new User("test@example.com", "John Smith");
             User savedUser = userService.create(testUser);
 
             Portfolio mainPortfolio = new Portfolio(savedUser, "Main Portfolio");

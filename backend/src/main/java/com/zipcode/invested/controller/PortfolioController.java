@@ -6,6 +6,7 @@ import com.zipcode.invested.service.PortfolioService;
 import com.zipcode.invested.service.UserService;
 import com.zipcode.invested.service.PortfolioPositionService;
 import com.zipcode.invested.service.FinnhubService;
+import com.zipcode.invested.service.MarketDataService;
 import com.zipcode.invested.service.CoinMarketCapService;
 import com.zipcode.invested.user.User;
 import com.zipcode.invested.dto.BuyRequest;
@@ -38,6 +39,7 @@ public class PortfolioController {
     private final PortfolioSummaryService portfolioSummaryService;
     private final TwelveDataService twelveDataService;
     private final CoinMarketCapService coinMarketCapService;
+    private final MarketDataService marketDataService;
 
 
     public PortfolioController(PortfolioService portfolioService, 
@@ -46,7 +48,8 @@ public class PortfolioController {
                               FinnhubService finnhubService, 
                               PortfolioSummaryService portfolioSummaryService,
                               TwelveDataService twelveDataService,
-                              CoinMarketCapService coinMarketCapService) {
+                              CoinMarketCapService coinMarketCapService,
+                              MarketDataService marketDataService)  {
         this.portfolioService = portfolioService;
         this.userService = userService;
         this.positionService = positionService;
@@ -55,6 +58,7 @@ public class PortfolioController {
         this.portfolioSummaryService = portfolioSummaryService;
         this.twelveDataService = twelveDataService;
         this.coinMarketCapService = coinMarketCapService;
+        this.marketDataService = marketDataService;
     }
 
     @GetMapping
@@ -153,21 +157,7 @@ public class PortfolioController {
             for (PortfolioPosition position : positions) {
                 try {
                     String symbol = position.getAsset().getSymbol();
-                    BigDecimal currentPrice;
-                    
-                    if (symbol.startsWith("CRYPTO:")) {
-                        String cryptoSymbol = symbol.replace("CRYPTO:", "");
-                        String cryptoQuoteJson = coinMarketCapService.getCryptoQuote(cryptoSymbol);
-                        JsonNode cryptoQuoteNode = objectMapper.readTree(cryptoQuoteJson);
-                        
-                        currentPrice = BigDecimal.valueOf(
-                            cryptoQuoteNode.get("data").get(cryptoSymbol).get("quote").get("USD").get("price").asDouble()
-                        );
-                    } else {
-                        String quoteJson = finnhubService.getQuote(symbol);
-                        JsonNode quoteNode = objectMapper.readTree(quoteJson);
-                        currentPrice = BigDecimal.valueOf(quoteNode.get("c").asDouble());
-                    }
+                    BigDecimal currentPrice = marketDataService.getCurrentPrice(symbol);
                     
                     BigDecimal positionValue = position.getQuantity().multiply(currentPrice);
                     totalValue = totalValue.add(positionValue);
@@ -229,21 +219,8 @@ public class PortfolioController {
                 positionData.put("updatedAt", position.getUpdatedAt());
                 
                 try {
-                    String symbol = position.getAsset().getSymbol();
-                    double currentPrice;
-                    
-                    if (symbol.startsWith("CRYPTO:")) {
-                        String cryptoSymbol = symbol.replace("CRYPTO:", "");
-                        String cryptoQuoteJson = coinMarketCapService.getCryptoQuote(cryptoSymbol);
-                        JsonNode cryptoQuoteNode = objectMapper.readTree(cryptoQuoteJson);
-                        currentPrice = cryptoQuoteNode.get("data").get(cryptoSymbol).get("quote").get("USD").get("price").asDouble();
-                    } else {
-                        String quoteJson = finnhubService.getQuote(symbol);
-                        JsonNode quoteNode = objectMapper.readTree(quoteJson);
-                        currentPrice = quoteNode.get("c").asDouble();
-                    }
-                    
-                    positionData.put("currentPrice", currentPrice);
+                    BigDecimal currentPrice = marketDataService.getCurrentPrice(position.getAsset().getSymbol());
+                    positionData.put("currentPrice", currentPrice.doubleValue());
                 } catch (Exception e) {
                     System.err.println("Error fetching price for " + position.getAsset().getSymbol() + ": " + e.getMessage());
                     positionData.put("currentPrice", position.getAverageBuyPrice().doubleValue());

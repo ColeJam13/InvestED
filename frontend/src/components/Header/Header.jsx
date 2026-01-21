@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import ThemeToggle from '../ThemeToggle';
 import { marketService } from '../../services/marketService';
+import { portfolioService } from '../../services/portfolioService';
 import styles from './Header.module.css';
 
 // Custom graduation cap with dollar sign tassel
@@ -47,6 +48,35 @@ const Header = ({ onNavigate }) => {
         { symbol: 'AMZN', price: '$178.25', change: '-0.3%', positive: false },
         { symbol: 'ETH', price: '$2,450', change: '+3.2%', positive: true },
     ]);
+
+    const [userData, setUserData] = useState({
+        displayName: 'User',
+        firstName: 'User',
+        initials: 'U'
+    });
+
+    // Fetch user data
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const user = await portfolioService.getUser(1); // Hardcoded userId=1 for demo
+                const nameParts = user.displayName.split(' ');
+                const firstName = nameParts[0];
+                const initials = nameParts.map(n => n[0]).join('').toUpperCase();
+                
+                setUserData({
+                    displayName: user.displayName,
+                    firstName: firstName,
+                    initials: initials
+                });
+            } catch (error) {
+                console.error('Failed to fetch user data:', error);
+                // Keep default data on error
+            }
+        };
+
+        fetchUserData();
+    }, []);
 
     useEffect(() => {
         const fetchMarketData = async () => {
@@ -121,10 +151,10 @@ const Header = ({ onNavigate }) => {
                 </div>
             </div>
             <div className={styles.headerRight}>
-                <span className={styles.welcomeText}>Welcome back, Jordan!</span>
+                <span className={styles.welcomeText}>Welcome back, {userData.firstName}!</span>
                 <ThemeToggle />
                 <button className={styles.avatarButton} onClick={handleAvatarClick}>
-                    <div className={styles.avatar}>JM</div>
+                    <div className={styles.avatar}>{userData.initials}</div>
                 </button>
             </div>
         </header>
